@@ -122,4 +122,4 @@ def apply_and_restart(new_path):
         ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
          "-WindowStyle", "Hidden", "-File", script],
         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        creationflags=0x00000008 | 0x00000200, cwd=os.path.dirname(script), close_fds=True)
+        creationflags=0x08000000, cwd=os.path.dirname(script), close_fds=True)
