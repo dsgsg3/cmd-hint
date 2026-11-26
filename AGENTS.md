@@ -115,6 +115,14 @@ python main.py
 1. 改 `version.py`。
 2. 运行一键打包（`python build.py`）。它会核对新 exe 的版本号、保留上一版、并确认新版能启动。
 3. 提交，提交说明里写版本号，并打标签 `v版本号`，例如 `v1.0.0.1`。
+4. 发 Release。附件名要用纯英文：文件名带中文会被 GitHub 改成 `default.exe`（踩过）。先复制一份：
+
+   ```
+   cp "dist/命令提示.exe" /tmp/CmdHint-<版本>.exe
+   gh release create v<版本> /tmp/CmdHint-<版本>.exe --title "命令提示 <版本>" --notes-file <说明文件> --latest
+   ```
+
+   exe 不进仓库，作为附件上传。发布说明里要写 SHA256、首次运行会被 Windows 提示「未知发布者」、以及已知限制。上传走 `api.github.com`，这台机器能直连；改说明用 `gh release edit v<版本> --notes-file <文件>`。
 
 ## Git 与推送
 
