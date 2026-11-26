@@ -148,6 +148,7 @@ class App:
             path = update.prepare(info)
             self.q.put(("update_ready", info["version"], path))
         except Exception as e:
+            update.log("检查更新失败：%r" % e)
             if manual:
                 self.notify("检查更新失败：" + str(e)[:100])
         finally:

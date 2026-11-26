@@ -103,7 +103,7 @@ python main.py
 
 四段式 `主.次.中.小`，当前是 `1.0.1.5`。全项目只在 `cmdhint/version.py` 里写版本号，提示条标题、托盘提示和 exe 的文件属性都从它来。
 
-历史：`1.0.0.0` 第一个版本；`1.0.0.1` 加了一键打包脚本；`1.0.1.0` 命令库可外置（`%APPDATA%\CmdHint\commands_user.txt`，保存即生效）；`1.0.1.2` 加自动更新；`1.0.1.3` 修后台启动方式（`DETACHED_PROCESS` 启动的 PowerShell 会立刻退出）；`1.0.1.4` 替换后等几秒再启动；`1.0.1.5` 启动后识别 `Error` 对话框并重试；`1.0.1.6` 去掉后台 PowerShell 的 `-WindowStyle Hidden`（这个参数会让它启动的 GUI 程序起不来）。
+历史：`1.0.0.0` 第一个版本；`1.0.0.1` 加了一键打包脚本；`1.0.1.0` 命令库可外置（`%APPDATA%\CmdHint\commands_user.txt`，保存即生效）；`1.0.1.2` 加自动更新；`1.0.1.3` 修后台启动方式（`DETACHED_PROCESS` 启动的 PowerShell 会立刻退出）；`1.0.1.4` 替换后等几秒再启动；`1.0.1.5` 启动后识别 `Error` 对话框并重试；`1.0.1.6` 去掉后台 PowerShell 的 `-WindowStyle Hidden`；`1.0.1.7` 自动更新改用自带更新器进程；`1.0.2.0` 更新检查加日志（`%APPDATA%\CmdHint\update.log`）、代理失败自动直连、接口限流时改用发布页重定向探测版本。
 
 - **小版本**：第 4 段加 1，范围 1 到 5。修 bug、做小调整，用法不变。
 - **中版本**：第 3 段加 1、第 4 段归 0，范围 1 到 5。新增功能或用法有变化，比如新快捷键、新模式、命令库大扩充。要不要加由开发者判断。
@@ -151,6 +151,7 @@ git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.he
 - **拼音**：`matcher` 启动时用 pypinyin 给每条命令的说明算全拼和首字母，2500 多条约 1 秒。首字母缩写 2 个字母只认开头，3 个字母起可以匹配中间。
 - **自动更新**：`update.py`。`GET /repos/dsgsg3/cmd-hint/releases/latest`（走 `urllib` 的 `ProxyHandler()`，默认读系统代理；`update_proxy` 可覆盖）→ 取 tag 和名字形如 `CmdHint-x.y.z.w.exe` 的附件 → 比版本号 → 下载到 `%APPDATA%\CmdHint\update\`，依次校验附件大小、发布页的 `digest`（sha256）和下载文件自带的 FileVersion。替换自己不能在本进程做，做法是：把当前 exe 复制成 `update\CmdHint-updater.exe`，用 `--apply-update <新文件> <原exe>` 启动它；更新器在 `main()` 的最前面处理这个参数（不进 App、不装键盘钩子、不占单实例互斥量），轮询等原 exe 解锁后 `shutil.copy2` 覆盖、`os.startfile` 重启、删掉下载文件。启动时 `update.cleanup()` 会清掉 update 目录里上次遗留的 exe/ps1。启动 20 秒后查一次，之后每 6 小时一次。
   为什么不用 PowerShell 替换：实测这条路不可靠——`DETACHED_PROCESS` 启动的 PowerShell 会立刻退出；给它加 `-WindowStyle Hidden` 会让它再启动的 GUI 程序起不来；即使去掉这些，替换后立刻启动也会偶发 `Failed to load Python DLL`（PyInstaller 单文件解压被干扰），而用同名进程重试也判不准（错误对话框本身是活着的进程）。改用自带的更新器进程后一次通过。
+  网络的两条退路：`_open_first()` 先走系统代理，连接类错误再试直连（HTTP 4xx/5xx 直接抛出，不再重试，省额度）；`fetch_latest()` 遇到 403/429 限流时改用 `github.com/.../releases/latest` 的重定向拿到版本号，再按约定拼附件地址（`ASSET_URL`），此时没有 size/digest，但下载后仍会核对 exe 自带的 FileVersion。整个过程写进 `%APPDATA%\CmdHint\update.log`，排查先看它。匿名接口每 IP 每小时只有 60 次，测试时反复调用很容易打满。
 - **命令文件**：三层来源，后面的覆盖前面的同名命令 —— `commands.json`（第一阶段导出）、`commands_extra.txt`（内置扩充）、`%APPDATA%\CmdHint\commands_user.txt`（用户自己的）。格式一行一条 `分类¦命令¦说明¦标签(逗号分隔)¦标志`，`d` 危险、`h` 常用，新分类用 `@cat¦id¦名称` 声明；分类标签也是用户文件优先。主程序每秒看用户文件的 mtime，变了就起线程重建 Matcher（含拼音预计算），完成后经队列把新对象交回主线程替换。
 
 ## 怎么测试
