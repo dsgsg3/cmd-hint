@@ -1,0 +1,2416 @@
+# 额外命令库。格式：分类¦命令¦说明¦标签(逗号分隔)¦标志(d=危险 h=常用)。{{参数}} 表示需要自己替换的值
+@cat¦git¦Git 版本管理
+@cat¦win¦Windows 命令
+@cat¦mid¦中间件
+@cat¦auto¦自动化运维
+@cat¦sec¦安全与审计
+@cat¦dev¦开发运行环境
+@cat¦sh¦Shell 脚本
+file¦ls -lt | head -20¦按修改时间倒序，看最近改动的文件¦排序,最近¦h
+file¦ls -lS | head -20¦按大小倒序，看最大的文件¦排序,大文件¦
+file¦ls -d */¦只列出当前目录下的子目录¦目录¦
+file¦tree -L 2 -d {{目录}}¦只看两层目录结构¦树形,目录¦
+file¦cp -a {{源}} {{目标}}¦完整复制，保留权限、属主和时间¦复制,拷贝¦h
+file¦cp -r {{源目录}} {{目标目录}}¦递归复制整个目录¦复制,拷贝¦
+file¦mv {{旧名}} {{新名}}¦重命名或移动文件¦重命名,移动¦
+file¦rm -rf {{目录}}¦强制递归删除目录，不可恢复¦删除¦d
+file¦rm -i {{文件}}¦删除前逐个确认¦删除,确认¦
+file¦mkdir -p {{a/b/c}}¦递归创建多级目录¦创建目录¦h
+file¦touch {{文件}}¦创建空文件或更新时间戳¦创建文件¦
+file¦find . -type f -name "*.{{后缀}}"¦在当前目录下按后缀查文件¦查找,后缀¦h
+file¦find . -type f -mmin -30¦查最近 30 分钟内改动过的文件¦最近修改¦
+file¦find . -type f -mtime -1¦查最近 24 小时内改动过的文件¦最近修改,今天¦
+file¦find . -type f -empty¦查找空文件¦空文件¦
+file¦find . -type d -empty¦查找空目录¦空目录¦
+file¦find . -type f -perm 777¦查权限为 777 的文件，排查安全隐患¦权限,安全¦
+file¦find / -user {{用户}} -type f 2>/dev/null¦查找某个用户拥有的所有文件¦属主,用户¦
+file¦find . -type l¦查找符号链接（软链接）¦软链接¦
+file¦find . -type f -exec ls -lh {} \;¦对查到的每个文件执行命令¦批量,执行¦
+file¦find . -type f -print0 | xargs -0 {{命令}}¦把查到的文件安全地交给 xargs 处理¦批量,管道¦
+file¦locate {{文件名}}¦用索引快速查找文件（比 find 快）¦查找,索引¦
+file¦updatedb¦更新 locate 使用的文件索引¦索引¦
+file¦which {{命令}}¦查看命令所在的路径¦命令位置¦h
+file¦whereis {{命令}}¦查命令的二进制、手册和源码位置¦命令位置¦
+file¦type {{命令}}¦判断是别名、内建命令还是外部命令¦别名¦
+file¦realpath {{文件}}¦取文件的绝对路径¦绝对路径¦
+file¦basename {{路径}}¦取路径中的文件名部分¦文件名¦
+file¦dirname {{路径}}¦取路径中的目录部分¦目录¦
+file¦ln -sf {{目标}} {{链接名}}¦创建或覆盖软链接¦软链接,快捷方式¦
+file¦install -d -m 755 -o {{用户}} {{目录}}¦创建目录并同时设置权限和属主¦创建目录,权限¦
+file¦file -i {{文件}}¦查看文件的编码和 MIME 类型¦编码¦
+file¦iconv -f gbk -t utf-8 {{文件}} -o {{输出文件}}¦把 GBK 编码转成 UTF-8，解决乱码¦乱码,转码¦h
+file¦dos2unix {{文件}}¦去掉 Windows 换行符（^M）¦换行,乱码¦
+file¦sed -i 's/\r$//' {{文件}}¦没有 dos2unix 时去掉 CRLF 换行¦换行¦
+file¦lsattr {{文件}}¦查看文件的特殊属性（如不可修改）¦属性¦
+file¦chattr +i {{文件}}¦给文件加不可修改属性，root 也删不掉¦防删除,属性¦
+file¦inotifywait -m -r -e modify,create,delete {{目录}}¦实时监控目录里文件的变化¦监控,变化¦
+file¦lsof +D {{目录}}¦查看目录下的文件被哪些进程占用¦占用,卸载失败¦
+file¦fuser -mv {{挂载点}}¦查看哪些进程在使用某个挂载点¦占用,卸载失败¦
+file¦readlink -f {{链接}}¦解析软链接指向的真实路径¦软链接¦
+file¦split -l 100000 {{文件}} {{前缀}}¦按行数把大文件拆成多份¦拆分,大文件¦
+text¦grep -rn "{{关键字}}" --include="*.{{后缀}}" {{目录}}¦只在指定后缀的文件里递归搜索¦搜索,后缀¦h
+text¦grep -rl "{{关键字}}" {{目录}}¦只列出包含关键字的文件名¦搜索,文件名¦
+text¦grep -E "{{词1}}|{{词2}}" {{文件}}¦同时匹配多个关键字（或）¦多个关键字,正则¦
+text¦grep -w "{{词}}" {{文件}}¦整词匹配，避免匹配到更长的单词¦整词¦
+text¦grep -n -C 5 "{{关键字}}" {{文件}}¦显示匹配行及前后 5 行¦上下文¦h
+text¦grep -v "^#" {{文件}} | grep -v "^$"¦去掉注释行和空行，看有效配置¦配置,注释,空行¦h
+text¦grep -P "\d+\.\d+\.\d+\.\d+" {{文件}}¦用 Perl 正则提取 IP 地址所在的行¦IP,正则¦
+text¦grep -oE "[0-9]{1,3}(\.[0-9]{1,3}){3}" {{文件}}¦只提取出文件里的 IP 地址¦IP,提取¦h
+text¦egrep -c "{{关键字}}" {{文件}}¦统计匹配的行数¦统计¦
+text¦sed -n '{{10}},{{20}}p' {{文件}}¦打印文件的第 10 到 20 行¦指定行,截取¦h
+text¦sed -n '/{{开始}}/,/{{结束}}/p' {{文件}}¦打印两个关键字之间的内容¦区间,截取¦
+text¦sed -i 's/{{旧}}/{{新}}/g' {{文件}}¦批量替换文件里的文本¦替换¦h
+text¦sed -i.bak 's/{{旧}}/{{新}}/g' {{文件}}¦替换前自动备份成 .bak¦替换,备份¦
+text¦sed -i '/{{关键字}}/d' {{文件}}¦删除包含关键字的所有行¦删除行¦
+text¦sed -i '{{5}}d' {{文件}}¦删除指定的某一行¦删除行¦
+text¦sed -i '{{5}}i\{{新内容}}' {{文件}}¦在第 5 行前插入一行¦插入行¦
+text¦sed -i '$a {{内容}}' {{文件}}¦在文件末尾追加一行¦追加¦
+text¦sed -i 's/^/#/' {{文件}}¦给每一行开头加 #，整体注释掉¦注释¦
+text¦sed -i 's/^#//' {{文件}}¦去掉每行开头的 #，取消注释¦取消注释¦
+text¦sed 's/[[:space:]]*$//' {{文件}}¦去掉每行末尾的空格¦空格¦
+text¦awk '{print $1}' {{文件}}¦打印每行的第 1 列¦列,字段¦h
+text¦awk -F: '{print $1}' /etc/passwd¦按冒号分隔取第 1 列（列出所有用户）¦分隔符,用户¦
+text¦awk '{s+=$1} END {print s}' {{文件}}¦把第一列的数字加起来求和¦求和¦h
+text¦awk 'NR>={{10}} && NR<={{20}}' {{文件}}¦按行号区间输出¦指定行¦
+text¦awk '!a[$0]++' {{文件}}¦去重但保持原顺序（不需要先排序）¦去重¦
+text¦awk 'length>80' {{文件}}¦找出超过 80 个字符的行¦长度¦
+text¦awk '{print NF}' {{文件}} | sort -u¦查看每行有几列，排查格式不一致¦列数¦
+text¦cut -d, -f1,3 {{文件.csv}}¦按逗号分隔取第 1 列和第 3 列¦csv,列¦
+text¦cut -c1-20 {{文件}}¦每行只保留前 20 个字符¦截取¦
+text¦sort -n {{文件}}¦按数字大小排序¦排序,数字¦
+text¦sort -k2 -nr {{文件}}¦按第 2 列数字倒序排¦排序,倒序¦
+text¦sort {{文件}} | uniq -c | sort -rn¦统计每行出现的次数并从高到低排¦统计,去重,排行¦h
+text¦sort -u {{文件}}¦排序并去重¦去重¦
+text¦uniq -d {{文件}}¦只显示重复出现的行¦重复¦
+text¦comm -12 <(sort {{a}}) <(sort {{b}})¦找出两个文件共有的行¦交集,对比¦
+text¦comm -23 <(sort {{a}}) <(sort {{b}})¦找出只在第一个文件里的行¦差集,对比¦
+text¦diff -u {{旧文件}} {{新文件}}¦统一格式对比两个文件的差异¦对比,差异¦h
+text¦diff -rq {{目录1}} {{目录2}}¦对比两个目录，只显示哪些文件不同¦对比,目录¦
+text¦wc -l {{文件}}¦统计文件行数¦行数,统计¦h
+text¦wc -c {{文件}}¦统计文件字节数¦字节¦
+text¦head -n {{20}} {{文件}}¦查看文件前 20 行¦开头¦h
+text¦head -c 1k {{文件}}¦只看文件前 1KB 内容¦开头,大文件¦
+text¦tail -n +{{2}} {{文件}}¦从第 2 行开始输出到结尾（跳过表头）¦跳过¦
+text¦tr -d '\r' < {{文件}}¦去掉 Windows 回车符¦换行¦
+text¦tr 'a-z' 'A-Z' < {{文件}}¦全部转成大写¦大小写¦
+text¦tr -s ' ' < {{文件}}¦把连续多个空格压成一个¦空格¦
+text¦xargs -n1 < {{文件}}¦把文件内容拆成一行一个单词¦拆分¦
+text¦paste -sd, {{文件}}¦把多行合并成一行，用逗号隔开¦合并行¦
+text¦column -t -s, {{文件.csv}}¦把 csv 对齐成表格查看¦表格,csv¦
+text¦nl -ba {{文件}}¦给文件每行加上行号¦行号¦
+text¦cat -A {{文件}}¦显示隐藏字符（制表符、换行符）排查格式问题¦隐藏字符,乱码¦
+text¦cat -n {{文件}}¦带行号显示文件内容¦行号¦
+text¦tac {{文件}}¦倒着显示文件（最后一行在最前）¦倒序¦
+text¦rev {{文件}}¦把每一行的字符反转¦反转¦
+text¦jq . {{文件.json}}¦格式化显示 JSON¦json,格式化¦h
+text¦jq -r '.{{字段}}' {{文件.json}}¦取出 JSON 中某个字段的值¦json,字段¦h
+text¦jq -r '.[] | .{{字段}}' {{文件.json}}¦取出 JSON 数组里每个元素的某字段¦json,数组¦
+text¦jq -c . {{文件.json}}¦把 JSON 压成一行¦json,压缩¦
+text¦python3 -m json.tool {{文件.json}}¦没装 jq 时用 Python 格式化 JSON¦json,格式化¦
+text¦yq '.{{路径}}' {{文件.yaml}}¦读取 YAML 文件里的某个字段¦yaml¦
+text¦vim +{{行号}} {{文件}}¦打开文件并直接跳到某一行¦编辑,行号¦
+text¦vim -d {{文件1}} {{文件2}}¦用 vim 左右对比两个文件¦对比¦
+text¦nano {{文件}}¦用 nano 编辑文件（比 vim 好上手）¦编辑¦
+text¦echo "{{内容}}" >> {{文件}}¦往文件末尾追加一行¦追加,写入¦h
+text¦echo "{{内容}}" | tee -a {{文件}}¦追加内容并同时显示在屏幕上¦追加¦
+text¦echo "{{内容}}" | sudo tee {{文件}}¦用 sudo 写入受保护的文件¦权限,写入¦h
+text¦printf '%s\n' {{内容}}¦按格式输出，比 echo 更可靠¦输出¦
+text¦base64 {{文件}}¦把文件编码成 base64¦编码¦
+text¦echo "{{文本}}" | base64 -d¦把 base64 文本解码¦解码¦
+text¦urlencode() { python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$1"; }¦定义一个 URL 编码函数¦编码,url¦
+text¦xxd {{文件}} | head¦以十六进制查看文件开头¦十六进制,二进制¦
+text¦strings {{文件}} | grep "{{关键字}}"¦从二进制文件里找可读字符串¦二进制¦
+text¦less +F {{文件}}¦用 less 实时跟踪文件，按 Ctrl+C 暂停翻页¦跟踪,日志¦
+text¦less -N {{文件}}¦带行号用 less 翻看文件¦翻页,行号¦
+text¦zcat {{文件.gz}} | head¦不解压直接看 gz 文件的开头¦压缩,gz¦
+text¦zgrep -i "{{关键字}}" {{文件.gz}}¦在 gz 压缩的日志里搜关键字¦压缩,日志¦h
+text¦bzcat {{文件.bz2}}¦不解压直接查看 bz2 文件¦压缩¦
+text¦xzcat {{文件.xz}}¦不解压直接查看 xz 文件¦压缩¦
+disk¦df -h /¦只看根分区的使用情况¦根分区¦
+disk¦df -h --total¦显示所有分区并合计总容量¦合计¦
+disk¦df -hT -x tmpfs -x devtmpfs¦排除内存虚拟盘，只看真实磁盘¦过滤¦h
+disk¦du -h --max-depth=1 {{目录}} | sort -hr | head¦看某目录下一层谁最大¦排行,大目录¦h
+disk¦du -sh /var/log/*¦查看日志目录下每一项的大小¦日志,大小¦
+disk¦du -ah {{目录}} | sort -rh | head -20¦找出目录里最大的 20 个文件或目录¦大文件,排行¦h
+disk¦du -sh --exclude="*.log" {{目录}}¦统计目录大小时排除某类文件¦排除¦
+disk¦du --apparent-size -sh {{文件}}¦看文件的表面大小（稀疏文件用）¦稀疏文件¦
+disk¦lsof +L1¦找已删除但仍被进程占用的文件（删了空间不释放）¦删除不释放,占用¦h
+disk¦lsof / | awk '$7 > 100000000'¦找占用超过 100MB 的已打开文件¦大文件,占用¦
+disk¦find / -xdev -type f -size +500M 2>/dev/null¦找整个根分区里超过 500MB 的文件¦大文件,磁盘满¦h
+disk¦find /var/log -type f -name "*.log" -mtime +30 -delete¦删除 30 天前的日志¦清理,日志¦d
+disk¦find /tmp -type f -atime +7 -delete¦清理 7 天没访问过的临时文件¦清理,临时文件¦d
+disk¦journalctl --vacuum-size=200M¦把 systemd 日志压缩到 200MB 以内¦日志,清理¦h
+disk¦journalctl --vacuum-time=7d¦只保留最近 7 天的 systemd 日志¦日志,清理¦
+disk¦journalctl --disk-usage¦查看 systemd 日志占了多少磁盘¦日志,占用¦
+disk¦docker system prune -af¦清理所有未使用的镜像、容器、网络¦清理,docker¦d
+disk¦yum clean all¦清理 yum 缓存释放空间¦清理,缓存¦
+disk¦apt clean && apt autoremove -y¦清理 apt 缓存和无用依赖¦清理,缓存¦
+disk¦cat /dev/null > {{文件}}¦清空文件内容（日志文件正在被写入时用）¦清空,日志¦h
+disk¦: > {{文件}}¦清空文件内容的最短写法¦清空¦
+disk¦fallocate -l 1G {{文件}}¦快速创建一个指定大小的文件（做测试用）¦创建,测试¦
+disk¦dd if=/dev/zero of={{文件}} bs=1M count=1024¦写一个 1GB 的文件，可测磁盘写入速度¦测速,创建¦
+disk¦hdparm -tT {{/dev/sda}}¦测试磁盘读取速度¦测速¦
+disk¦fio --name=test --rw=randrw --size=1g --directory={{目录}}¦用 fio 做磁盘随机读写压测¦压测,性能¦
+disk¦iostat -dx 1¦每秒刷新磁盘 IO 详情，看 %util 是否打满¦io,性能¦h
+disk¦iotop -oPa¦累计显示进程的磁盘读写量¦io,进程¦
+disk¦pvs && vgs && lvs¦查看 LVM 的物理卷、卷组、逻辑卷¦lvm¦h
+disk¦lvextend -r -L +{{10G}} /dev/{{vg}}/{{lv}}¦给逻辑卷扩容并同时扩展文件系统¦lvm,扩容¦h
+disk¦lvextend -l +100%FREE -r /dev/{{vg}}/{{lv}}¦把卷组剩余空间全部给逻辑卷¦lvm,扩容¦
+disk¦vgextend {{vg}} {{/dev/sdb}}¦把新磁盘加入卷组¦lvm,扩容¦
+disk¦pvcreate {{/dev/sdb}}¦把新磁盘初始化为 LVM 物理卷¦lvm¦
+disk¦xfs_growfs {{挂载点}}¦扩展 XFS 文件系统到新容量¦xfs,扩容¦h
+disk¦resize2fs {{/dev/sdb1}}¦扩展 ext4 文件系统到新容量¦ext4,扩容¦
+disk¦growpart {{/dev/vda}} {{1}}¦云盘扩容后先扩分区¦扩容,云盘¦
+disk¦mkfs.xfs {{/dev/sdb1}}¦把分区格式化成 XFS（会清空数据）¦格式化¦d
+disk¦mkfs.ext4 {{/dev/sdb1}}¦把分区格式化成 ext4（会清空数据）¦格式化¦d
+disk¦parted {{/dev/sdb}} mklabel gpt¦给新盘创建 GPT 分区表¦分区¦d
+disk¦mount -o remount,rw /¦把根分区重新挂成可读写（只读故障时用）¦只读,挂载¦h
+disk¦mount -a¦按 /etc/fstab 重新挂载所有分区，检验配置¦fstab,挂载¦
+disk¦mount | column -t¦对齐显示当前所有挂载信息¦挂载¦
+disk¦cat /proc/mounts¦查看内核实际挂载的文件系统¦挂载¦
+disk¦echo "UUID=$(blkid -s UUID -o value {{/dev/sdb1}}) {{挂载点}} xfs defaults 0 0" >> /etc/fstab¦把新盘按 UUID 写入开机自动挂载¦fstab,开机挂载¦
+disk¦umount -l {{挂载点}}¦懒卸载，卸载提示“设备忙”时使用¦卸载,设备忙¦h
+disk¦swapon --show¦查看当前启用的 swap¦swap¦
+disk¦fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile¦创建并启用 2GB 的 swap 文件¦swap,创建¦h
+disk¦swapoff -a && swapon -a¦刷新 swap，把 swap 里的数据换回内存¦swap,刷新¦
+disk¦smartctl -a {{/dev/sda}}¦查看磁盘的 SMART 健康信息¦健康,坏道¦
+disk¦badblocks -sv {{/dev/sdb}}¦检查磁盘有没有坏块（只读检测）¦坏块¦
+disk¦fsck -y {{/dev/sdb1}}¦修复文件系统错误（需先卸载）¦修复,fsck¦d
+disk¦xfs_repair {{/dev/sdb1}}¦修复 XFS 文件系统（需先卸载）¦修复,xfs¦d
+disk¦tune2fs -l {{/dev/sdb1}}¦查看 ext 文件系统的详细参数¦ext4,参数¦
+disk¦tune2fs -m 1 {{/dev/sdb1}}¦把保留块比例改成 1%，释放可用空间¦保留块,空间¦
+disk¦lsof | grep deleted¦列出已删除但还没释放的文件¦删除不释放¦
+disk¦ncdu -x /¦交互式浏览根分区占用（不跨分区）¦大文件,交互¦
+perm¦chmod +x {{脚本}}¦给脚本加上可执行权限¦执行权限,脚本¦h
+perm¦chmod -R 755 {{目录}}¦递归设置目录权限¦递归,权限¦
+perm¦chmod u+w {{文件}}¦给属主加上写权限¦写权限¦
+perm¦chmod g+rw {{文件}}¦给属组加读写权限¦属组¦
+perm¦chmod o-rwx {{文件}}¦去掉其他人的所有权限¦其他用户¦
+perm¦chmod 600 ~/.ssh/authorized_keys¦修复 ssh 公钥文件权限，否则无法免密¦ssh,免密¦h
+perm¦chmod 700 ~/.ssh¦修复 .ssh 目录权限¦ssh¦
+perm¦chmod 644 {{文件}}¦设置文件为属主读写、其他只读¦权限¦
+perm¦chmod 1777 {{目录}}¦设置粘滞位，像 /tmp 一样只能删自己的文件¦粘滞位¦
+perm¦chmod g+s {{目录}}¦目录新文件自动继承属组¦setgid,属组¦
+perm¦find {{目录}} -type d -exec chmod 755 {} +¦只把目录批量改成 755¦批量,目录¦h
+perm¦find {{目录}} -type f -exec chmod 644 {} +¦只把文件批量改成 644¦批量,文件¦h
+perm¦chown -R {{用户}}:{{组}} {{目录}}¦递归修改属主和属组¦属主,递归¦h
+perm¦chown {{用户}} {{文件}}¦只修改属主¦属主¦
+perm¦chgrp -R {{组}} {{目录}}¦递归修改属组¦属组¦
+perm¦stat -c '%a %U:%G %n' {{文件}}¦用数字显示文件权限和属主¦权限,属主¦
+perm¦namei -l {{路径}}¦逐级查看路径上每一层的权限，排查 Permission denied¦权限,排查¦h
+perm¦getenforce¦查看 SELinux 当前状态¦selinux¦h
+perm¦setenforce 0¦临时关闭 SELinux¦selinux,关闭¦
+perm¦sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/conf
+perm¦sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config¦永久关闭 SELinux（需重启）¦selinux,永久¦
+perm¦restorecon -Rv {{目录}}¦恢复目录的 SELinux 安全上下文¦selinux¦
+perm¦ls -Z {{文件}}¦查看文件的 SELinux 上下文¦selinux¦
+perm¦ausearch -m avc -ts recent¦查看最近被 SELinux 拦截的记录¦selinux,拦截¦
+perm¦whoami¦查看当前登录的用户名¦当前用户¦h
+perm¦groups {{用户}}¦查看用户属于哪些组¦用户组¦
+perm¦id {{用户}}¦查看用户的 uid、gid 和所属组¦uid¦
+perm¦who¦查看当前都有谁登录了系统¦登录¦h
+perm¦w¦查看谁登录了，以及他们在做什么¦登录,进程¦
+perm¦last -n 20¦查看最近 20 次登录记录¦登录记录¦h
+perm¦lastb -n 20¦查看最近 20 次失败的登录尝试¦失败登录,爆破¦h
+perm¦lastlog¦查看每个用户最后一次登录时间¦登录¦
+perm¦useradd -m -s /bin/bash {{用户}}¦创建用户并自动建家目录¦创建用户¦h
+perm¦userdel -r {{用户}}¦删除用户并删除他的家目录¦删除用户¦d
+perm¦usermod -aG {{组}} {{用户}}¦把用户追加到某个附加组（不覆盖原有组）¦加组¦h
+perm¦usermod -aG sudo {{用户}}¦让用户拥有 sudo 权限（Debian/Ubuntu）¦sudo,提权¦
+perm¦usermod -aG wheel {{用户}}¦让用户拥有 sudo 权限（CentOS）¦sudo,提权¦
+perm¦usermod -s /sbin/nologin {{用户}}¦禁止用户登录系统¦禁止登录¦
+perm¦usermod -L {{用户}}¦锁定用户账号¦锁定¦
+perm¦usermod -U {{用户}}¦解锁用户账号¦解锁¦
+perm¦passwd -l {{用户}}¦锁定用户密码¦锁定¦
+perm¦passwd -e {{用户}}¦强制用户下次登录时改密码¦改密码¦
+perm¦echo "{{用户}}:{{密码}}" | chpasswd¦在脚本里非交互地设置密码¦改密码,脚本¦h
+perm¦chage -l {{用户}}¦查看用户密码有效期¦密码过期¦
+perm¦chage -M 90 {{用户}}¦设置用户密码 90 天后过期¦密码过期¦
+perm¦chage -E -1 -M -1 {{用户}}¦取消用户密码和账号的过期限制¦密码过期¦
+perm¦groupadd {{组}}¦创建用户组¦用户组¦
+perm¦groupdel {{组}}¦删除用户组¦用户组¦d
+perm¦gpasswd -d {{用户}} {{组}}¦把用户从某个组里移除¦用户组¦
+perm¦getent passwd {{用户}}¦查询用户信息（包含 LDAP 等来源）¦用户,查询¦
+perm¦visudo¦安全地编辑 sudo 权限配置¦sudo,配置¦h
+perm¦sudo -l¦查看当前用户能用 sudo 执行哪些命令¦sudo¦
+perm¦sudo -u {{用户}} {{命令}}¦用别的用户身份执行命令¦sudo,切换用户¦h
+perm¦sudo -i¦切换到 root 的完整环境¦root¦
+perm¦su - {{用户}}¦切换用户并加载他的完整环境¦切换用户¦h
+perm¦pkill -KILL -u {{用户}}¦踢掉某个用户的所有进程¦踢人,用户¦d
+perm¦awk -F: '$3==0' /etc/passwd¦查找 uid 为 0 的账号（排查后门）¦root,安全,后门¦h
+perm¦awk -F: '($2=="") {print $1}' /etc/shadow¦查找空密码的账号¦空密码,安全¦h
+perm¦getfacl -R {{目录}}¦递归查看目录的 ACL 权限¦acl¦
+perm¦setfacl -R -m u:{{用户}}:rwx {{目录}}¦给指定用户单独授权，不改属主¦acl,授权¦h
+perm¦setfacl -b {{文件}}¦清除文件上所有 ACL 权限¦acl¦
+perm¦setfacl -d -m u:{{用户}}:rwx {{目录}}¦设置目录默认 ACL，新文件自动继承¦acl¦
+perm¦getcap -r / 2>/dev/null¦查找所有带特殊 capability 的程序¦能力,安全¦
+perm¦find / -perm -4000 -type f 2>/dev/null¦查找所有带 SUID 的程序（安全审计）¦suid,安全¦h
+perm¦find / -nouser -o -nogroup 2>/dev/null¦查找没有属主或属组的文件¦孤儿文件¦
+perm¦umask 022¦设置新建文件的默认权限掩码¦默认权限¦
+proc¦ps aux --sort=-%cpu | head -10¦CPU 占用最高的 10 个进程¦cpu,排行¦h
+proc¦ps aux --sort=-%mem | head -10¦内存占用最高的 10 个进程¦内存,排行¦h
+proc¦ps -ef | grep {{进程名}} | grep -v grep¦按名字查进程（排除 grep 自己）¦查进程¦h
+proc¦ps -eLf | grep {{进程名}} | wc -l¦统计某进程的线程数¦线程¦
+proc¦ps -p {{PID}} -o pid,ppid,user,%cpu,%mem,etime,cmd¦查看指定进程的详细信息和运行时长¦进程详情,运行时间¦h
+proc¦ps -eo pid,ppid,stat,cmd | awk '$3 ~ /Z/'¦找出僵尸进程¦僵尸¦h
+proc¦ps -eo pid,stat,cmd | awk '$2 ~ /D/'¦找出处于 D 状态（卡在 IO）的进程¦卡死,io¦
+proc¦ps -o pid,ppid,cmd --ppid {{PID}}¦查看某进程的所有子进程¦子进程¦
+proc¦pstree -p {{PID}}¦以树形显示进程及其子进程¦进程树¦
+proc¦top -u {{用户}}¦只看某个用户的进程¦用户¦
+proc¦top -H -p {{PID}}¦查看进程里每个线程的 CPU 占用¦线程,cpu¦h
+proc¦top -b -n 1 | head -20¦非交互地输出一次 top 结果（适合脚本）¦脚本¦
+proc¦htop¦更好用的交互式进程查看器¦进程,交互¦
+proc¦kill -9 {{PID}}¦强制杀死进程¦杀进程,强制¦d
+proc¦kill -15 {{PID}}¦优雅终止进程（给它保存数据的机会）¦杀进程¦h
+proc¦kill -HUP {{PID}}¦通知进程重新加载配置¦重载¦
+proc¦killall {{进程名}}¦按名字杀掉所有同名进程¦杀进程¦d
+proc¦pkill -f "{{关键字}}"¦按命令行关键字杀进程¦杀进程¦d
+proc¦pgrep -af {{关键字}}¦按关键字查进程并显示完整命令行¦查进程¦
+proc¦pidof {{进程名}}¦直接得到进程的 PID¦pid¦
+proc¦lsof -p {{PID}}¦查看进程打开的所有文件和连接¦打开文件¦
+proc¦lsof -i -P -n | grep LISTEN¦列出所有监听端口及对应进程¦端口,监听¦h
+proc¦ls -l /proc/{{PID}}/fd | wc -l¦统计进程打开了多少个文件句柄¦句柄,fd¦h
+proc¦ls -l /proc/{{PID}}/cwd¦查看进程的工作目录¦工作目录¦
+proc¦ls -l /proc/{{PID}}/exe¦查看进程对应的可执行文件路径¦可执行文件¦
+proc¦cat /proc/{{PID}}/cmdline | tr '\0' ' '¦查看进程的完整启动命令¦启动命令¦h
+proc¦cat /proc/{{PID}}/environ | tr '\0' '\n'¦查看进程的环境变量¦环境变量¦
+proc¦cat /proc/{{PID}}/status | grep -E "VmRSS|Threads"¦查看进程实际内存占用和线程数¦内存,线程¦
+proc¦cat /proc/{{PID}}/limits¦查看进程的资源限制（ulimit）¦限制,句柄¦
+proc¦cat /proc/{{PID}}/io¦查看进程的磁盘读写累计¦io¦
+proc¦strace -p {{PID}}¦跟踪进程正在做的系统调用¦调试,卡死¦
+proc¦strace -c -p {{PID}}¦统计进程的系统调用耗时分布¦调试,性能¦
+proc¦strace -f -e trace=network -p {{PID}}¦只跟踪进程的网络系统调用¦调试,网络¦
+proc¦pstack {{PID}}¦打印进程的线程栈（排查卡死）¦卡死,栈¦
+proc¦gdb -p {{PID}} -batch -ex "thread apply all bt"¦导出进程所有线程的调用栈¦卡死,栈¦
+proc¦perf top¦实时查看哪些函数最耗 CPU¦性能,cpu¦
+proc¦perf record -g -p {{PID}} -- sleep 30¦采样进程 30 秒做性能分析¦性能,火焰图¦
+proc¦renice -n -5 -p {{PID}}¦调高进程优先级¦优先级¦
+proc¦nice -n 10 {{命令}}¦用较低优先级运行命令¦优先级¦
+proc¦ionice -c3 -p {{PID}}¦把进程的 IO 优先级降到最低¦io,优先级¦
+proc¦taskset -cp {{0,1}} {{PID}}¦把进程绑定到指定 CPU 核¦cpu,绑定¦
+proc¦cpulimit -p {{PID}} -l 50¦限制进程最多使用 50% 的 CPU¦限制,cpu¦
+proc¦nohup {{命令}} > /dev/null 2>&1 &¦让命令在后台运行，退出终端也不中断¦后台,不中断¦h
+proc¦{{命令}} &¦把命令放到后台运行¦后台¦
+proc¦jobs -l¦查看当前终端的后台任务¦后台任务¦
+proc¦bg %{{1}}¦把暂停的任务放到后台继续跑¦后台任务¦
+proc¦fg %{{1}}¦把后台任务拉回前台¦后台任务¦
+proc¦disown -h %{{1}}¦让后台任务脱离终端，退出也不会被杀¦后台,不中断¦
+proc¦setsid {{命令}}¦在新会话里运行命令，完全脱离当前终端¦后台,不中断¦
+proc¦timeout 30 {{命令}}¦限制命令最多运行 30 秒¦超时¦h
+proc¦watch -n 1 '{{命令}}'¦每秒刷新一次命令输出¦监控,刷新¦h
+proc¦watch -d -n 2 '{{命令}}'¦每 2 秒刷新并高亮变化的部分¦监控,变化¦
+proc¦free -m¦以 MB 为单位查看内存和 swap¦内存¦h
+proc¦free -h -s 2¦每 2 秒刷新一次内存使用情况¦内存,监控¦
+proc¦cat /proc/meminfo | head -20¦查看内核给出的详细内存信息¦内存详情¦
+proc¦cat /proc/meminfo | grep -E "MemTotal|MemAvailable|Cached|SwapTotal|SwapFree"¦只看关键的内存指标¦内存¦
+proc¦slabtop¦查看内核 slab 缓存占用（排查内核内存泄露）¦内存,泄露¦
+proc¦echo 3 > /proc/sys/vm/drop_caches¦释放页缓存（应急用，生产慎用）¦释放内存,缓存¦d
+proc¦sync && echo 3 > /proc/sys/vm/drop_caches¦先落盘再释放页缓存¦释放内存,缓存¦
+proc¦vmstat -SM 1¦每秒显示 CPU、内存、IO，单位 MB¦性能¦
+proc¦vmstat -s¦显示内存和系统事件的累计统计¦内存¦
+proc¦sar -u 1 5¦采样 5 次 CPU 使用率¦cpu,历史¦
+proc¦sar -r 1 5¦采样 5 次内存使用率¦内存,历史¦
+proc¦sar -n DEV 1 5¦采样 5 次网卡流量¦网络,流量¦h
+proc¦sar -q 1 5¦采样 5 次系统负载和运行队列¦负载¦
+proc¦sar -d 1 5¦采样 5 次磁盘读写¦磁盘,io¦
+proc¦sar -u -f /var/log/sa/sa{{日}}¦查看某一天的历史 CPU 使用率¦cpu,历史¦
+proc¦mpstat -P ALL 1¦每个 CPU 核单独的使用率¦cpu,每核¦h
+proc¦pidstat -u 1¦每秒显示各进程的 CPU 占用¦cpu,进程¦
+proc¦pidstat -d 1¦每秒显示各进程的磁盘读写¦io,进程¦
+proc¦pidstat -r 1¦每秒显示各进程的内存变化¦内存,进程¦
+proc¦pidstat -w 1¦每秒显示各进程的上下文切换¦上下文切换¦
+proc¦uptime¦查看运行时长和 1、5、15 分钟的负载¦负载,运行时间¦h
+proc¦cat /proc/loadavg¦直接读取系统负载¦负载¦
+proc¦nproc --all¦查看 CPU 逻辑核数¦cpu,核数¦
+proc¦lscpu | grep -E "^CPU\(s\)|Model name|Thread|Core"¦只看 CPU 型号和核数¦cpu¦
+proc¦cat /proc/cpuinfo | grep "model name" | uniq¦查看 CPU 型号¦cpu,型号¦
+proc¦cat /proc/cpuinfo | grep processor | wc -l¦统计逻辑 CPU 个数¦cpu,核数¦
+proc¦dmidecode -t memory¦查看内存条型号、容量和插槽¦内存,硬件¦
+proc¦dmidecode -s system-serial-number¦查看服务器序列号¦硬件,序列号¦
+proc¦dmidecode -t system¦查看服务器厂商和型号¦硬件¦
+proc¦lspci | grep -i -E "vga|nvidia"¦查看显卡信息¦显卡¦
+proc¦nvidia-smi¦查看 NVIDIA 显卡的使用率、显存和温度¦显卡,gpu¦h
+proc¦nvidia-smi -l 1¦每秒刷新显卡状态¦显卡,监控¦
+proc¦ipmitool sensor¦查看服务器传感器（温度、风扇、电压）¦硬件,温度¦
+proc¦ipmitool sel list¦查看服务器硬件事件日志¦硬件,日志¦
+proc¦sensors¦查看 CPU 等硬件温度¦温度¦
+proc¦dmesg -T | grep -i -E "oom|killed process"¦查看有没有进程被 OOM 杀掉¦oom,内存¦h
+proc¦dmesg -T | grep -i error¦在内核日志里找错误¦内核,错误¦
+proc¦dmesg -T | tail -50¦查看内核日志最后 50 行¦内核日志¦h
+proc¦dmesg -w¦实时跟踪内核日志¦内核日志¦
+proc¦journalctl -k¦用 journalctl 看本次启动的内核日志¦内核日志¦
+proc¦sysctl -a | grep {{关键字}}¦按关键字查内核参数¦内核参数¦
+proc¦sysctl -w {{参数}}={{值}}¦临时修改内核参数¦内核参数¦
+proc¦sysctl -p /etc/sysctl.d/{{文件}}.conf¦加载指定的内核参数文件¦内核参数¦
+proc¦cat /proc/sys/net/core/somaxconn¦查看连接队列长度¦内核参数,连接¦
+proc¦ulimit -a¦查看当前 shell 的所有资源限制¦限制¦h
+proc¦ulimit -n 65535¦把当前 shell 的最大文件句柄调到 65535¦句柄,限制¦h
+proc¦cat /proc/sys/fs/file-nr¦查看系统已用文件句柄数¦句柄¦
+proc¦cat /proc/sys/fs/file-max¦查看系统最大文件句柄数¦句柄¦
+proc¦prlimit --pid {{PID}}¦查看某个进程的资源限制¦限制¦
+proc¦systemd-analyze blame | head¦查看开机最慢的服务¦开机,启动慢¦h
+proc¦systemd-analyze¦查看系统开机总耗时¦开机¦
+proc¦uname -a¦查看内核版本和系统架构¦内核,版本¦h
+proc¦uname -r¦只看内核版本号¦内核,版本¦
+proc¦cat /etc/os-release¦查看发行版名称和版本¦系统版本¦h
+proc¦cat /etc/redhat-release¦查看 CentOS/RHEL 的版本¦系统版本¦
+proc¦lsb_release -a¦查看 Ubuntu/Debian 的版本¦系统版本¦
+proc¦hostnamectl¦查看主机名、系统版本、内核和硬件虚拟化¦主机名¦h
+proc¦hostnamectl set-hostname {{主机名}}¦永久修改主机名¦主机名¦h
+proc¦systemd-detect-virt¦判断是物理机还是虚拟机，以及虚拟化类型¦虚拟化¦
+proc¦getconf LONG_BIT¦判断系统是 32 位还是 64 位¦位数¦
+proc¦arch¦查看 CPU 架构¦架构¦
+proc¦reboot¦重启服务器¦重启¦d
+proc¦shutdown -r +5 "{{提示}}"¦5 分钟后重启并通知在线用户¦重启¦d
+proc¦shutdown -h now¦立即关机¦关机¦d
+proc¦shutdown -c¦取消已经安排的重启或关机¦取消重启¦
+proc¦poweroff¦关机¦关机¦d
+proc¦echo b > /proc/sysrq-trigger¦强制立即重启（系统卡死时的最后手段）¦强制重启,卡死¦d
+proc¦crash¦分析内核崩溃转储（vmcore）¦崩溃,内核¦
+net¦ip a¦查看所有网卡和 IP 地址¦网卡,ip¦h
+net¦ip -br a¦简洁表格显示网卡和 IP¦网卡,ip¦h
+net¦ip -4 addr show {{网卡}}¦查看指定网卡的 IPv4 地址¦网卡,ip¦
+net¦ip link show¦查看网卡的链路状态和 MAC¦网卡,mac¦
+net¦ip link set {{网卡}} up¦启用网卡¦网卡,启用¦
+net¦ip link set {{网卡}} down¦停用网卡¦网卡,停用¦
+net¦ip addr add {{IP}}/24 dev {{网卡}}¦临时给网卡添加一个 IP¦添加ip¦
+net¦ip addr del {{IP}}/24 dev {{网卡}}¦删除网卡上的某个 IP¦删除ip¦
+net¦ip route¦查看路由表¦路由¦h
+net¦ip route get {{目标IP}}¦查看访问某个 IP 走哪条路由¦路由,排查¦h
+net¦ip route add {{网段}} via {{网关}}¦临时添加一条静态路由¦路由,添加¦
+net¦ip route del {{网段}}¦删除一条路由¦路由,删除¦
+net¦ip route add default via {{网关}}¦设置默认网关¦网关¦
+net¦ip neigh¦查看 ARP 邻居表¦arp¦
+net¦ip -s link¦查看网卡收发包和错误统计¦流量,丢包¦h
+net¦ifconfig¦查看网卡信息（老系统）¦网卡¦
+net¦ifconfig {{网卡}} {{IP}} netmask {{掩码}}¦临时设置网卡 IP（老系统）¦网卡,设置ip¦
+net¦arp -a¦查看 ARP 缓存¦arp¦
+net¦arping -I {{网卡}} {{IP}}¦用 ARP 探测 IP 是否被占用（查 IP 冲突）¦ip冲突¦h
+net¦ss -tunlp¦查看所有监听的 TCP/UDP 端口和进程¦端口,监听¦h
+net¦ss -tan state established¦查看所有已建立的 TCP 连接¦连接¦
+net¦ss -tan state time-wait | wc -l¦统计 TIME_WAIT 连接数¦time_wait,连接¦h
+net¦ss -s¦查看各种状态的连接数汇总¦连接,统计¦h
+net¦ss -tan | awk '{print $1}' | sort | uniq -c¦统计各 TCP 状态的连接数量¦连接,状态¦
+net¦ss -tn dst {{IP}}¦查看和某个 IP 之间的连接¦连接,ip¦
+net¦ss -tnp | grep :{{端口}}¦查看某端口上的连接及进程¦端口,连接¦
+net¦ss -ltnp | grep :{{端口}}¦查看某端口是不是在监听¦端口,监听¦h
+net¦ss -tn | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -rn | head¦统计连接数最多的来源 IP¦连接,攻击¦h
+net¦netstat -tunlp¦查看监听端口和进程（老系统）¦端口,监听¦
+net¦netstat -ant | awk '{print $6}' | sort | uniq -c¦统计各 TCP 状态的连接数（老系统）¦连接,状态¦
+net¦netstat -nr¦查看路由表（老系统）¦路由¦
+net¦netstat -s¦查看协议统计，排查重传和丢包¦丢包,重传¦
+net¦lsof -i tcp:{{端口}}¦查哪个进程占用了 TCP 端口¦端口,占用¦
+net¦lsof -iTCP -sTCP:LISTEN -P -n¦列出所有 TCP 监听端口¦端口,监听¦
+net¦fuser -n tcp {{端口}}¦查占用端口的进程 PID¦端口,占用¦
+net¦ping -c 4 {{主机}}¦ping 4 次测试连通性¦连通,ping¦h
+net¦ping -c 100 -i 0.2 {{主机}}¦快速 ping 100 次看丢包率¦丢包,ping¦
+net¦ping -s 1472 -M do {{主机}}¦测试 MTU 是否能通过（禁止分片）¦mtu¦
+net¦traceroute -n {{主机}}¦跟踪到目标的每一跳路径¦路由,跟踪¦
+net¦tracepath {{主机}}¦跟踪路径并探测 MTU¦路由,mtu¦
+net¦mtr -rwc 20 {{主机}}¦生成 20 次探测的路由质量报告¦路由,丢包¦h
+net¦dig {{域名}} +short¦只显示域名解析的结果 IP¦dns,解析¦h
+net¦dig @{{DNS服务器}} {{域名}}¦指定 DNS 服务器解析域名¦dns,解析¦
+net¦dig {{域名}} MX +short¦查询域名的邮件记录¦dns,邮件¦
+net¦dig {{域名}} NS +short¦查询域名的 NS 服务器¦dns¦
+net¦dig {{域名}} TXT +short¦查询域名的 TXT 记录¦dns¦
+net¦dig -x {{IP}} +short¦反向解析：由 IP 查域名¦dns,反向¦
+net¦dig {{域名}} +trace¦跟踪完整的 DNS 解析过程¦dns,排查¦
+net¦nslookup {{域名}}¦解析域名¦dns,解析¦
+net¦host {{域名}}¦简单解析域名¦dns¦
+net¦getent hosts {{域名}}¦按系统方式解析域名（会读 hosts）¦dns,hosts¦
+net¦resolvectl status¦查看 systemd-resolved 的 DNS 配置¦dns,配置¦
+net¦cat /etc/resolv.conf¦查看系统使用的 DNS 服务器¦dns,配置¦h
+net¦cat /etc/hosts¦查看本地 hosts 解析¦hosts¦
+net¦echo "{{IP}} {{域名}}" >> /etc/hosts¦追加一条 hosts 解析¦hosts,解析¦
+net¦curl -I {{URL}}¦只看响应头¦http,响应头¦h
+net¦curl -s -o /dev/null -w "%{http_code}\n" {{URL}}¦只输出 HTTP 状态码¦http,状态码¦h
+net¦curl -s -o /dev/null -w "dns:%{time_namelookup} connect:%{time_connect} ttfb:%{time_starttransfer} total:%{time_total}\n" {{URL}}¦分解请求各阶段耗时¦http,耗时,慢¦h
+net¦curl -v {{URL}}¦显示请求和响应的完整细节¦http,调试¦
+net¦curl -k {{https地址}}¦忽略证书错误访问 https¦https,证书¦
+net¦curl -L {{URL}}¦自动跟随重定向¦http,重定向¦
+net¦curl -X POST -H "Content-Type: application/json" -d '{{json}}' {{URL}}¦发送 JSON 的 POST 请求¦http,post,接口¦h
+net¦curl -X POST -d "{{a=1&b=2}}" {{URL}}¦发送表单 POST 请求¦http,post¦
+net¦curl -H "Authorization: Bearer {{token}}" {{URL}}¦带 Bearer 令牌访问接口¦http,令牌¦
+net¦curl -u {{用户}}:{{密码}} {{URL}}¦带账号密码访问¦http,认证¦
+net¦curl --resolve {{域名}}:{{443}}:{{IP}} https://{{域名}}¦指定 IP 访问域名（绕过 DNS，测试后端）¦http,解析¦h
+net¦curl -x {{代理}} {{URL}}¦通过代理访问¦代理¦
+net¦curl --connect-timeout 3 -m 10 {{URL}}¦设置连接和总超时¦http,超时¦
+net¦curl -o {{文件}} {{URL}}¦下载文件并保存为指定名称¦下载¦
+net¦curl -O {{URL}}¦下载文件并保留原文件名¦下载¦
+net¦curl -C - -O {{URL}}¦断点续传下载¦下载,续传¦
+net¦curl ifconfig.me¦查看本机的公网出口 IP¦公网ip¦h
+net¦wget -c {{URL}}¦断点续传下载文件¦下载,续传¦h
+net¦wget -r -np -nd {{URL}}¦递归下载目录里的文件¦下载,递归¦
+net¦wget --spider {{URL}}¦只检查链接是否可访问，不下载¦检查¦
+net¦wget -O {{文件}} {{URL}}¦下载并保存为指定名称¦下载¦
+net¦nc -zv {{主机}} {{端口}}¦测试端口是否通¦端口,连通¦h
+net¦nc -zv {{主机}} {{1}}-{{1024}}¦扫描主机上一段端口¦端口,扫描¦
+net¦nc -l {{端口}}¦在本机监听一个端口（测试用）¦端口,监听¦
+net¦nc -zu {{主机}} {{端口}}¦测试 UDP 端口¦端口,udp¦
+net¦telnet {{主机}} {{端口}}¦用 telnet 测试端口¦端口,连通¦
+net¦timeout 3 bash -c "</dev/tcp/{{主机}}/{{端口}}" && echo open || echo closed¦没有 nc 时用 bash 测试端口¦端口,连通¦h
+net¦nmap -sT -p {{端口}} {{主机}}¦扫描指定端口¦端口,扫描¦
+net¦nmap -sn {{网段}}/24¦扫描网段里有哪些主机在线¦扫描,在线¦h
+net¦nmap -p- {{主机}}¦扫描主机全部 65535 个端口¦端口,扫描¦
+net¦nmap -sV -p {{端口}} {{主机}}¦探测端口上运行的服务和版本¦端口,版本¦
+net¦tcpdump -i any port {{端口}} -nn¦抓取指定端口的包¦抓包,端口¦h
+net¦tcpdump -i any host {{IP}} -nn¦抓取和某个 IP 之间的包¦抓包,ip¦h
+net¦tcpdump -i any -nn -c 100¦抓 100 个包就停止¦抓包¦
+net¦tcpdump -i any -w {{文件}}.pcap port {{端口}}¦抓包保存成文件，用 Wireshark 分析¦抓包,保存¦h
+net¦tcpdump -r {{文件}}.pcap -nn¦读取已保存的抓包文件¦抓包¦
+net¦tcpdump -i any -A -s 0 port 80¦以文本形式查看 HTTP 抓包内容¦抓包,http¦
+net¦tcpdump -i any icmp -nn¦只抓 ping 包¦抓包,icmp¦
+net¦tcpdump -i any 'tcp[tcpflags] & tcp-syn != 0' -nn¦只抓 TCP 握手 SYN 包¦抓包,syn¦
+net¦tcpdump -i any udp port 53 -nn¦抓 DNS 查询包¦抓包,dns¦
+net¦tshark -i any -f "port {{端口}}"¦用 tshark 命令行抓包¦抓包¦
+net¦iftop -i {{网卡}}¦实时查看网卡上每个连接的流量¦流量,连接¦h
+net¦iftop -nNP¦显示端口号和 IP，不做域名解析¦流量¦
+net¦nethogs {{网卡}}¦按进程查看网络流量¦流量,进程¦h
+net¦iptraf-ng¦交互式查看网络流量统计¦流量¦
+net¦nload {{网卡}}¦实时查看网卡上下行速率¦流量,速率¦
+net¦vnstat -i {{网卡}}¦查看网卡累计流量统计¦流量,统计¦
+net¦ethtool {{网卡}}¦查看网卡速率、双工和连接状态¦网卡,速率¦
+net¦ethtool -S {{网卡}} | grep -i -E "err|drop"¦查看网卡错误和丢包计数¦网卡,丢包¦h
+net¦ethtool -i {{网卡}}¦查看网卡驱动和固件版本¦网卡,驱动¦
+net¦ethtool -K {{网卡}} tso off gso off¦关闭网卡分段卸载（某些丢包问题用）¦网卡,优化¦
+net¦cat /sys/class/net/{{网卡}}/speed¦读取网卡的协商速率¦网卡,速率¦
+net¦nmcli device status¦查看 NetworkManager 管理的网卡状态¦网卡,nmcli¦
+net¦nmcli connection show¦查看所有网络连接配置¦网卡,nmcli¦
+net¦nmcli connection up {{连接名}}¦启用网络连接¦网卡,nmcli¦
+net¦nmcli connection reload¦重新加载网络配置¦网卡,nmcli¦
+net¦nmcli con mod {{连接名}} ipv4.addresses {{IP}}/24 ipv4.gateway {{网关}} ipv4.method manual¦用 nmcli 配置静态 IP¦静态ip,nmcli¦h
+net¦systemctl restart NetworkManager¦重启 NetworkManager¦网络,重启¦
+net¦systemctl restart network¦重启网络服务（CentOS 7）¦网络,重启¦
+net¦netplan apply¦应用 Ubuntu 的 netplan 网络配置¦网络,ubuntu¦h
+net¦netplan try¦试用网络配置，失败会自动回滚¦网络,ubuntu¦
+net¦cat /etc/sysconfig/network-scripts/ifcfg-{{网卡}}¦查看 CentOS 网卡配置文件¦网卡,配置¦
+net¦ip rule¦查看策略路由规则¦路由,策略¦
+net¦ip -s -s neigh flush all¦清空 ARP 缓存¦arp,清理¦
+net¦brctl show¦查看网桥及其接口¦网桥¦
+net¦bridge link¦查看网桥上的端口¦网桥¦
+net¦ip -d link show {{网卡}}¦查看网卡类型详情（vlan、bond 等）¦网卡,vlan¦
+net¦cat /proc/net/bonding/{{bond0}}¦查看网卡绑定（bond）状态¦bond,网卡¦h
+net¦conntrack -L | wc -l¦统计当前连接跟踪表条数¦conntrack,连接¦h
+net¦conntrack -S¦查看连接跟踪的丢包统计¦conntrack,丢包¦
+net¦sysctl net.netfilter.nf_conntrack_max¦查看连接跟踪表上限¦conntrack¦
+net¦sysctl -w net.ipv4.ip_forward=1¦临时开启 IP 转发¦转发¦
+net¦echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf && sysctl -p¦永久开启 IP 转发¦转发¦
+net¦sysctl -w net.ipv4.tcp_tw_reuse=1¦开启 TIME_WAIT 复用¦time_wait,优化¦
+net¦sysctl net.ipv4.ip_local_port_range¦查看本地可用端口范围¦端口,范围¦
+net¦iptables -L -n -v --line-numbers¦查看防火墙规则（带行号和计数）¦防火墙,iptables¦h
+net¦iptables -t nat -L -n -v¦查看 NAT 转发规则¦防火墙,nat¦
+net¦iptables -I INPUT -s {{IP}} -j DROP¦封禁某个来源 IP¦防火墙,封禁¦h
+net¦iptables -D INPUT -s {{IP}} -j DROP¦解除对某个 IP 的封禁¦防火墙,解封¦
+net¦iptables -D INPUT {{行号}}¦按行号删除一条防火墙规则¦防火墙,删除¦
+net¦iptables -A INPUT -p tcp --dport {{端口}} -j ACCEPT¦放行某个 TCP 端口¦防火墙,放行¦
+net¦iptables -t nat -A PREROUTING -p tcp --dport {{80}} -j REDIRECT --to-port {{8080}}¦把一个端口转发到另一个端口¦防火墙,转发¦
+net¦iptables -F¦清空所有防火墙规则（可能导致断连）¦防火墙,清空¦d
+net¦iptables-save > {{文件}}¦导出防火墙规则做备份¦防火墙,备份¦
+net¦iptables-restore < {{文件}}¦从备份恢复防火墙规则¦防火墙,恢复¦
+net¦nft list ruleset¦查看 nftables 的全部规则¦防火墙,nftables¦
+net¦firewall-cmd --state¦查看 firewalld 是否在运行¦防火墙,firewalld¦
+net¦firewall-cmd --list-all¦查看 firewalld 当前所有配置¦防火墙,firewalld¦h
+net¦firewall-cmd --permanent --add-port={{端口}}/tcp && firewall-cmd --reload¦永久放行一个端口并生效¦防火墙,放行¦h
+net¦firewall-cmd --permanent --remove-port={{端口}}/tcp && firewall-cmd --reload¦永久关闭一个端口并生效¦防火墙,关闭¦
+net¦firewall-cmd --permanent --add-source={{IP}}/32 --zone=trusted && firewall-cmd --reload¦把某个 IP 加入信任名单¦防火墙,白名单¦
+net¦firewall-cmd --permanent --add-rich-rule='rule family="ipv4" source address="{{IP}}" reject' && firewall-cmd --reload¦拒绝某个 IP 的访问¦防火墙,封禁¦
+net¦firewall-cmd --query-port={{端口}}/tcp¦查询某个端口是否已放行¦防火墙,端口¦
+net¦systemctl stop firewalld && systemctl disable firewalld¦停止并禁用 firewalld¦防火墙,关闭¦
+net¦ufw status verbose¦查看 Ubuntu 的 ufw 防火墙状态¦防火墙,ufw¦
+net¦ufw allow {{端口}}/tcp¦用 ufw 放行端口¦防火墙,ufw¦h
+net¦ufw deny from {{IP}}¦用 ufw 封禁来源 IP¦防火墙,ufw¦
+net¦ufw enable¦启用 ufw 防火墙¦防火墙,ufw¦
+net¦ufw disable¦关闭 ufw 防火墙¦防火墙,ufw¦
+net¦fail2ban-client status sshd¦查看 fail2ban 封禁了哪些 IP¦防爆破,封禁¦h
+net¦fail2ban-client set sshd unbanip {{IP}}¦手动解封被 fail2ban 封的 IP¦防爆破,解封¦
+net¦openssl s_client -connect {{域名}}:443 -servername {{域名}}¦测试 https 握手并查看证书¦https,证书¦h
+net¦echo | openssl s_client -connect {{域名}}:443 2>/dev/null | openssl x509 -noout -dates¦查看网站证书的有效期¦证书,过期¦h
+net¦echo | openssl s_client -connect {{域名}}:443 2>/dev/null | openssl x509 -noout -subject -issuer¦查看网站证书的域名和颁发机构¦证书¦
+net¦openssl x509 -in {{证书.crt}} -noout -text¦查看证书文件的完整内容¦证书¦
+net¦openssl x509 -in {{证书.crt}} -noout -enddate¦查看证书文件的过期时间¦证书,过期¦
+net¦openssl verify -CAfile {{ca.crt}} {{证书.crt}}¦验证证书是否由指定 CA 签发¦证书,验证¦
+net¦openssl req -new -newkey rsa:2048 -nodes -keyout {{域名}}.key -out {{域名}}.csr¦生成私钥和证书申请文件¦证书,csr¦
+net¦openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout {{key}} -out {{crt}}¦生成自签名证书¦证书,自签¦h
+net¦openssl rsa -in {{key}} -check¦检查私钥是否有效¦证书,私钥¦
+net¦openssl pkcs12 -export -out {{文件}}.pfx -inkey {{key}} -in {{crt}}¦把证书和私钥打包成 pfx¦证书,pfx¦
+net¦openssl pkcs12 -in {{文件}}.pfx -nodes -out {{文件}}.pem¦把 pfx 转成 pem¦证书,pfx¦
+net¦openssl x509 -noout -modulus -in {{crt}} | md5sum¦查证书的指纹，对比证书和私钥是否匹配¦证书,匹配¦
+net¦openssl rsa -noout -modulus -in {{key}} | md5sum¦查私钥的指纹，对比证书和私钥是否匹配¦证书,匹配¦
+net¦openssl rand -hex 16¦生成 16 字节随机十六进制串（密码、密钥）¦随机,密码¦h
+net¦openssl rand -base64 24¦生成随机 base64 密码¦随机,密码¦
+net¦openssl passwd -6 {{密码}}¦生成 SHA512 加密的密码串¦密码,加密¦
+net¦openssl enc -aes-256-cbc -salt -in {{文件}} -out {{文件}}.enc¦用 AES 加密文件¦加密¦
+net¦openssl dgst -sha256 {{文件}}¦计算文件的 SHA256¦校验,sha256¦
+net¦sha256sum {{文件}}¦计算文件的 SHA256 校验值¦校验,sha256¦h
+net¦sha256sum -c {{校验文件}}¦校验下载的文件是否完整¦校验¦
+net¦md5sum {{文件}}¦计算文件的 MD5 值¦校验,md5¦h
+net¦ssh -v {{用户}}@{{主机}}¦显示 ssh 连接的详细过程（排查连不上）¦ssh,排查¦
+net¦whois {{域名}}¦查询域名的注册信息¦域名,查询¦
+net¦ab -n 1000 -c 50 {{URL}}¦用 ab 做 1000 次请求、50 并发的压测¦压测,http¦
+net¦wrk -t4 -c100 -d30s {{URL}}¦用 wrk 压测 30 秒¦压测,http¦
+net¦iperf3 -s¦在本机启动 iperf3 服务端测带宽¦带宽,测速¦
+net¦iperf3 -c {{服务端IP}}¦用 iperf3 测试到服务端的带宽¦带宽,测速¦h
+net¦iperf3 -c {{服务端IP}} -R¦反向测试下行带宽¦带宽,测速¦
+net¦speedtest-cli¦测试本机的公网带宽¦带宽,测速¦
+net¦python3 -m http.server {{8000}}¦在当前目录快速起一个文件下载服务¦http,文件共享¦h
+net¦rsync -avz {{文件}} {{用户}}@{{主机}}:{{目录}}¦把文件同步到远程主机¦同步,传输¦
+net¦scp {{文件}} {{用户}}@{{主机}}:{{目录}}¦把文件复制到远程主机¦传输,上传¦h
+net¦scp {{用户}}@{{主机}}:{{文件}} {{本地目录}}¦把远程文件下载到本地¦传输,下载¦h
+net¦scp -r {{目录}} {{用户}}@{{主机}}:{{目标目录}}¦把整个目录复制到远程主机¦传输,目录¦
+net¦scp -P {{端口}} {{文件}} {{用户}}@{{主机}}:{{目录}}¦指定 ssh 端口传文件¦传输,端口¦
+net¦sftp {{用户}}@{{主机}}¦用 sftp 交互式传文件¦传输¦
+net¦lftp -u {{用户}},{{密码}} {{主机}}¦连接 FTP 服务器¦ftp¦
+log¦journalctl -xe¦查看最近的系统日志和错误详情¦日志,排障¦h
+log¦journalctl -u {{服务}} -n 100 --no-pager¦查看服务最近 100 行日志¦日志,服务¦h
+log¦journalctl -u {{服务}} --since "1 hour ago"¦查看服务最近 1 小时的日志¦日志,时间¦h
+log¦journalctl -u {{服务}} --since "{{2025-01-01 10:00}}" --until "{{2025-01-01 11:00}}"¦查看服务在指定时间段的日志¦日志,时间¦
+log¦journalctl -p err -b¦查看本次开机以来的错误日志¦日志,错误¦h
+log¦journalctl -p err..alert --since today¦查看今天的错误及以上级别日志¦日志,错误¦
+log¦journalctl -b -1¦查看上一次开机的日志（排查重启原因）¦日志,重启¦h
+log¦journalctl --list-boots¦列出所有开机记录¦日志,开机¦
+log¦journalctl -f¦实时查看系统所有日志¦日志,实时¦
+log¦journalctl _PID={{PID}}¦查看某个进程产生的日志¦日志,进程¦
+log¦journalctl -o json-pretty -n 1¦以 JSON 查看一条日志的全部字段¦日志,字段¦
+log¦journalctl --grep="{{关键字}}"¦在 systemd 日志里按关键字搜索¦日志,搜索¦
+log¦tail -f {{日志}} | grep --line-buffered -i error¦实时只看错误日志¦日志,错误¦h
+log¦tail -f {{日志}} | grep --line-buffered -v "{{排除}}"¦实时看日志并排除干扰行¦日志,过滤¦
+log¦tail -F {{日志}}¦跟踪日志，文件被轮转后自动重新打开¦日志,轮转¦h
+log¦tail -n 1000 {{日志}} | grep -c "{{关键字}}"¦统计最近 1000 行里出现关键字的次数¦日志,统计¦
+log¦grep -c "{{关键字}}" {{日志}}¦统计日志里关键字出现的行数¦日志,统计¦
+log¦grep "{{2025-01-01 10:}}" {{日志}}¦按时间前缀截取某个时段的日志¦日志,时间¦h
+log¦sed -n '/{{10:00}}/,/{{10:30}}/p' {{日志}}¦截取两个时间点之间的日志¦日志,时间¦h
+log¦awk '$4 >= "[01/Jan/2025:10:00" && $4 <= "[01/Jan/2025:11:00"' {{access.log}}¦按时间段筛选 nginx 访问日志¦日志,时间,nginx¦
+log¦grep -i -E "error|fail|exception" {{日志}} | tail -50¦查看日志里最近 50 条错误¦日志,错误¦h
+log¦grep -B 5 -A 20 "Exception" {{日志}}¦查看异常及其前后堆栈¦日志,异常,堆栈¦h
+log¦grep -rn "OutOfMemoryError" {{目录}}¦搜索目录里的内存溢出日志¦日志,oom,java¦
+log¦zcat {{日志}}.gz | grep "{{关键字}}"¦在压缩的历史日志里搜索¦日志,压缩¦
+log¦zgrep -h "{{关键字}}" {{日志}}*.gz¦同时搜索多个压缩日志¦日志,压缩¦
+log¦ls -lh /var/log¦查看系统日志目录有哪些文件¦日志,目录¦
+log¦ls -lhS /var/log | head¦查看最大的日志文件¦日志,大小¦
+log¦tail -n 100 /var/log/messages¦查看系统日志最后 100 行（CentOS）¦日志,系统¦h
+log¦tail -n 100 /var/log/syslog¦查看系统日志最后 100 行（Ubuntu）¦日志,系统¦h
+log¦tail -n 100 /var/log/secure¦查看登录认证日志（CentOS）¦日志,登录¦h
+log¦tail -n 100 /var/log/auth.log¦查看登录认证日志（Ubuntu）¦日志,登录¦h
+log¦grep "Failed password" /var/log/secure | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head¦统计 ssh 爆破最多的来源 IP¦日志,爆破,安全¦h
+log¦grep "Accepted" /var/log/secure | tail -20¦查看最近成功的 ssh 登录¦日志,登录¦
+log¦grep "Failed password" /var/log/auth.log | tail -20¦查看最近失败的 ssh 登录（Ubuntu）¦日志,登录,爆破¦
+log¦grep "session opened" /var/log/secure | tail¦查看最近的会话登录记录¦日志,登录¦
+log¦grep -i "sudo" /var/log/secure | tail -20¦查看最近的 sudo 使用记录¦日志,sudo,审计¦
+log¦cat /var/log/cron¦查看定时任务执行记录¦日志,定时任务¦
+log¦grep -i "oom-killer" /var/log/messages¦查找被内核 OOM 杀进程的记录¦日志,oom¦h
+log¦tail -f /var/log/nginx/access.log¦实时查看 nginx 访问日志¦日志,nginx¦
+log¦tail -f /var/log/mysql/error.log¦实时查看 MySQL 错误日志¦日志,mysql¦
+log¦tail -f /var/log/mysqld.log¦实时查看 MySQL 错误日志（CentOS）¦日志,mysql¦
+log¦tail -f /var/log/redis/redis-server.log¦实时查看 Redis 日志¦日志,redis¦
+log¦tail -f /var/log/messages | grep -i {{关键字}}¦实时筛选系统日志¦日志,过滤¦
+log¦awk '{print $1}' {{access.log}} | sort | uniq -c | sort -rn | head -20¦访问量最多的 20 个 IP¦日志,统计,ip¦h
+log¦awk '{print $7}' {{access.log}} | sort | uniq -c | sort -rn | head -20¦访问量最多的 20 个 URL¦日志,统计,url¦h
+log¦awk '{print $9}' {{access.log}} | sort | uniq -c | sort -rn¦统计各 HTTP 状态码的数量¦日志,状态码¦h
+log¦awk '$9==404 {print $7}' {{access.log}} | sort | uniq -c | sort -rn | head¦统计 404 最多的 URL¦日志,404¦
+log¦awk '$9>=500' {{access.log}} | tail -50¦查看最近 50 条 5xx 请求¦日志,5xx¦
+log¦awk '{print $4}' {{access.log}} | cut -c2-15 | sort | uniq -c¦按小时统计访问量¦日志,统计,时间¦
+log¦awk '{sum+=$10} END {print sum/1024/1024 " MB"}' {{access.log}}¦统计访问日志的总流量¦日志,流量¦
+log¦awk '{print $NF}' {{access.log}} | sort -n | tail¦查看响应时间最长的请求¦日志,慢请求¦
+log¦awk '$NF > 1 {print $7, $NF}' {{access.log}} | sort -k2 -nr | head¦找出响应超过 1 秒的慢请求¦日志,慢请求¦h
+log¦grep "{{IP}}" {{access.log}} | awk '{print $7}' | sort | uniq -c | sort -rn | head¦查看某个 IP 都访问了什么¦日志,ip¦
+log¦grep "POST" {{access.log}} | awk '{print $7}' | sort | uniq -c | sort -rn | head¦统计 POST 请求最多的接口¦日志,post¦
+log¦logrotate -d /etc/logrotate.conf¦模拟日志轮转，只看会做什么¦日志,轮转¦
+log¦logrotate -f /etc/logrotate.d/{{配置}}¦立即强制执行一次日志轮转¦日志,轮转¦h
+log¦cat /etc/logrotate.d/{{配置}}¦查看日志轮转配置¦日志,轮转¦
+log¦systemctl status rsyslog¦查看 rsyslog 服务状态¦日志,服务¦
+log¦logger "{{内容}}"¦往系统日志写一条测试信息¦日志,测试¦
+log¦lnav {{日志}}¦用 lnav 更好看地浏览日志¦日志,查看¦
+log¦multitail {{日志1}} {{日志2}}¦同时分屏实时看多个日志¦日志,分屏¦
+log¦ausearch -ts today -m USER_LOGIN¦用审计日志查今天的用户登录¦日志,审计¦
+log¦aureport --auth¦生成认证事件的审计报告¦日志,审计¦
+log¦last reboot¦查看历史重启记录¦重启,记录¦h
+log¦who -b¦查看系统最近一次启动的时间¦重启,开机¦
+log¦uptime -s¦查看系统是从什么时候开始运行的¦重启,开机¦
+log¦cat /var/log/dmesg¦查看开机时的内核日志¦日志,内核¦
+log¦grep -i "error" /var/log/dmesg¦在开机日志里找错误¦日志,内核¦
+log¦cat /var/log/yum.log¦查看 yum 的安装和卸载记录¦日志,软件包¦
+log¦grep -E "Installed|Erased" /var/log/yum.log¦查看最近安装或卸载了什么软件¦日志,软件包¦
+log¦cat /var/log/apt/history.log¦查看 apt 的安装和卸载记录¦日志,软件包¦
+log¦history | tail -30¦查看最近 30 条命令历史¦命令历史¦h
+log¦history | grep {{关键字}}¦在命令历史里搜索¦命令历史,搜索¦h
+log¦HISTTIMEFORMAT="%F %T " history¦显示带时间的命令历史¦命令历史,时间¦
+log¦cat ~/.bash_history | tail -50¦查看历史命令文件¦命令历史¦
+log¦history -c && history -w¦清空当前会话的命令历史¦命令历史,清理¦d
+log¦echo "export HISTTIMEFORMAT='%F %T '" >> /etc/profile¦让所有用户的历史命令带上时间¦命令历史,审计¦
+pkg¦yum install -y {{软件}}¦安装软件包¦安装,yum¦h
+pkg¦yum remove -y {{软件}}¦卸载软件包¦卸载,yum¦
+pkg¦yum update -y¦更新所有软件包¦更新,yum¦
+pkg¦yum update -y {{软件}}¦只更新指定软件包¦更新,yum¦
+pkg¦yum search {{关键字}}¦搜索软件包¦搜索,yum¦h
+pkg¦yum info {{软件}}¦查看软件包信息¦信息,yum¦
+pkg¦yum list installed | grep {{关键字}}¦查看某软件是否已安装¦已安装,yum¦h
+pkg¦yum provides */{{命令}}¦查某个命令是哪个包提供的¦命令,来源¦h
+pkg¦yum whatprovides {{文件}}¦查某个文件属于哪个软件包¦文件,来源¦
+pkg¦yum history¦查看 yum 的操作历史¦历史,yum¦
+pkg¦yum history undo {{编号}}¦撤销某次 yum 操作¦回滚,yum¦
+pkg¦yum list --showduplicates {{软件}}¦查看软件所有可用版本¦版本,yum¦h
+pkg¦yum install -y {{软件}}-{{版本}}¦安装指定版本的软件¦版本,yum¦
+pkg¦yum downgrade {{软件}}-{{版本}}¦降级到指定版本¦降级,yum¦
+pkg¦yum install --downloadonly --downloaddir={{目录}} {{软件}}¦只下载 rpm 不安装（离线用）¦离线,下载¦
+pkg¦yum makecache¦重新生成 yum 缓存¦缓存,yum¦
+pkg¦yum repolist¦查看已启用的软件源¦源,yum¦h
+pkg¦yum-config-manager --add-repo {{源地址}}¦添加一个 yum 软件源¦源,添加¦
+pkg¦yum install -y epel-release¦启用 EPEL 扩展软件源¦源,epel¦
+pkg¦yum groupinstall -y "Development Tools"¦安装开发工具包（gcc 等）¦开发,编译¦
+pkg¦yum versionlock add {{软件}}¦锁定软件版本，防止被升级¦锁定,版本¦
+pkg¦yum list updates¦查看有哪些软件可以更新¦更新,查看¦
+pkg¦yum check-update --security¦只看安全更新¦更新,安全¦
+pkg¦yum update --security -y¦只安装安全更新¦更新,安全¦
+pkg¦yum autoremove -y¦清理不再需要的依赖包¦清理,依赖¦
+pkg¦dnf install -y {{软件}}¦用 dnf 安装软件包¦安装,dnf¦
+pkg¦dnf search {{关键字}}¦用 dnf 搜索软件包¦搜索,dnf¦
+pkg¦dnf history¦查看 dnf 操作历史¦历史,dnf¦
+pkg¦dnf module list¦查看可用的模块流¦模块,dnf¦
+pkg¦dnf module enable {{模块}}:{{版本}}¦启用某个模块版本¦模块,dnf¦
+pkg¦rpm -qa | grep {{关键字}}¦查看已安装的 rpm 包¦已安装,rpm¦h
+pkg¦rpm -ql {{软件}}¦列出软件包安装的所有文件¦文件,rpm¦
+pkg¦rpm -qf {{文件}}¦查文件属于哪个 rpm 包¦文件,来源¦h
+pkg¦rpm -qi {{软件}}¦查看 rpm 包详情¦信息,rpm¦
+pkg¦rpm -qpl {{文件.rpm}}¦查看 rpm 安装包里有什么文件¦文件,rpm¦
+pkg¦rpm -ivh {{文件.rpm}}¦安装本地 rpm 包¦安装,rpm¦
+pkg¦rpm -Uvh {{文件.rpm}}¦升级本地 rpm 包¦升级,rpm¦
+pkg¦rpm -e {{软件}}¦卸载 rpm 包¦卸载,rpm¦
+pkg¦rpm -e --nodeps {{软件}}¦忽略依赖强制卸载 rpm 包¦卸载,强制¦d
+pkg¦rpm -V {{软件}}¦校验软件包文件有没有被改动¦校验,安全¦
+pkg¦rpm -qa --last | head¦查看最近安装的软件¦最近安装¦h
+pkg¦rpm --import {{GPG密钥}}¦导入软件源的签名密钥¦密钥,rpm¦
+pkg¦rpm2cpio {{文件.rpm}} | cpio -idmv¦不安装直接解开 rpm 包¦解包,rpm¦
+pkg¦apt update¦刷新软件源索引¦更新,apt¦h
+pkg¦apt install -y {{软件}}¦安装软件包（Debian/Ubuntu）¦安装,apt¦h
+pkg¦apt remove {{软件}}¦卸载软件包但保留配置¦卸载,apt¦
+pkg¦apt purge {{软件}}¦卸载软件包并删除配置¦卸载,apt¦
+pkg¦apt upgrade -y¦升级所有已安装的软件包¦升级,apt¦
+pkg¦apt full-upgrade -y¦完整升级，可能增删依赖¦升级,apt¦
+pkg¦apt search {{关键字}}¦搜索软件包¦搜索,apt¦
+pkg¦apt show {{软件}}¦查看软件包信息¦信息,apt¦
+pkg¦apt list --installed | grep {{关键字}}¦查看某软件是否已安装¦已安装,apt¦
+pkg¦apt list --upgradable¦查看可以升级的软件¦升级,apt¦
+pkg¦apt-cache policy {{软件}}¦查看软件的可用版本和来源¦版本,apt¦h
+pkg¦apt install -y {{软件}}={{版本}}¦安装指定版本的软件¦版本,apt¦
+pkg¦apt-mark hold {{软件}}¦锁定软件版本，防止被升级¦锁定,apt¦
+pkg¦apt-mark showhold¦查看被锁定的软件¦锁定,apt¦
+pkg¦apt autoremove -y¦清理不再需要的依赖¦清理,apt¦
+pkg¦apt --fix-broken install¦修复依赖损坏的软件包¦修复,apt¦h
+pkg¦apt-get install -y {{软件}}¦用 apt-get 安装软件（脚本里常用）¦安装,apt¦
+pkg¦apt-get install --reinstall {{软件}}¦重新安装软件包¦重装,apt¦
+pkg¦apt-get download {{软件}}¦只下载 deb 包不安装¦下载,apt¦
+pkg¦dpkg -l | grep {{关键字}}¦查看已安装的 deb 包¦已安装,dpkg¦h
+pkg¦dpkg -L {{软件}}¦列出软件包安装的所有文件¦文件,dpkg¦
+pkg¦dpkg -S {{文件}}¦查文件属于哪个 deb 包¦文件,来源¦
+pkg¦dpkg -i {{文件.deb}}¦安装本地 deb 包¦安装,dpkg¦
+pkg¦dpkg -r {{软件}}¦卸载 deb 包¦卸载,dpkg¦
+pkg¦dpkg --get-selections | grep hold¦查看被锁定的 deb 包¦锁定,dpkg¦
+pkg¦dpkg-reconfigure {{软件}}¦重新配置已安装的软件包¦配置,dpkg¦
+pkg¦add-apt-repository ppa:{{源}}¦添加 Ubuntu 的 PPA 软件源¦源,ppa¦
+pkg¦snap install {{软件}}¦用 snap 安装软件¦安装,snap¦
+pkg¦snap list¦查看已安装的 snap 软件¦snap¦
+pkg¦pip3 install {{包}}¦用 pip 安装 Python 包¦python,pip¦h
+pkg¦pip3 install -r requirements.txt¦按依赖文件批量安装 Python 包¦python,pip¦h
+pkg¦pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple {{包}}¦用清华镜像加速安装 Python 包¦python,镜像,加速¦h
+pkg¦pip3 install --upgrade pip¦升级 pip¦python,pip¦
+pkg¦pip3 list¦查看已安装的 Python 包¦python,pip¦
+pkg¦pip3 freeze > requirements.txt¦导出当前环境的依赖清单¦python,pip¦h
+pkg¦pip3 uninstall -y {{包}}¦卸载 Python 包¦python,pip¦
+pkg¦pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple¦永久把 pip 源改成清华镜像¦python,镜像¦h
+pkg¦python3 -m venv {{目录}}¦创建 Python 虚拟环境¦python,虚拟环境¦h
+pkg¦source {{目录}}/bin/activate¦进入 Python 虚拟环境¦python,虚拟环境¦
+pkg¦deactivate¦退出 Python 虚拟环境¦python,虚拟环境¦
+pkg¦npm install¦安装项目依赖¦node,npm¦h
+pkg¦npm install -g {{包}}¦全局安装 npm 包¦node,npm¦
+pkg¦npm config set registry https://registry.npmmirror.com¦把 npm 源改成国内镜像¦node,镜像,加速¦h
+pkg¦npm ls -g --depth=0¦查看全局安装的 npm 包¦node,npm¦
+pkg¦npm run build¦执行项目的构建脚本¦node,构建¦
+pkg¦npm cache clean --force¦清理 npm 缓存¦node,清理¦
+pkg¦yarn install¦用 yarn 安装依赖¦node,yarn¦
+pkg¦nvm install {{版本}}¦用 nvm 安装指定版本的 Node¦node,版本¦
+pkg¦nvm use {{版本}}¦切换 Node 版本¦node,版本¦
+pkg¦node -v && npm -v¦查看 Node 和 npm 版本¦node,版本¦
+pkg¦java -version¦查看 Java 版本¦java,版本¦h
+pkg¦javac -version¦查看 Java 编译器版本¦java,版本¦
+pkg¦update-alternatives --config java¦切换系统默认的 Java 版本¦java,切换¦h
+pkg¦echo $JAVA_HOME¦查看 JAVA_HOME 环境变量¦java,环境变量¦
+pkg¦mvn clean package -DskipTests¦Maven 打包并跳过测试¦java,maven,构建¦h
+pkg¦mvn dependency:tree¦查看 Maven 依赖树¦java,maven¦
+pkg¦gradle build -x test¦Gradle 构建并跳过测试¦java,gradle¦
+pkg¦go version¦查看 Go 版本¦go,版本¦
+pkg¦go build -o {{输出}} .¦编译 Go 项目¦go,编译¦
+pkg¦go env GOPROXY¦查看 Go 的模块代理设置¦go,代理¦
+pkg¦go env -w GOPROXY=https://goproxy.cn,direct¦把 Go 模块代理改成国内镜像¦go,镜像¦
+pkg¦gcc -v¦查看 gcc 版本¦编译,gcc¦
+pkg¦make && make install¦编译并安装源码包¦编译,源码¦
+pkg¦./configure --prefix={{安装目录}}¦配置源码编译的安装路径¦编译,源码¦
+pkg¦ldd {{程序}}¦查看程序依赖哪些动态库¦库,依赖¦h
+pkg¦ldconfig -p | grep {{库}}¦查看系统是否已有某个动态库¦库,依赖¦
+pkg¦ldconfig¦刷新动态库缓存¦库¦
+pkg¦readelf -d {{程序}} | grep NEEDED¦查看程序需要的动态库¦库,依赖¦
+svc¦systemctl status {{服务}}¦查看服务状态¦服务,状态¦h
+svc¦systemctl start {{服务}}¦启动服务¦服务,启动¦h
+svc¦systemctl stop {{服务}}¦停止服务¦服务,停止¦
+svc¦systemctl restart {{服务}}¦重启服务¦服务,重启¦h
+svc¦systemctl reload {{服务}}¦平滑重载服务配置（不中断）¦服务,重载¦h
+svc¦systemctl enable {{服务}}¦设置服务开机自启¦服务,自启¦h
+svc¦systemctl enable --now {{服务}}¦设置开机自启并立即启动¦服务,自启¦h
+svc¦systemctl disable {{服务}}¦取消服务开机自启¦服务,自启¦
+svc¦systemctl disable --now {{服务}}¦取消自启并立即停止¦服务,自启¦
+svc¦systemctl is-enabled {{服务}}¦查看服务是否开机自启¦服务,自启¦
+svc¦systemctl is-active {{服务}}¦查看服务是否在运行（适合脚本判断）¦服务,状态¦
+svc¦systemctl list-units --type=service --state=running¦列出所有正在运行的服务¦服务,运行¦h
+svc¦systemctl list-units --type=service --state=failed¦列出启动失败的服务¦服务,失败¦h
+svc¦systemctl --failed¦快速查看所有失败的单元¦服务,失败¦h
+svc¦systemctl list-unit-files --type=service¦列出所有服务及其开机启动状态¦服务,自启¦
+svc¦systemctl list-unit-files | grep enabled¦列出所有开机自启的服务¦服务,自启¦
+svc¦systemctl list-dependencies {{服务}}¦查看服务的依赖关系¦服务,依赖¦
+svc¦systemctl cat {{服务}}¦查看服务的 unit 文件内容¦服务,配置¦
+svc¦systemctl show {{服务}} -p MainPID,ActiveState,ExecStart¦查看服务的主进程和启动命令¦服务,进程¦
+svc¦systemctl show {{服务}} -p Environment¦查看服务的环境变量¦服务,环境变量¦
+svc¦systemctl edit {{服务}}¦给服务加覆盖配置（不改原文件）¦服务,配置¦
+svc¦systemctl edit --full {{服务}}¦完整编辑服务的 unit 文件¦服务,配置¦
+svc¦systemctl daemon-reload¦修改 unit 文件后重新加载¦服务,配置¦h
+svc¦systemctl reset-failed {{服务}}¦清除服务的失败状态¦服务,失败¦
+svc¦systemctl mask {{服务}}¦彻底禁止服务被启动¦服务,屏蔽¦
+svc¦systemctl unmask {{服务}}¦取消对服务的屏蔽¦服务,屏蔽¦
+svc¦systemctl set-default multi-user.target¦设置默认进入命令行模式¦启动,模式¦
+svc¦systemctl get-default¦查看默认启动模式¦启动,模式¦
+svc¦systemctl list-timers --all¦查看所有定时器¦定时器¦
+svc¦systemctl list-sockets¦查看 systemd 管理的 socket¦socket¦
+svc¦systemctl kill -s SIGKILL {{服务}}¦强制杀掉服务的所有进程¦服务,强制¦d
+svc¦systemctl isolate rescue.target¦切换到救援模式¦启动,救援¦d
+svc¦systemd-run --unit={{名称}} {{命令}}¦把命令作为临时服务运行¦服务,临时¦
+svc¦systemd-analyze verify {{服务文件}}¦检查 unit 文件有没有语法错误¦服务,检查¦
+svc¦systemd-cgls¦以树形查看 cgroup 里的服务和进程¦服务,cgroup¦
+svc¦systemd-cgtop¦按 cgroup 实时查看资源占用¦服务,资源¦
+svc¦service {{服务}} status¦查看服务状态（老系统）¦服务,状态¦
+svc¦service {{服务}} restart¦重启服务（老系统）¦服务,重启¦
+svc¦chkconfig {{服务}} on¦设置服务开机自启（老系统）¦服务,自启¦
+svc¦chkconfig --list¦查看所有服务的自启状态（老系统）¦服务,自启¦
+svc¦rc-service {{服务}} restart¦重启服务（Alpine）¦服务,重启¦
+svc¦tee /etc/systemd/system/{{名称}}.service <<'EOF'¦新建一个 systemd 服务文件¦服务,创建¦
+svc¦timedatectl set-timezone Asia/Shanghai¦设置时区为上海¦时间,时区¦h
+svc¦timedatectl status¦查看时间、时区和 NTP 同步状态¦时间,时区¦h
+svc¦timedatectl set-ntp true¦开启自动对时¦时间,同步¦
+svc¦chronyc sources -v¦查看 chrony 的时间源¦时间,同步¦h
+svc¦chronyc tracking¦查看 chrony 的同步精度和偏差¦时间,同步¦
+svc¦chronyc makestep¦立即强制同步时间¦时间,同步¦
+svc¦ntpdate {{NTP服务器}}¦手动同步一次时间¦时间,同步¦
+svc¦ntpq -p¦查看 ntp 的同步状态¦时间,同步¦
+svc¦hwclock -w¦把系统时间写入硬件时钟¦时间,硬件¦
+svc¦date -s "{{2025-01-01 10:00:00}}"¦手动设置系统时间¦时间,设置¦
+svc¦date "+%Y-%m-%d %H:%M:%S"¦按常用格式输出当前时间¦时间,格式¦h
+svc¦date -d @{{时间戳}}¦把时间戳转成可读时间¦时间,时间戳¦h
+svc¦date +%s¦输出当前时间戳（秒）¦时间,时间戳¦h
+svc¦date -d "{{2025-01-01}}" +%s¦把日期转成时间戳¦时间,时间戳¦
+svc¦date -d "7 days ago" +%F¦输出 7 天前的日期¦时间,日期¦
+svc¦localectl set-locale LANG=en_US.UTF-8¦设置系统语言为英文 UTF-8¦语言,编码¦
+svc¦locale -a¦查看系统有哪些语言包¦语言,编码¦
+svc¦export LANG=en_US.UTF-8¦临时设置当前终端的语言编码¦语言,乱码¦h
+ssh¦ssh {{用户}}@{{主机}}¦登录远程主机¦登录,ssh¦h
+ssh¦ssh -p {{端口}} {{用户}}@{{主机}}¦指定端口登录¦登录,端口¦h
+ssh¦ssh -i {{私钥}} {{用户}}@{{主机}}¦用指定私钥登录¦登录,密钥¦h
+ssh¦ssh {{用户}}@{{主机}} "{{命令}}"¦登录远程主机执行一条命令并返回¦远程执行¦h
+ssh¦ssh -t {{用户}}@{{主机}} "sudo {{命令}}"¦远程执行需要 sudo 的命令¦远程执行,sudo¦
+ssh¦ssh -o StrictHostKeyChecking=no {{用户}}@{{主机}}¦首次连接时不提示确认指纹¦登录,指纹¦
+ssh¦ssh -o ServerAliveInterval=30 {{用户}}@{{主机}}¦保持连接不断线¦登录,断线¦h
+ssh¦ssh -J {{跳板机}} {{用户}}@{{内网主机}}¦通过跳板机登录内网主机¦跳板机,堡垒机¦h
+ssh¦ssh -L {{本地端口}}:{{目标主机}}:{{目标端口}} {{用户}}@{{跳板机}}¦本地端口转发（访问内网服务）¦隧道,转发¦h
+ssh¦ssh -R {{远程端口}}:localhost:{{本地端口}} {{用户}}@{{主机}}¦远程端口转发（把本机服务暴露出去）¦隧道,转发¦
+ssh¦ssh -D {{1080}} {{用户}}@{{主机}}¦建立动态 SOCKS 代理¦隧道,代理¦
+ssh¦ssh -N -f -L {{本地端口}}:{{目标}}:{{端口}} {{用户}}@{{主机}}¦在后台建立端口转发隧道¦隧道,后台¦
+ssh¦ssh -X {{用户}}@{{主机}}¦开启 X11 转发运行图形程序¦图形,x11¦
+ssh¦ssh -vvv {{用户}}@{{主机}}¦显示最详细的连接调试信息¦登录,排查¦
+ssh¦ssh-keygen -t ed25519 -C "{{备注}}"¦生成 ed25519 密钥对¦密钥,生成¦h
+ssh¦ssh-keygen -t rsa -b 4096¦生成 4096 位 RSA 密钥对¦密钥,生成¦
+ssh¦ssh-copy-id -i ~/.ssh/id_ed25519.pub {{用户}}@{{主机}}¦把公钥发到远程主机，实现免密登录¦密钥,免密¦h
+ssh¦ssh-keygen -R {{主机}}¦清除 known_hosts 里的旧指纹（重装后连不上时用）¦指纹,重装¦h
+ssh¦ssh-keygen -lf ~/.ssh/id_ed25519.pub¦查看公钥的指纹¦密钥,指纹¦
+ssh¦ssh-keygen -y -f {{私钥}}¦由私钥导出公钥¦密钥,公钥¦
+ssh¦ssh-keygen -p -f {{私钥}}¦修改私钥的密码¦密钥,密码¦
+ssh¦ssh-keyscan {{主机}} >> ~/.ssh/known_hosts¦提前信任远程主机指纹¦指纹¦
+ssh¦ssh-add ~/.ssh/{{私钥}}¦把私钥加入 ssh-agent¦密钥,agent¦
+ssh¦eval $(ssh-agent) && ssh-add¦启动 ssh-agent 并加载私钥¦密钥,agent¦
+ssh¦ssh-add -l¦查看 ssh-agent 里已加载的密钥¦密钥,agent¦
+ssh¦cat ~/.ssh/id_ed25519.pub¦查看公钥内容（用来复制给别人）¦密钥,公钥¦h
+ssh¦cat ~/.ssh/authorized_keys¦查看允许免密登录的公钥列表¦密钥,免密¦
+ssh¦cat ~/.ssh/config¦查看 ssh 客户端配置¦配置¦
+ssh¦sshd -t¦检查 sshd 配置语法是否正确¦配置,检查¦h
+ssh¦sshd -T | grep -i -E "permitroot|passwordauth|port"¦查看 sshd 实际生效的关键配置¦配置,安全¦
+ssh¦sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config¦禁止 root 通过 ssh 登录¦配置,安全,root¦
+ssh¦sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config¦禁止密码登录，只允许密钥¦配置,安全¦
+ssh¦sed -i 's/^#\?Port .*/Port {{2222}}/' /etc/ssh/sshd_config¦修改 ssh 监听端口¦配置,端口¦
+ssh¦systemctl restart sshd¦重启 ssh 服务使配置生效¦配置,重启¦h
+ssh¦systemctl status sshd¦查看 ssh 服务状态¦服务,状态¦
+ssh¦ss -tnp | grep sshd¦查看当前有哪些 ssh 连接¦连接,会话¦
+ssh¦who -u¦查看当前 ssh 登录的用户和来源 IP¦会话,登录¦
+ssh¦pkill -9 -t pts/{{编号}}¦踢掉某个终端会话¦会话,踢人¦d
+ssh¦sshpass -p '{{密码}}' ssh {{用户}}@{{主机}}¦用密码自动登录（脚本里用）¦登录,密码¦
+ssh¦sshpass -p '{{密码}}' scp {{文件}} {{用户}}@{{主机}}:{{目录}}¦用密码自动传文件¦传输,密码¦
+ssh¦rsync -avz --progress -e "ssh -p {{端口}}" {{源}} {{用户}}@{{主机}}:{{目标}}¦指定 ssh 端口同步文件¦同步,端口¦
+ssh¦rsync -avz --delete {{源}}/ {{用户}}@{{主机}}:{{目标}}/¦镜像同步，目标多余文件会被删除¦同步,镜像¦d
+ssh¦rsync -avzn {{源}}/ {{目标}}/¦演练模式：只显示会同步什么，不真的执行¦同步,演练¦h
+ssh¦rsync -avz --exclude='{{目录}}' {{源}}/ {{目标}}/¦同步时排除某些目录¦同步,排除¦
+ssh¦rsync -avz --bwlimit=10000 {{源}} {{目标}}¦限速同步，避免占满带宽¦同步,限速¦
+ssh¦rsync -avz --partial --progress {{源}} {{目标}}¦同步大文件，支持断点续传¦同步,续传¦
+ssh¦ssh {{主机}} "tar czf - {{目录}}" | tar xzf - -C {{本地目录}}¦通过 ssh 管道打包传输目录¦传输,打包¦
+ssh¦tar czf - {{目录}} | ssh {{用户}}@{{主机}} "tar xzf - -C {{目标}}"¦本地打包直接传到远程解压¦传输,打包¦
+ssh¦ssh {{主机}} "cat {{远程文件}}" > {{本地文件}}¦把远程文件内容直接保存到本地¦传输,下载¦
+ssh¦cat {{本地文件}} | ssh {{主机}} "cat > {{远程文件}}"¦把本地文件内容直接写到远程¦传输,上传¦
+ssh¦sshfs {{用户}}@{{主机}}:{{远程目录}} {{本地挂载点}}¦把远程目录挂载到本地¦挂载,远程¦
+ssh¦autossh -M 0 -f -N -L {{本地端口}}:{{目标}}:{{端口}} {{用户}}@{{主机}}¦断线自动重连的端口转发¦隧道,重连¦
+ssh¦screen -S {{名称}}¦新建 screen 会话（断线后任务不丢）¦会话,screen¦h
+ssh¦screen -ls¦查看所有 screen 会话¦会话,screen¦
+ssh¦screen -r {{名称}}¦恢复 screen 会话¦会话,screen¦h
+ssh¦screen -d -r {{名称}}¦强制从别处断开并恢复会话¦会话,screen¦
+ssh¦screen -X -S {{名称}} quit¦结束某个 screen 会话¦会话,screen¦
+ssh¦tmux new -s {{名称}}¦新建 tmux 会话¦会话,tmux¦h
+ssh¦tmux ls¦查看所有 tmux 会话¦会话,tmux¦
+ssh¦tmux attach -t {{名称}}¦恢复 tmux 会话¦会话,tmux¦h
+ssh¦tmux kill-session -t {{名称}}¦结束 tmux 会话¦会话,tmux¦
+ssh¦tmux new -d -s {{名称}} '{{命令}}'¦在后台 tmux 会话里运行命令¦会话,后台¦
+ssh¦tmux send-keys -t {{名称}} '{{命令}}' Enter¦给 tmux 会话发送命令¦会话,tmux¦
+ssh¦tmux capture-pane -p -t {{名称}}¦读取 tmux 会话当前屏幕内容¦会话,tmux¦
+ssh¦tmux kill-server¦关闭所有 tmux 会话¦会话,tmux¦d
+sh¦#!/bin/bash¦脚本第一行，指定用 bash 执行¦脚本,开头¦h
+sh¦set -euo pipefail¦脚本出错就退出，未定义变量报错，管道失败也算失败¦脚本,严格¦h
+sh¦set -x¦脚本里打开调试，打印每条执行的命令¦脚本,调试¦h
+sh¦bash -x {{脚本}}¦调试方式运行脚本¦脚本,调试¦
+sh¦bash -n {{脚本}}¦只检查脚本语法，不执行¦脚本,检查¦
+sh¦shellcheck {{脚本}}¦静态检查脚本里的常见错误¦脚本,检查¦
+sh¦for i in {1..{{10}}}; do {{命令}}; done¦循环执行 10 次¦脚本,循环¦h
+sh¦for f in *.{{log}}; do {{命令}} "$f"; done¦对每个匹配的文件循环执行¦脚本,循环¦h
+sh¦for h in {{host1}} {{host2}}; do ssh $h "{{命令}}"; done¦批量对多台机器执行命令¦脚本,批量¦h
+sh¦while read -r line; do {{命令}} "$line"; done < {{文件}}¦逐行读取文件并处理¦脚本,循环¦h
+sh¦while true; do {{命令}}; sleep {{5}}; done¦每隔几秒循环执行命令¦脚本,循环¦
+sh¦until {{命令}}; do sleep 2; done¦一直重试直到命令成功¦脚本,重试¦
+sh¦if [ -f {{文件}} ]; then {{命令}}; fi¦判断文件存在再执行¦脚本,判断¦h
+sh¦if [ -d {{目录}} ]; then {{命令}}; fi¦判断目录存在再执行¦脚本,判断¦
+sh¦if [ -z "$var" ]; then {{命令}}; fi¦判断变量是否为空¦脚本,判断¦
+sh¦if [ $? -ne 0 ]; then {{命令}}; fi¦上一条命令失败时执行¦脚本,判断¦
+sh¦[ "$(id -u)" -ne 0 ] && echo "请用 root 运行" && exit 1¦脚本里检查是否 root¦脚本,权限¦
+sh¦case "$1" in start) {{命令}};; stop) {{命令}};; esac¦按参数选择不同分支¦脚本,分支¦
+sh¦command -v {{命令}} >/dev/null 2>&1 || echo "未安装"¦检查命令是否存在¦脚本,检查¦h
+sh¦{{命令}} > {{文件}} 2>&1¦把标准输出和错误都写入文件¦脚本,重定向¦h
+sh¦{{命令}} >> {{文件}} 2>&1¦把标准输出和错误追加到文件¦脚本,重定向¦
+sh¦{{命令}} 2>/dev/null¦丢弃错误输出¦脚本,重定向¦
+sh¦{{命令}} &> /dev/null¦丢弃全部输出¦脚本,重定向¦
+sh¦{{命令}} 2>&1 | tee {{文件}}¦输出到屏幕的同时保存到文件¦脚本,重定向¦h
+sh¦{{命令}} || true¦命令失败也不让脚本退出¦脚本,容错¦
+sh¦{{命令1}} && {{命令2}}¦上一条成功才执行下一条¦脚本,串联¦h
+sh¦{{命令1}} ; {{命令2}}¦不管成败依次执行¦脚本,串联¦
+sh¦trap '{{清理命令}}' EXIT¦脚本退出时一定执行清理¦脚本,清理¦
+sh¦trap '' HUP¦忽略挂断信号，退出终端也不中断¦脚本,信号¦
+sh¦$(date +%F)¦在命令里插入今天的日期¦脚本,日期¦h
+sh¦$(date +%Y%m%d_%H%M%S)¦插入精确到秒的时间戳（备份文件命名）¦脚本,日期,备份¦h
+sh¦$(hostname -I | awk '{print $1}')¦取本机第一个 IP¦脚本,ip¦h
+sh¦$(cat {{文件}})¦把文件内容当作参数¦脚本,文件¦
+sh¦${var:-{{默认值}}}¦变量为空时使用默认值¦脚本,变量¦
+sh¦${var##*/}¦取路径里的文件名¦脚本,变量¦
+sh¦${var%.*}¦去掉文件扩展名¦脚本,变量¦
+sh¦$#¦脚本接收到的参数个数¦脚本,参数¦
+sh¦$@¦脚本接收到的所有参数¦脚本,参数¦
+sh¦$?¦上一条命令的退出码（0 表示成功）¦脚本,退出码¦h
+sh¦$$¦当前 shell 的进程号¦脚本,进程¦
+sh¦read -p "{{提示}}: " {{变量}}¦读取用户输入¦脚本,输入¦
+sh¦read -s -p "密码: " {{变量}}¦读取密码输入（不回显）¦脚本,输入¦
+sh¦declare -A {{数组}}¦声明关联数组¦脚本,数组¦
+sh¦array=({{a}} {{b}} {{c}}); echo ${array[@]}¦定义并打印数组¦脚本,数组¦
+sh¦echo ${#{{变量}}}¦取字符串长度¦脚本,字符串¦
+sh¦printf "%-20s %s\n" {{列1}} {{列2}}¦按固定宽度对齐输出¦脚本,格式¦
+sh¦printf "\033[31m{{红字}}\033[0m\n"¦输出红色文字¦脚本,颜色¦
+sh¦printf "\033[32m{{绿字}}\033[0m\n"¦输出绿色文字¦脚本,颜色¦
+sh¦source {{文件}}¦在当前 shell 中加载脚本或环境变量文件¦环境变量,加载¦h
+sh¦. {{文件}}¦source 的简写¦环境变量,加载¦
+sh¦export {{变量}}={{值}}¦设置环境变量（当前会话）¦环境变量¦h
+sh¦export PATH=$PATH:{{目录}}¦把目录加入 PATH¦环境变量,path¦h
+sh¦echo 'export PATH=$PATH:{{目录}}' >> ~/.bashrc && source ~/.bashrc¦永久添加 PATH¦环境变量,path¦h
+sh¦env | sort¦按字母排序查看所有环境变量¦环境变量¦
+sh¦printenv {{变量}}¦查看某个环境变量¦环境变量¦
+sh¦unset {{变量}}¦删除环境变量¦环境变量¦
+sh¦alias ll='ls -alh'¦设置命令别名¦别名¦
+sh¦alias¦查看当前所有别名¦别名¦
+sh¦unalias {{别名}}¦取消别名¦别名¦
+sh¦echo "alias {{名}}='{{命令}}'" >> ~/.bashrc¦永久保存别名¦别名¦
+sh¦cat ~/.bashrc¦查看当前用户的 shell 配置¦配置¦
+sh¦cat /etc/profile¦查看全局环境变量配置¦配置,环境变量¦
+sh¦echo $SHELL¦查看当前用户的默认 shell¦shell¦
+sh¦chsh -s /bin/zsh¦修改默认 shell¦shell¦
+sh¦cat /etc/shells¦查看系统支持哪些 shell¦shell¦
+sh¦clear¦清屏¦清屏¦
+sh¦reset¦终端乱码或显示错乱时重置终端¦乱码,终端¦
+sh¦stty sane¦恢复终端的正常输入状态¦乱码,终端¦
+sh¦tput reset¦重置终端显示¦终端¦
+sh¦exec bash¦重新启动当前 shell¦shell,重启¦
+sh¦exit¦退出当前登录¦退出¦
+sh¦logout¦退出当前登录会话¦退出¦
+sh¦ctrl+r¦在历史命令里反向搜索（输入关键字）¦快捷键,历史¦h
+sh¦!!¦重复执行上一条命令¦历史,重复¦h
+sh¦sudo !!¦用 sudo 重新执行上一条命令¦历史,sudo¦h
+sh¦!{{前缀}}¦执行最近一条以某前缀开头的命令¦历史,重复¦
+sh¦!$¦引用上一条命令的最后一个参数¦历史,参数¦
+sh¦^{{旧}}^{{新}}¦把上一条命令里的字符串替换后重新执行¦历史,替换¦
+sh¦cd -¦回到上一次所在的目录¦目录,切换¦h
+sh¦pushd {{目录}}¦进入目录并记住当前位置¦目录,切换¦
+sh¦popd¦回到 pushd 记住的目录¦目录,切换¦
+sh¦dirs -v¦查看记住的目录栈¦目录¦
+sh¦cd ~¦回到家目录¦目录,家目录¦
+sh¦tee -a {{文件}} <<'EOF'¦用 here-document 写多行内容到文件¦脚本,写入¦
+sh¦cat > {{文件}} <<'EOF'¦用 here-document 覆盖写入多行文件¦脚本,写入¦h
+sh¦expect -c 'spawn ssh {{用户}}@{{主机}}; expect "password:"; send "{{密码}}\r"; interact'¦用 expect 自动输入密码登录¦自动化,登录¦
+sh¦xargs -I{} {{命令}} {} < {{文件}}¦对文件里每一行执行命令¦脚本,批量¦h
+sh¦xargs -P {{4}} -n 1 {{命令}} < {{文件}}¦并行执行，同时跑 4 个¦脚本,并行¦
+sh¦parallel -j {{4}} {{命令}} ::: {{参数}}¦用 GNU parallel 并行执行¦脚本,并行¦
+sh¦seq 1 {{10}}¦输出 1 到 10 的数字序列¦脚本,序列¦
+sh¦shuf -n 1 {{文件}}¦随机取文件里的一行¦脚本,随机¦
+sh¦uuidgen¦生成一个 UUID¦随机,uuid¦
+sh¦mktemp -d¦创建一个临时目录¦脚本,临时¦
+sh¦mktemp¦创建一个临时文件¦脚本,临时¦
+sh¦sleep {{5}}¦等待 5 秒¦脚本,等待¦
+sh¦time {{命令}}¦统计命令的执行耗时¦脚本,耗时¦h
+sh¦yes | {{命令}}¦自动对所有询问回答 yes¦脚本,自动¦
+sh¦flock -n /tmp/{{锁}}.lock {{命令}}¦用文件锁防止脚本重复运行¦脚本,锁¦h
+sh¦nohup bash {{脚本}} > {{日志}} 2>&1 &¦让脚本后台运行并记录日志¦脚本,后台¦h
+docker¦docker ps¦查看正在运行的容器¦容器,查看¦h
+docker¦docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"¦简洁表格查看所有容器的名称、状态和端口¦容器,查看¦h
+docker¦docker ps -q¦只输出运行中容器的 ID¦容器,脚本¦
+docker¦docker ps -a -f status=exited¦只看已退出的容器¦容器,退出¦h
+docker¦docker ps -a -f name={{名称}}¦按名称筛选容器¦容器,筛选¦
+docker¦docker images¦查看本地所有镜像¦镜像,查看¦h
+docker¦docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"¦简洁表格查看镜像和大小¦镜像,大小¦
+docker¦docker images -f dangling=true¦查看悬空（无标签）镜像¦镜像,清理¦
+docker¦docker run -d --name {{名称}} -p {{宿主端口}}:{{容器端口}} {{镜像}}¦后台启动容器并映射端口¦启动,端口¦h
+docker¦docker run -it --rm {{镜像}} /bin/bash¦临时启动一个容器进去操作，退出后自动删除¦启动,临时¦h
+docker¦docker run -d --restart=always --name {{名称}} {{镜像}}¦启动容器并设置总是自动重启¦启动,自启¦h
+docker¦docker run -d -v {{宿主目录}}:{{容器目录}} {{镜像}}¦启动容器并挂载目录¦启动,挂载¦h
+docker¦docker run -d -e {{变量}}={{值}} {{镜像}}¦启动容器并传入环境变量¦启动,环境变量¦
+docker¦docker run -d --env-file {{文件}} {{镜像}}¦从文件加载环境变量启动容器¦启动,环境变量¦
+docker¦docker run -d --network host {{镜像}}¦使用宿主机网络启动容器¦启动,网络¦
+docker¦docker run -d --memory 512m --cpus 1 {{镜像}}¦启动容器并限制内存和 CPU¦启动,限制¦
+docker¦docker run -d --privileged {{镜像}}¦以特权模式启动容器（慎用）¦启动,特权¦d
+docker¦docker run -d --user {{uid}}:{{gid}} {{镜像}}¦指定用户身份启动容器¦启动,用户¦
+docker¦docker run -d --add-host {{域名}}:{{IP}} {{镜像}}¦启动时添加 hosts 解析¦启动,hosts¦
+docker¦docker run --entrypoint {{命令}} -it {{镜像}}¦覆盖镜像的启动命令进入容器¦启动,调试¦h
+docker¦docker exec -it {{容器}} /bin/bash¦进入运行中的容器¦进入,exec¦h
+docker¦docker exec -it {{容器}} sh¦进入没有 bash 的容器¦进入,exec¦h
+docker¦docker exec {{容器}} {{命令}}¦在容器里执行一条命令¦exec¦
+docker¦docker exec -u root -it {{容器}} bash¦以 root 身份进入容器¦进入,root¦
+docker¦docker exec -w {{目录}} {{容器}} {{命令}}¦在容器的指定目录执行命令¦exec¦
+docker¦docker logs -f --tail 200 {{容器}}¦实时看容器最后 200 行日志¦日志,实时¦h
+docker¦docker logs --since 10m {{容器}}¦看容器最近 10 分钟的日志¦日志,时间¦h
+docker¦docker logs -t {{容器}}¦日志带时间戳¦日志,时间¦
+docker¦docker logs {{容器}} 2>&1 | grep -i error¦在容器日志里搜索错误¦日志,错误¦h
+docker¦docker logs --until {{2025-01-01T10:00:00}} {{容器}}¦看某个时间点之前的日志¦日志,时间¦
+docker¦docker inspect {{容器}}¦查看容器的完整配置¦详情,配置¦h
+docker¦docker inspect -f '{{.NetworkSettings.IPAddress}}' {{容器}}¦查看容器 IP¦ip,网络¦h
+docker¦docker inspect -f '{{.State.Status}}' {{容器}}¦查看容器状态¦状态¦
+docker¦docker inspect -f '{{.State.ExitCode}}' {{容器}}¦查看容器退出码（排查为何退出）¦退出码,排查¦h
+docker¦docker inspect -f '{{.State.OOMKilled}}' {{容器}}¦查看容器是不是被 OOM 杀掉¦oom,排查¦h
+docker¦docker inspect -f '{{json .Mounts}}' {{容器}}¦查看容器挂载的目录¦挂载¦
+docker¦docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' {{容器}}¦查看容器的重启策略¦重启策略¦
+docker¦docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' {{容器}}¦查看容器的环境变量¦环境变量¦
+docker¦docker inspect --format='{{.LogPath}}' {{容器}}¦查看容器日志文件在宿主机的位置¦日志,路径¦h
+docker¦docker top {{容器}}¦查看容器里的进程¦进程¦
+docker¦docker stats¦实时查看所有容器的资源占用¦资源,监控¦h
+docker¦docker stats --no-stream¦输出一次所有容器的资源占用快照¦资源,快照¦
+docker¦docker stats {{容器}}¦只看某个容器的资源占用¦资源,监控¦
+docker¦docker port {{容器}}¦查看容器的端口映射¦端口¦
+docker¦docker diff {{容器}}¦查看容器相对镜像改动了哪些文件¦改动¦
+docker¦docker events --since 10m¦查看最近 10 分钟的 docker 事件¦事件,排查¦
+docker¦docker start {{容器}}¦启动已停止的容器¦启动¦h
+docker¦docker stop {{容器}}¦停止容器¦停止¦h
+docker¦docker restart {{容器}}¦重启容器¦重启¦h
+docker¦docker pause {{容器}}¦暂停容器里所有进程¦暂停¦
+docker¦docker unpause {{容器}}¦恢复被暂停的容器¦恢复¦
+docker¦docker kill {{容器}}¦强制杀掉容器¦强制,停止¦d
+docker¦docker rm {{容器}}¦删除已停止的容器¦删除¦d
+docker¦docker rm -f {{容器}}¦强制删除容器（包括运行中的）¦删除,强制¦d
+docker¦docker rm $(docker ps -aq -f status=exited)¦删除所有已退出的容器¦删除,清理¦d
+docker¦docker rename {{旧名}} {{新名}}¦重命名容器¦重命名¦
+docker¦docker update --restart=always {{容器}}¦修改运行中容器的重启策略¦重启策略¦
+docker¦docker update --memory 1g --memory-swap 1g {{容器}}¦调整运行中容器的内存限制¦限制,内存¦
+docker¦docker cp {{容器}}:{{容器路径}} {{本地路径}}¦把容器里的文件复制出来¦复制,文件¦h
+docker¦docker cp {{本地路径}} {{容器}}:{{容器路径}}¦把本地文件复制进容器¦复制,文件¦h
+docker¦docker commit {{容器}} {{镜像名}}:{{标签}}¦把容器当前状态保存成镜像¦镜像,保存¦
+docker¦docker export {{容器}} > {{文件}}.tar¦导出容器文件系统¦导出¦
+docker¦docker pull {{镜像}}:{{标签}}¦拉取镜像¦镜像,拉取¦h
+docker¦docker push {{镜像}}:{{标签}}¦推送镜像到仓库¦镜像,推送¦
+docker¦docker tag {{源镜像}} {{仓库}}/{{镜像}}:{{标签}}¦给镜像打新标签¦镜像,标签¦h
+docker¦docker login {{仓库地址}}¦登录镜像仓库¦仓库,登录¦
+docker¦docker logout¦退出镜像仓库登录¦仓库¦
+docker¦docker search {{关键字}}¦在 Docker Hub 搜索镜像¦镜像,搜索¦
+docker¦docker build -t {{镜像}}:{{标签}} .¦用当前目录的 Dockerfile 构建镜像¦构建,镜像¦h
+docker¦docker build --no-cache -t {{镜像}}:{{标签}} .¦不使用缓存重新构建镜像¦构建,缓存¦
+docker¦docker build -f {{Dockerfile}} -t {{镜像}} {{目录}}¦指定 Dockerfile 构建¦构建¦
+docker¦docker build --build-arg {{参数}}={{值}} -t {{镜像}} .¦构建时传入参数¦构建,参数¦
+docker¦docker history {{镜像}}¦查看镜像每一层的大小和命令¦镜像,分层¦
+docker¦docker save -o {{文件}}.tar {{镜像}}:{{标签}}¦把镜像导出成文件（离线传输）¦镜像,导出,离线¦h
+docker¦docker load -i {{文件}}.tar¦从文件导入镜像¦镜像,导入,离线¦h
+docker¦docker rmi {{镜像}}¦删除镜像¦镜像,删除¦d
+docker¦docker rmi $(docker images -f dangling=true -q)¦删除所有悬空镜像¦镜像,清理¦d
+docker¦docker image prune -a -f¦删除所有没被容器使用的镜像¦镜像,清理¦d
+docker¦docker container prune -f¦删除所有已停止的容器¦容器,清理¦d
+docker¦docker volume ls¦查看所有数据卷¦数据卷¦h
+docker¦docker volume inspect {{卷}}¦查看数据卷的详情和宿主机路径¦数据卷¦
+docker¦docker volume create {{卷}}¦创建数据卷¦数据卷¦
+docker¦docker volume rm {{卷}}¦删除数据卷¦数据卷¦d
+docker¦docker volume prune -f¦删除所有未使用的数据卷¦数据卷,清理¦d
+docker¦docker network ls¦查看所有网络¦网络¦h
+docker¦docker network inspect {{网络}}¦查看网络详情和其中的容器¦网络¦
+docker¦docker network create {{网络}}¦创建网络¦网络¦
+docker¦docker network connect {{网络}} {{容器}}¦把容器接入网络¦网络¦
+docker¦docker network disconnect {{网络}} {{容器}}¦把容器从网络里断开¦网络¦
+docker¦docker network prune -f¦删除所有未使用的网络¦网络,清理¦d
+docker¦docker system df¦查看镜像、容器、数据卷各占多少空间¦空间,占用¦h
+docker¦docker system df -v¦显示每个镜像和容器的空间占用详情¦空间,占用¦
+docker¦docker system prune -f¦清理已停止容器、悬空镜像和无用网络¦清理¦d
+docker¦docker system info¦查看 docker 引擎的详细信息¦信息,版本¦
+docker¦docker info | grep -i -E "storage|root dir|cgroup"¦查看存储驱动和数据目录¦存储,目录¦
+docker¦docker version¦查看 docker 客户端和服务端版本¦版本¦h
+docker¦docker context ls¦查看 docker 上下文（连接哪个主机）¦上下文¦
+docker¦docker compose up -d¦后台启动 compose 里的所有服务¦compose,启动¦h
+docker¦docker compose up -d --build¦重新构建镜像并启动¦compose,构建¦h
+docker¦docker compose up -d --force-recreate¦强制重新创建容器¦compose,重建¦
+docker¦docker compose up -d {{服务}}¦只启动指定服务¦compose,启动¦
+docker¦docker compose down¦停止并删除 compose 的容器和网络¦compose,停止¦h
+docker¦docker compose down -v¦停止并同时删除数据卷（会丢数据）¦compose,删除¦d
+docker¦docker compose ps¦查看 compose 里各服务的状态¦compose,状态¦h
+docker¦docker compose logs -f --tail 100 {{服务}}¦实时看 compose 服务日志¦compose,日志¦h
+docker¦docker compose restart {{服务}}¦重启 compose 里的服务¦compose,重启¦
+docker¦docker compose stop {{服务}}¦停止 compose 里的服务¦compose,停止¦
+docker¦docker compose pull¦拉取 compose 里所有服务的最新镜像¦compose,拉取¦h
+docker¦docker compose config¦检查并展示 compose 文件合并后的结果¦compose,检查¦h
+docker¦docker compose exec {{服务}} bash¦进入 compose 里的服务容器¦compose,进入¦h
+docker¦docker compose run --rm {{服务}} {{命令}}¦用服务配置临时执行一条命令¦compose,临时¦
+docker¦docker compose -f {{文件}} up -d¦指定 compose 文件启动¦compose,启动¦
+docker¦docker compose -p {{项目名}} up -d¦指定项目名启动¦compose,项目¦
+docker¦docker-compose up -d¦用老版 docker-compose 启动¦compose,启动¦
+docker¦docker-compose down¦用老版 docker-compose 停止¦compose,停止¦
+docker¦docker-compose logs -f {{服务}}¦用老版 docker-compose 看日志¦compose,日志¦
+docker¦cat /etc/docker/daemon.json¦查看 docker 守护进程配置¦配置,daemon¦h
+docker¦systemctl restart docker¦重启 docker 服务¦服务,重启¦
+docker¦systemctl status docker¦查看 docker 服务状态¦服务,状态¦
+docker¦journalctl -u docker -n 100 --no-pager¦查看 docker 服务日志¦服务,日志¦
+docker¦docker info | grep -i "Docker Root Dir"¦查看 docker 数据目录¦目录¦
+docker¦du -sh /var/lib/docker/*¦查看 docker 数据目录各部分占用¦空间,占用¦
+docker¦du -sh /var/lib/docker/containers/*/*-json.log | sort -rh | head¦查找最大的容器日志文件¦日志,空间¦h
+docker¦truncate -s 0 $(docker inspect --format='{{.LogPath}}' {{容器}})¦清空某个容器的日志文件¦日志,清理¦h
+docker¦docker ps -q | xargs docker inspect -f '{{.Name}} {{.NetworkSettings.IPAddress}}'¦批量查看所有容器的 IP¦ip,批量¦
+docker¦docker ps --format '{{.Names}}' | xargs -I{} docker logs --tail 5 {}¦批量看每个容器最后 5 行日志¦日志,批量¦
+docker¦docker stop $(docker ps -q)¦停止所有运行中的容器¦批量,停止¦d
+docker¦docker restart $(docker ps -q)¦重启所有运行中的容器¦批量,重启¦d
+docker¦docker image ls --filter "reference={{关键字}}*"¦按名称筛选镜像¦镜像,筛选¦
+docker¦docker buildx build --platform linux/amd64,linux/arm64 -t {{镜像}} --push .¦构建多架构镜像并推送¦构建,多架构¦
+docker¦docker scan {{镜像}}¦扫描镜像里的安全漏洞¦镜像,安全¦
+docker¦docker trust inspect {{镜像}}¦查看镜像的签名信息¦镜像,安全¦
+docker¦docker swarm init¦初始化 swarm 集群¦swarm¦
+docker¦docker service ls¦查看 swarm 服务列表¦swarm¦
+docker¦ctr -n k8s.io images ls¦用 containerd 查看 k8s 的镜像¦containerd,镜像¦
+docker¦ctr -n k8s.io containers ls¦用 containerd 查看 k8s 的容器¦containerd,容器¦
+docker¦crictl ps¦查看 CRI 运行时里的容器¦containerd,容器¦h
+docker¦crictl images¦查看 CRI 运行时里的镜像¦containerd,镜像¦
+docker¦crictl logs {{容器ID}}¦查看 CRI 容器日志¦containerd,日志¦
+docker¦crictl pods¦查看 CRI 运行时里的 Pod¦containerd,pod¦
+docker¦crictl stats¦查看 CRI 容器资源占用¦containerd,资源¦
+docker¦nerdctl ps¦用 nerdctl 查看容器（兼容 docker 命令）¦containerd,容器¦
+docker¦podman ps -a¦用 podman 查看所有容器¦podman,容器¦
+docker¦podman generate systemd --name {{容器}} --files --new¦把 podman 容器生成 systemd 服务¦podman,服务¦
+k8s¦kubectl get nodes -o wide¦查看节点状态、IP 和版本¦节点,查看¦h
+k8s¦kubectl get pods -A¦查看所有命名空间的 Pod¦pod,查看¦h
+k8s¦kubectl get pods -n {{命名空间}} -o wide¦查看某命名空间的 Pod 及所在节点¦pod,查看¦h
+k8s¦kubectl get pods --field-selector=status.phase!=Running -A¦查看所有不在 Running 状态的 Pod¦pod,异常¦h
+k8s¦kubectl get pods -A | grep -v Running | grep -v Completed¦快速找出异常的 Pod¦pod,异常¦h
+k8s¦kubectl get pods -l app={{标签}} -n {{命名空间}}¦按标签筛选 Pod¦pod,标签¦
+k8s¦kubectl get pods --sort-by=.status.startTime -n {{命名空间}}¦按启动时间排序 Pod¦pod,排序¦
+k8s¦kubectl get pod {{Pod}} -o yaml¦导出 Pod 的完整 YAML¦pod,配置¦
+k8s¦kubectl get pods -o custom-columns=NAME:.metadata.name,RESTARTS:.status.containerStatuses[0].restartCount -n {{命名空间}}¦查看 Pod 的重启次数¦pod,重启¦h
+k8s¦kubectl get deploy -n {{命名空间}}¦查看 Deployment¦部署,查看¦h
+k8s¦kubectl get sts -n {{命名空间}}¦查看 StatefulSet¦有状态,查看¦
+k8s¦kubectl get ds -n {{命名空间}}¦查看 DaemonSet¦daemonset,查看¦
+k8s¦kubectl get svc -A¦查看所有命名空间的 Service¦服务,查看¦h
+k8s¦kubectl get ep {{服务}} -n {{命名空间}}¦查看服务背后的 Pod 端点（排查服务不通）¦服务,端点¦h
+k8s¦kubectl get ing -A¦查看所有 Ingress¦入口,查看¦h
+k8s¦kubectl get cm -n {{命名空间}}¦查看 ConfigMap¦配置,查看¦
+k8s¦kubectl get secret -n {{命名空间}}¦查看 Secret 列表¦密钥,查看¦
+k8s¦kubectl get pv,pvc -A¦查看持久卷和持久卷声明¦存储,查看¦h
+k8s¦kubectl get sc¦查看存储类¦存储,查看¦
+k8s¦kubectl get ns¦查看所有命名空间¦命名空间¦
+k8s¦kubectl get events -A --sort-by=.lastTimestamp | tail -30¦查看全集群最近 30 条事件¦事件,排查¦h
+k8s¦kubectl get events -n {{命名空间}} --field-selector type=Warning¦只看警告事件¦事件,警告¦h
+k8s¦kubectl get all -n {{命名空间}}¦查看命名空间下的主要资源¦查看,全部¦h
+k8s¦kubectl get hpa -A¦查看自动扩缩容配置¦扩缩容,hpa¦
+k8s¦kubectl get cronjob,job -A¦查看定时任务和任务¦任务,cronjob¦
+k8s¦kubectl get crd¦查看所有自定义资源类型¦crd¦
+k8s¦kubectl api-resources¦查看集群支持的所有资源类型¦资源,类型¦
+k8s¦kubectl explain {{pod.spec}}¦查看资源字段的说明文档¦文档,字段¦
+k8s¦kubectl describe pod {{Pod}} -n {{命名空间}}¦查看 Pod 详情和事件（排查启动失败）¦pod,排查¦h
+k8s¦kubectl describe node {{节点}}¦查看节点详情、资源和事件¦节点,排查¦h
+k8s¦kubectl describe svc {{服务}} -n {{命名空间}}¦查看服务详情¦服务,排查¦
+k8s¦kubectl describe ing {{入口}} -n {{命名空间}}¦查看 Ingress 详情¦入口,排查¦
+k8s¦kubectl describe pvc {{pvc}} -n {{命名空间}}¦查看 PVC 详情（排查挂载问题）¦存储,排查¦
+k8s¦kubectl logs -f {{Pod}} -n {{命名空间}}¦实时查看 Pod 日志¦日志,实时¦h
+k8s¦kubectl logs {{Pod}} -c {{容器}} -n {{命名空间}}¦查看 Pod 里指定容器的日志¦日志,容器¦
+k8s¦kubectl logs --previous {{Pod}} -n {{命名空间}}¦查看上一次崩溃的容器日志¦日志,崩溃¦h
+k8s¦kubectl logs --tail=200 --since=10m {{Pod}} -n {{命名空间}}¦查看最近 10 分钟的最后 200 行日志¦日志,时间¦h
+k8s¦kubectl logs -l app={{标签}} -n {{命名空间}} --tail=50¦查看同一标签下所有 Pod 的日志¦日志,标签¦
+k8s¦kubectl logs deploy/{{部署}} -n {{命名空间}}¦直接看 Deployment 的日志¦日志,部署¦
+k8s¦kubectl exec -it {{Pod}} -n {{命名空间}} -- /bin/bash¦进入 Pod 里的容器¦进入,pod¦h
+k8s¦kubectl exec -it {{Pod}} -n {{命名空间}} -- sh¦进入没有 bash 的 Pod¦进入,pod¦h
+k8s¦kubectl exec -it {{Pod}} -c {{容器}} -n {{命名空间}} -- bash¦进入 Pod 里指定的容器¦进入,容器¦
+k8s¦kubectl exec {{Pod}} -n {{命名空间}} -- {{命令}}¦在 Pod 里执行一条命令¦exec¦
+k8s¦kubectl cp {{Pod}}:{{路径}} {{本地路径}} -n {{命名空间}}¦把 Pod 里的文件复制到本地¦复制,文件¦h
+k8s¦kubectl cp {{本地路径}} {{Pod}}:{{路径}} -n {{命名空间}}¦把本地文件复制进 Pod¦复制,文件¦
+k8s¦kubectl port-forward {{Pod}} {{本地端口}}:{{Pod端口}} -n {{命名空间}}¦把 Pod 端口转发到本机¦端口转发,调试¦h
+k8s¦kubectl port-forward svc/{{服务}} {{本地端口}}:{{服务端口}} -n {{命名空间}}¦把服务端口转发到本机¦端口转发,调试¦
+k8s¦kubectl top nodes¦查看节点 CPU 和内存使用¦资源,节点¦h
+k8s¦kubectl top pods -A --sort-by=memory | head¦内存占用最高的 Pod¦资源,内存¦h
+k8s¦kubectl top pods -A --sort-by=cpu | head¦CPU 占用最高的 Pod¦资源,cpu¦h
+k8s¦kubectl top pod {{Pod}} --containers -n {{命名空间}}¦查看 Pod 里每个容器的资源占用¦资源,容器¦
+k8s¦kubectl apply -f {{文件}}.yaml¦应用 YAML 配置（创建或更新）¦应用,部署¦h
+k8s¦kubectl apply -f {{目录}}/¦应用目录下所有 YAML¦应用,部署¦
+k8s¦kubectl apply -f {{文件}}.yaml --dry-run=client¦只做检查不真正应用¦应用,检查¦h
+k8s¦kubectl diff -f {{文件}}.yaml¦应用前先看会有哪些变化¦应用,对比¦h
+k8s¦kubectl create -f {{文件}}.yaml¦创建资源（已存在会报错）¦创建¦
+k8s¦kubectl delete -f {{文件}}.yaml¦删除 YAML 里定义的资源¦删除¦d
+k8s¦kubectl delete pod {{Pod}} -n {{命名空间}}¦删除 Pod（会被控制器重建）¦删除,pod¦d
+k8s¦kubectl delete pod {{Pod}} -n {{命名空间}} --force --grace-period=0¦强制删除卡住的 Pod¦删除,强制¦d
+k8s¦kubectl delete pods --field-selector=status.phase=Failed -A¦删除所有失败的 Pod¦删除,清理¦d
+k8s¦kubectl delete pods --field-selector=status.phase=Succeeded -A¦删除所有已完成的 Pod¦删除,清理¦d
+k8s¦kubectl delete ns {{命名空间}}¦删除整个命名空间（含所有资源）¦删除,命名空间¦d
+k8s¦kubectl edit deploy {{部署}} -n {{命名空间}}¦在线编辑 Deployment¦编辑,部署¦
+k8s¦kubectl edit cm {{配置}} -n {{命名空间}}¦在线编辑 ConfigMap¦编辑,配置¦
+k8s¦kubectl patch deploy {{部署}} -n {{命名空间}} -p '{"spec":{"replicas":{{3}}}}'¦用补丁方式修改副本数¦修改,副本¦
+k8s¦kubectl scale deploy {{部署}} --replicas={{3}} -n {{命名空间}}¦调整副本数¦扩缩容,副本¦h
+k8s¦kubectl scale deploy {{部署}} --replicas=0 -n {{命名空间}}¦把副本缩到 0（相当于停止服务）¦扩缩容,停止¦d
+k8s¦kubectl autoscale deploy {{部署}} --min=2 --max=10 --cpu-percent=80 -n {{命名空间}}¦创建自动扩缩容¦扩缩容,hpa¦
+k8s¦kubectl set image deploy/{{部署}} {{容器}}={{镜像}}:{{标签}} -n {{命名空间}}¦更新部署的镜像版本¦升级,镜像¦h
+k8s¦kubectl set env deploy/{{部署}} {{变量}}={{值}} -n {{命名空间}}¦修改部署的环境变量¦修改,环境变量¦
+k8s¦kubectl set resources deploy/{{部署}} --limits=cpu=1,memory=1Gi -n {{命名空间}}¦修改部署的资源限制¦修改,资源¦
+k8s¦kubectl rollout status deploy/{{部署}} -n {{命名空间}}¦查看发布进度¦发布,状态¦h
+k8s¦kubectl rollout history deploy/{{部署}} -n {{命名空间}}¦查看发布历史版本¦发布,历史¦
+k8s¦kubectl rollout undo deploy/{{部署}} -n {{命名空间}}¦回滚到上一个版本¦发布,回滚¦h
+k8s¦kubectl rollout undo deploy/{{部署}} --to-revision={{版本号}} -n {{命名空间}}¦回滚到指定版本¦发布,回滚¦
+k8s¦kubectl rollout restart deploy/{{部署}} -n {{命名空间}}¦滚动重启部署（不改配置）¦重启,发布¦h
+k8s¦kubectl rollout pause deploy/{{部署}} -n {{命名空间}}¦暂停发布¦发布,暂停¦
+k8s¦kubectl rollout resume deploy/{{部署}} -n {{命名空间}}¦继续发布¦发布,继续¦
+k8s¦kubectl label pod {{Pod}} {{key}}={{value}} -n {{命名空间}}¦给 Pod 打标签¦标签¦
+k8s¦kubectl label node {{节点}} {{key}}={{value}}¦给节点打标签¦标签,节点¦
+k8s¦kubectl annotate pod {{Pod}} {{key}}={{value}} -n {{命名空间}}¦给 Pod 加注解¦注解¦
+k8s¦kubectl cordon {{节点}}¦把节点标记为不可调度（不影响现有 Pod）¦节点,维护¦h
+k8s¦kubectl uncordon {{节点}}¦恢复节点可调度¦节点,维护¦h
+k8s¦kubectl drain {{节点}} --ignore-daemonsets --delete-emptydir-data¦驱逐节点上的 Pod，用于节点维护¦节点,维护¦d
+k8s¦kubectl taint nodes {{节点}} {{key}}={{value}}:NoSchedule¦给节点加污点¦节点,污点¦
+k8s¦kubectl taint nodes {{节点}} {{key}}-¦移除节点的污点¦节点,污点¦
+k8s¦kubectl delete node {{节点}}¦把节点从集群中删除¦节点,删除¦d
+k8s¦kubectl create ns {{命名空间}}¦创建命名空间¦命名空间¦
+k8s¦kubectl create deploy {{名称}} --image={{镜像}}¦快速创建一个 Deployment¦创建,部署¦
+k8s¦kubectl create cm {{名称}} --from-file={{文件}} -n {{命名空间}}¦由文件创建 ConfigMap¦创建,配置¦
+k8s¦kubectl create secret generic {{名称}} --from-literal={{key}}={{value}} -n {{命名空间}}¦创建 Secret¦创建,密钥¦
+k8s¦kubectl create secret docker-registry {{名称}} --docker-server={{仓库}} --docker-username={{用户}} --docker-password={{密码}} -n {{命名空间}}¦创建镜像仓库拉取凭证¦创建,仓库¦h
+k8s¦kubectl create job {{名称}} --from=cronjob/{{定时任务}} -n {{命名空间}}¦立即手动触发一次定时任务¦任务,触发¦h
+k8s¦kubectl get secret {{名称}} -n {{命名空间}} -o jsonpath='{.data.{{key}}}' | base64 -d¦读取 Secret 里某个值并解码¦密钥,解码¦h
+k8s¦kubectl run {{名称}} --image={{镜像}} -it --rm --restart=Never -- sh¦临时起一个 Pod 进去调试¦调试,临时¦h
+k8s¦kubectl run tmp --image=busybox -it --rm --restart=Never -- nslookup {{服务}}¦临时 Pod 测试服务解析¦调试,dns¦
+k8s¦kubectl run tmp --image=curlimages/curl -it --rm --restart=Never -- curl {{URL}}¦临时 Pod 测试服务连通¦调试,网络¦
+k8s¦kubectl debug node/{{节点}} -it --image=busybox¦在节点上起调试容器¦调试,节点¦
+k8s¦kubectl debug {{Pod}} -it --image=busybox --target={{容器}}¦给运行中的 Pod 加调试容器¦调试,pod¦
+k8s¦kubectl config get-contexts¦查看所有集群上下文¦集群,上下文¦h
+k8s¦kubectl config current-context¦查看当前使用的集群¦集群,上下文¦
+k8s¦kubectl config use-context {{上下文}}¦切换到另一个集群¦集群,切换¦h
+k8s¦kubectl config set-context --current --namespace={{命名空间}}¦设置默认命名空间，省去 -n¦命名空间,默认¦h
+k8s¦kubectl config view --minify¦查看当前集群的连接配置¦集群,配置¦
+k8s¦kubectl cluster-info¦查看集群地址和核心组件¦集群,信息¦
+k8s¦kubectl version¦查看客户端和服务端版本¦版本¦
+k8s¦kubectl auth can-i {{create}} {{pods}} -n {{命名空间}}¦检查当前账号有没有某个权限¦权限,rbac¦h
+k8s¦kubectl auth can-i --list -n {{命名空间}}¦列出当前账号在命名空间里的全部权限¦权限,rbac¦
+k8s¦kubectl get rolebinding,clusterrolebinding -A | grep {{用户}}¦查看某个用户的角色绑定¦权限,rbac¦
+k8s¦kubectl get pods -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.nodeName}{"\n"}{end}'¦列出每个 Pod 所在的命名空间和节点¦pod,节点¦
+k8s¦kubectl get pods -A -o jsonpath='{range .items[*]}{.spec.containers[*].image}{"\n"}{end}' | sort -u¦列出集群里用到的所有镜像¦镜像,清单¦
+k8s¦kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}'¦取出所有节点的内网 IP¦节点,ip¦
+k8s¦kubectl get pods -n {{命名空间}} -o name | xargs -I{} kubectl delete {} -n {{命名空间}}¦批量删除命名空间里的所有 Pod¦批量,删除¦d
+k8s¦kubectl get pods -n {{命名空间}} -w¦实时观察 Pod 状态变化¦pod,观察¦h
+k8s¦kubectl wait --for=condition=Ready pod/{{Pod}} -n {{命名空间}} --timeout=120s¦等待 Pod 就绪¦pod,等待¦
+k8s¦kubectl kustomize {{目录}}¦渲染 kustomize 配置¦kustomize¦
+k8s¦kubectl apply -k {{目录}}¦应用 kustomize 目录¦kustomize,部署¦
+k8s¦helm list -A¦查看所有已安装的 Helm 应用¦helm,查看¦h
+k8s¦helm install {{名称}} {{chart}} -n {{命名空间}} --create-namespace¦安装 Helm 应用¦helm,安装¦h
+k8s¦helm upgrade --install {{名称}} {{chart}} -n {{命名空间}} -f {{values}}.yaml¦安装或升级 Helm 应用¦helm,升级¦h
+k8s¦helm uninstall {{名称}} -n {{命名空间}}¦卸载 Helm 应用¦helm,卸载¦d
+k8s¦helm rollback {{名称}} {{版本}} -n {{命名空间}}¦回滚 Helm 应用¦helm,回滚¦h
+k8s¦helm history {{名称}} -n {{命名空间}}¦查看 Helm 发布历史¦helm,历史¦
+k8s¦helm status {{名称}} -n {{命名空间}}¦查看 Helm 应用状态¦helm,状态¦
+k8s¦helm get values {{名称}} -n {{命名空间}}¦查看 Helm 应用当前的配置值¦helm,配置¦
+k8s¦helm template {{名称}} {{chart}} -f {{values}}.yaml¦本地渲染 chart，不真正安装¦helm,渲染¦h
+k8s¦helm repo add {{名}} {{地址}} && helm repo update¦添加并更新 Helm 仓库¦helm,仓库¦
+k8s¦helm search repo {{关键字}}¦在仓库里搜索 chart¦helm,搜索¦
+k8s¦helm lint {{chart目录}}¦检查 chart 有没有错误¦helm,检查¦
+k8s¦helm pull {{chart}} --untar¦下载并解开 chart¦helm,下载¦
+k8s¦kubeadm token create --print-join-command¦重新生成节点加入集群的命令¦集群,加入¦h
+k8s¦kubeadm certs check-expiration¦查看集群证书过期时间¦证书,过期¦h
+k8s¦kubeadm certs renew all¦续期集群所有证书¦证书,续期¦
+k8s¦kubeadm reset¦重置节点（清除 kubeadm 的改动）¦重置¦d
+k8s¦kubeadm upgrade plan¦查看可升级的集群版本¦升级¦
+k8s¦etcdctl endpoint health --cluster¦检查 etcd 集群健康状态¦etcd,健康¦h
+k8s¦etcdctl snapshot save {{文件}}.db¦备份 etcd 数据¦etcd,备份¦h
+k8s¦crictl ps -a | grep -i {{关键字}}¦在节点上查容器（kubectl 不通时用）¦节点,容器¦
+k8s¦journalctl -u kubelet -n 100 --no-pager¦查看 kubelet 日志¦kubelet,日志¦h
+k8s¦systemctl status kubelet¦查看 kubelet 状态¦kubelet,状态¦
+k8s¦systemctl restart kubelet¦重启 kubelet¦kubelet,重启¦
+k8s¦ls /etc/kubernetes/manifests¦查看静态 Pod 的配置文件¦静态pod¦
+k8s¦cat /var/lib/kubelet/config.yaml¦查看 kubelet 配置¦kubelet,配置¦
+k8s¦kubectl get --raw='/readyz?verbose'¦检查 apiserver 各组件是否就绪¦apiserver,健康¦
+k8s¦kubectl get cs¦查看控制面组件状态¦控制面,健康¦
+k8s¦kubectl -n kube-system get pods¦查看系统组件 Pod¦系统,查看¦h
+k8s¦kubectl -n kube-system logs -l k8s-app=kube-dns¦查看 CoreDNS 日志¦dns,日志¦
+k8s¦kubectl -n kube-system rollout restart deploy coredns¦重启 CoreDNS¦dns,重启¦
+k8s¦kubectl -n ingress-nginx logs -l app.kubernetes.io/name=ingress-nginx --tail=100¦查看 ingress-nginx 日志¦入口,日志¦h
+k8s¦kubectl exec -n ingress-nginx {{Pod}} -- cat /etc/nginx/nginx.conf¦查看 ingress-nginx 生成的配置¦入口,配置¦
+k8s¦kubectl get pods -A -o wide | grep {{节点}}¦查看某个节点上跑了哪些 Pod¦节点,pod¦h
+k8s¦kubectl describe node {{节点}} | grep -A 8 "Allocated resources"¦查看节点资源分配情况¦节点,资源¦h
+k8s¦kubectl describe quota -n {{命名空间}}¦查看命名空间资源配额¦配额¦
+k8s¦kubectl get limitrange -n {{命名空间}}¦查看命名空间默认资源限制¦配额¦
+k8s¦kubectl get networkpolicy -A¦查看网络策略¦网络,策略¦
+k8s¦kubectl get pdb -A¦查看 Pod 中断预算¦pdb¦
+k8s¦kubectl get pod {{Pod}} -n {{命名空间}} -o jsonpath='{.status.containerStatuses[*].lastState}'¦查看容器上次终止的原因¦pod,崩溃¦h
+k8s¦kubectl get pod {{Pod}} -n {{命名空间}} -o jsonpath='{.status.qosClass}'¦查看 Pod 的 QoS 等级¦pod,qos¦
+db¦mysql -u{{用户}} -p -h{{主机}} -P{{3306}}¦登录 MySQL¦mysql,登录¦h
+db¦mysql -u{{用户}} -p -e "{{SQL}}"¦不进交互界面直接执行一条 SQL¦mysql,执行¦h
+db¦mysql -u{{用户}} -p {{库}} < {{文件}}.sql¦导入 SQL 文件到指定库¦mysql,导入¦h
+db¦mysqldump -u{{用户}} -p {{库}} > {{文件}}.sql¦备份整个数据库¦mysql,备份¦h
+db¦mysqldump -u{{用户}} -p --single-transaction {{库}} > {{文件}}.sql¦不锁表备份 InnoDB 数据库¦mysql,备份¦h
+db¦mysqldump -u{{用户}} -p {{库}} {{表}} > {{文件}}.sql¦只备份某一张表¦mysql,备份,表¦
+db¦mysqldump -u{{用户}} -p --all-databases > {{文件}}.sql¦备份所有数据库¦mysql,备份¦
+db¦mysqldump -u{{用户}} -p -d {{库}} > {{文件}}.sql¦只备份表结构，不要数据¦mysql,备份,结构¦
+db¦mysqldump -u{{用户}} -p {{库}} | gzip > {{文件}}.sql.gz¦备份并直接压缩¦mysql,备份,压缩¦
+db¦gunzip < {{文件}}.sql.gz | mysql -u{{用户}} -p {{库}}¦导入压缩的 SQL 备份¦mysql,导入¦
+db¦mysqladmin -u{{用户}} -p status¦查看 MySQL 运行状态摘要¦mysql,状态¦
+db¦mysqladmin -u{{用户}} -p processlist¦查看当前所有连接和 SQL¦mysql,连接¦
+db¦mysqladmin -u{{用户}} -p ping¦检查 MySQL 是否存活¦mysql,存活¦
+db¦mysqladmin -u root password '{{新密码}}'¦设置 root 密码¦mysql,密码¦
+db¦mysqlcheck -u{{用户}} -p --all-databases¦检查所有表有没有损坏¦mysql,检查¦
+db¦mysqlcheck -u{{用户}} -p --auto-repair --all-databases¦检查并自动修复所有表¦mysql,修复¦
+db¦mysqlslap -u{{用户}} -p --concurrency=50 --iterations=3 --auto-generate-sql¦MySQL 自带压测¦mysql,压测¦
+db¦SHOW DATABASES;¦列出所有数据库¦mysql,sql¦h
+db¦SHOW TABLES;¦列出当前库的所有表¦mysql,sql¦h
+db¦SHOW CREATE TABLE {{表}}\G¦查看表的建表语句¦mysql,sql,表结构¦h
+db¦DESC {{表}};¦查看表结构¦mysql,sql,表结构¦h
+db¦SHOW INDEX FROM {{表}};¦查看表的索引¦mysql,sql,索引¦h
+db¦SHOW FULL PROCESSLIST;¦查看所有连接正在执行的 SQL¦mysql,sql,慢¦h
+db¦SHOW STATUS LIKE 'Threads%';¦查看连接线程数¦mysql,sql,连接¦
+db¦SHOW STATUS LIKE 'Slow_queries';¦查看慢查询累计数量¦mysql,sql,慢查询¦
+db¦SHOW VARIABLES LIKE '{{变量}}';¦查看 MySQL 配置变量¦mysql,sql,配置¦h
+db¦SHOW VARIABLES LIKE 'max_connections';¦查看最大连接数¦mysql,sql,连接¦h
+db¦SET GLOBAL max_connections = {{1000}};¦临时调大最大连接数¦mysql,sql,连接¦
+db¦SHOW ENGINE INNODB STATUS\G¦查看 InnoDB 状态（锁、死锁）¦mysql,sql,死锁¦h
+db¦SELECT * FROM information_schema.INNODB_TRX\G¦查看当前未提交的事务¦mysql,sql,事务¦
+db¦SELECT * FROM sys.innodb_lock_waits\G¦查看哪些事务在等锁¦mysql,sql,锁¦h
+db¦KILL {{连接ID}};¦杀掉某个连接¦mysql,sql,杀进程¦d
+db¦EXPLAIN {{SQL}};¦查看 SQL 的执行计划¦mysql,sql,优化¦h
+db¦SHOW SLAVE STATUS\G¦查看主从复制状态（老版本）¦mysql,sql,主从¦h
+db¦SHOW REPLICA STATUS\G¦查看主从复制状态（8.0.22+）¦mysql,sql,主从¦h
+db¦SHOW MASTER STATUS;¦查看主库的 binlog 位置¦mysql,sql,主从,binlog¦
+db¦SHOW BINARY LOGS;¦查看所有 binlog 文件¦mysql,sql,binlog¦
+db¦PURGE BINARY LOGS BEFORE '{{2025-01-01 00:00:00}}';¦清理指定时间之前的 binlog¦mysql,sql,binlog,清理¦d
+db¦STOP SLAVE; START SLAVE;¦重启主从复制线程¦mysql,sql,主从¦
+db¦SET GLOBAL sql_slave_skip_counter = 1; START SLAVE;¦跳过一个主从复制错误¦mysql,sql,主从,错误¦
+db¦SELECT table_schema, ROUND(SUM(data_length+index_length)/1024/1024,2) AS MB FROM information_schema.tables GROUP BY table_schema ORDER BY MB DESC;¦查看每个库占用的空间¦mysql,sql,空间¦h
+db¦SELECT table_name, ROUND((data_length+index_length)/1024/1024,2) AS MB FROM information_schema.tables WHERE table_schema='{{库}}' ORDER BY MB DESC LIMIT 10;¦查看某库里最大的 10 张表¦mysql,sql,空间¦h
+db¦SELECT user,host FROM mysql.user;¦查看所有数据库用户¦mysql,sql,用户¦h
+db¦CREATE USER '{{用户}}'@'%' IDENTIFIED BY '{{密码}}';¦创建数据库用户¦mysql,sql,用户¦h
+db¦GRANT ALL PRIVILEGES ON {{库}}.* TO '{{用户}}'@'%'; FLUSH PRIVILEGES;¦给用户授予某个库的全部权限¦mysql,sql,授权¦h
+db¦SHOW GRANTS FOR '{{用户}}'@'%';¦查看用户的权限¦mysql,sql,授权¦
+db¦REVOKE ALL ON {{库}}.* FROM '{{用户}}'@'%';¦回收用户的权限¦mysql,sql,授权¦
+db¦ALTER USER '{{用户}}'@'%' IDENTIFIED BY '{{新密码}}';¦修改数据库用户密码¦mysql,sql,密码¦h
+db¦DROP USER '{{用户}}'@'%';¦删除数据库用户¦mysql,sql,用户¦d
+db¦CREATE DATABASE {{库}} DEFAULT CHARACTER SET utf8mb4;¦创建 utf8mb4 编码的数据库¦mysql,sql,创建¦h
+db¦DROP DATABASE {{库}};¦删除数据库¦mysql,sql,删除¦d
+db¦TRUNCATE TABLE {{表}};¦清空表数据（不可恢复）¦mysql,sql,清空¦d
+db¦OPTIMIZE TABLE {{表}};¦整理表碎片¦mysql,sql,优化¦
+db¦ANALYZE TABLE {{表}};¦更新表的统计信息¦mysql,sql,优化¦
+db¦SHOW CREATE DATABASE {{库}};¦查看数据库的建库语句和编码¦mysql,sql,编码¦
+db¦SET GLOBAL slow_query_log = 'ON'; SET GLOBAL long_query_time = 1;¦临时开启慢查询日志，阈值 1 秒¦mysql,sql,慢查询¦h
+db¦SHOW VARIABLES LIKE 'slow_query_log_file';¦查看慢查询日志文件位置¦mysql,sql,慢查询¦
+db¦mysqldumpslow -s t -t 10 {{慢日志}}¦汇总最慢的 10 条 SQL¦mysql,慢查询¦h
+db¦pt-query-digest {{慢日志}} | head -100¦用 percona 工具分析慢日志¦mysql,慢查询¦
+db¦mysqlbinlog --no-defaults -vv {{binlog文件}} | less¦查看 binlog 里的内容¦mysql,binlog¦h
+db¦mysqlbinlog --start-datetime="{{2025-01-01 10:00:00}}" --stop-datetime="{{2025-01-01 11:00:00}}" {{binlog}} > {{文件}}.sql¦按时间段导出 binlog，用于恢复数据¦mysql,binlog,恢复¦h
+db¦mysqld --skip-grant-tables &¦跳过权限验证启动（找回 root 密码用）¦mysql,密码,恢复¦d
+db¦systemctl restart mysqld¦重启 MySQL 服务¦mysql,重启¦
+db¦redis-cli -h {{主机}} -p {{6379}} -a {{密码}}¦登录 Redis¦redis,登录¦h
+db¦redis-cli -h {{主机}} -p {{端口}} ping¦检查 Redis 是否存活¦redis,存活¦
+db¦redis-cli info¦查看 Redis 全部运行信息¦redis,信息¦
+db¦redis-cli info memory¦查看 Redis 内存使用¦redis,内存¦h
+db¦redis-cli info replication¦查看 Redis 主从复制状态¦redis,主从¦h
+db¦redis-cli info clients¦查看 Redis 连接数¦redis,连接¦
+db¦redis-cli info stats¦查看 Redis 命中率和命令统计¦redis,统计¦
+db¦redis-cli info keyspace¦查看 Redis 各库的 key 数量¦redis,key¦
+db¦redis-cli info persistence¦查看 Redis 持久化状态¦redis,持久化¦
+db¦redis-cli dbsize¦查看当前库 key 总数¦redis,key¦
+db¦redis-cli --bigkeys¦找出最大的 key¦redis,大key¦h
+db¦redis-cli --scan --pattern '{{前缀}}*' | head¦按前缀安全地列出 key（不阻塞）¦redis,key,搜索¦h
+db¦redis-cli --scan --pattern '{{前缀}}*' | xargs redis-cli del¦按前缀批量删除 key¦redis,key,删除¦d
+db¦redis-cli keys '{{前缀}}*'¦按前缀查 key（生产慎用，会阻塞）¦redis,key¦
+db¦redis-cli get {{key}}¦读取一个 key¦redis,key¦h
+db¦redis-cli set {{key}} {{value}}¦写入一个 key¦redis,key¦
+db¦redis-cli setex {{key}} {{秒}} {{value}}¦写入 key 并设置过期时间¦redis,key,过期¦
+db¦redis-cli del {{key}}¦删除一个 key¦redis,key,删除¦d
+db¦redis-cli ttl {{key}}¦查看 key 还剩多少秒过期¦redis,key,过期¦
+db¦redis-cli expire {{key}} {{秒}}¦设置 key 的过期时间¦redis,key,过期¦
+db¦redis-cli type {{key}}¦查看 key 的类型¦redis,key¦
+db¦redis-cli hgetall {{key}}¦查看 hash 的全部内容¦redis,hash¦
+db¦redis-cli lrange {{key}} 0 -1¦查看 list 的全部内容¦redis,list¦
+db¦redis-cli smembers {{key}}¦查看 set 的全部成员¦redis,set¦
+db¦redis-cli zrange {{key}} 0 -1 withscores¦查看有序集合的全部内容¦redis,zset¦
+db¦redis-cli memory usage {{key}}¦查看某个 key 占用的内存¦redis,内存,key¦
+db¦redis-cli slowlog get 10¦查看最近 10 条慢命令¦redis,慢查询¦h
+db¦redis-cli monitor¦实时查看 Redis 收到的所有命令（会影响性能）¦redis,监控¦
+db¦redis-cli --latency¦测试 Redis 响应延迟¦redis,延迟¦
+db¦redis-cli --stat¦实时滚动查看 Redis 状态¦redis,监控¦
+db¦redis-cli client list¦查看所有客户端连接¦redis,连接¦
+db¦redis-cli client kill {{ip:端口}}¦踢掉某个客户端连接¦redis,连接¦d
+db¦redis-cli config get {{参数}}¦查看 Redis 配置¦redis,配置¦h
+db¦redis-cli config set maxmemory {{1gb}}¦动态设置最大内存¦redis,配置,内存¦
+db¦redis-cli config rewrite¦把动态改的配置写回配置文件¦redis,配置¦
+db¦redis-cli save¦立即做一次 RDB 快照（会阻塞）¦redis,持久化¦
+db¦redis-cli bgsave¦后台做一次 RDB 快照¦redis,持久化,备份¦h
+db¦redis-cli bgrewriteaof¦后台重写 AOF 文件¦redis,持久化¦
+db¦redis-cli flushdb¦清空当前库所有 key¦redis,清空¦d
+db¦redis-cli flushall¦清空所有库的所有 key¦redis,清空¦d
+db¦redis-cli replicaof {{主库IP}} {{端口}}¦设置当前节点为某主库的从库¦redis,主从¦
+db¦redis-cli replicaof no one¦把从库提升为主库¦redis,主从,切换¦d
+db¦redis-cli cluster nodes¦查看 Redis 集群节点¦redis,集群¦h
+db¦redis-cli cluster info¦查看 Redis 集群状态¦redis,集群¦
+db¦redis-cli --cluster check {{IP}}:{{端口}}¦检查 Redis 集群健康¦redis,集群,检查¦h
+db¦redis-cli --cluster rebalance {{IP}}:{{端口}}¦重新均衡集群槽位¦redis,集群¦
+db¦redis-cli -c -h {{主机}} -p {{端口}}¦以集群模式连接（自动跟随重定向）¦redis,集群,登录¦
+db¦redis-cli --rdb {{文件}}.rdb¦远程导出 RDB 备份¦redis,备份¦
+db¦redis-cli -a {{密码}} --no-auth-warning ping¦带密码测试，不打印密码警告¦redis,密码¦
+db¦redis-benchmark -h {{主机}} -p {{端口}} -c 50 -n 100000¦Redis 压测¦redis,压测¦
+db¦redis-check-aof --fix {{aof文件}}¦修复损坏的 AOF 文件¦redis,修复¦
+db¦redis-check-rdb {{rdb文件}}¦检查 RDB 文件是否损坏¦redis,检查¦
+db¦sentinel get-master-addr-by-name {{主库名}}¦查看哨兵当前认定的主库¦redis,哨兵¦
+db¦redis-cli -p 26379 sentinel masters¦查看哨兵监控的主库¦redis,哨兵¦h
+db¦psql -h {{主机}} -U {{用户}} -d {{库}}¦登录 PostgreSQL¦postgres,登录¦h
+db¦psql -U {{用户}} -d {{库}} -c "{{SQL}}"¦不进交互界面执行一条 SQL¦postgres,执行¦
+db¦psql -U {{用户}} -d {{库}} -f {{文件}}.sql¦执行 SQL 文件¦postgres,导入¦
+db¦pg_dump -U {{用户}} {{库}} > {{文件}}.sql¦备份 PostgreSQL 数据库¦postgres,备份¦h
+db¦pg_dump -U {{用户}} -Fc {{库}} > {{文件}}.dump¦用自定义格式备份（可并行恢复）¦postgres,备份¦
+db¦pg_dumpall -U postgres > {{文件}}.sql¦备份所有数据库和角色¦postgres,备份¦
+db¦pg_restore -U {{用户}} -d {{库}} {{文件}}.dump¦恢复自定义格式备份¦postgres,恢复¦
+db¦\l¦psql 中列出所有数据库¦postgres,psql¦
+db¦\dt¦psql 中列出当前库的表¦postgres,psql¦
+db¦\d {{表}}¦psql 中查看表结构¦postgres,psql¦
+db¦\du¦psql 中列出所有角色¦postgres,psql¦
+db¦\c {{库}}¦psql 中切换数据库¦postgres,psql¦
+db¦\x¦psql 中切换竖向显示结果¦postgres,psql¦
+db¦SELECT pid, state, query FROM pg_stat_activity WHERE state <> 'idle';¦查看正在执行的 SQL¦postgres,sql,慢¦h
+db¦SELECT pg_terminate_backend({{pid}});¦杀掉某个会话¦postgres,sql,杀进程¦d
+db¦SELECT pg_size_pretty(pg_database_size('{{库}}'));¦查看数据库大小¦postgres,sql,空间¦h
+db¦SELECT relname, pg_size_pretty(pg_total_relation_size(relid)) FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC LIMIT 10;¦查看最大的 10 张表¦postgres,sql,空间¦h
+db¦SELECT * FROM pg_stat_replication;¦查看主从复制状态¦postgres,sql,主从¦
+db¦VACUUM ANALYZE {{表}};¦清理表并更新统计信息¦postgres,sql,优化¦
+db¦pg_isready -h {{主机}} -p {{5432}}¦检查 PostgreSQL 是否可连接¦postgres,存活¦
+db¦mongosh "mongodb://{{主机}}:{{27017}}/{{库}}"¦登录 MongoDB¦mongo,登录¦h
+db¦mongodump --uri="mongodb://{{主机}}:27017/{{库}}" --out {{目录}}¦备份 MongoDB 数据库¦mongo,备份¦h
+db¦mongorestore --uri="mongodb://{{主机}}:27017" {{目录}}¦恢复 MongoDB 备份¦mongo,恢复¦
+db¦mongoexport --db {{库}} --collection {{集合}} --out {{文件}}.json¦导出集合为 JSON¦mongo,导出¦
+db¦db.stats()¦mongo 中查看库的统计信息¦mongo,统计¦
+db¦show dbs¦mongo 中列出所有数据库¦mongo¦
+db¦db.currentOp()¦mongo 中查看正在执行的操作¦mongo,慢¦
+db¦rs.status()¦mongo 中查看副本集状态¦mongo,主从¦h
+db¦curl -s {{主机}}:9200/_cluster/health?pretty¦查看 Elasticsearch 集群健康¦es,健康¦h
+db¦curl -s {{主机}}:9200/_cat/indices?v¦查看 ES 所有索引¦es,索引¦h
+db¦curl -s {{主机}}:9200/_cat/nodes?v¦查看 ES 节点列表¦es,节点¦
+db¦curl -s {{主机}}:9200/_cat/shards?v | grep -i unassigned¦查看 ES 未分配的分片¦es,分片¦h
+db¦curl -s {{主机}}:9200/_cluster/allocation/explain?pretty¦解释分片为什么没分配¦es,分片,排查¦h
+db¦curl -s {{主机}}:9200/_cat/allocation?v¦查看 ES 各节点磁盘使用¦es,磁盘¦
+db¦curl -s {{主机}}:9200/_cat/thread_pool?v¦查看 ES 线程池排队¦es,线程¦
+db¦curl -X DELETE {{主机}}:9200/{{索引}}¦删除 ES 索引¦es,索引,删除¦d
+db¦curl -X PUT {{主机}}:9200/_cluster/settings -H 'Content-Type: application/json' -d '{"transient":{"cluster.routing.allocation.enable":"all"}}'¦重新开启 ES 分片分配¦es,分片¦
+db¦curl -X POST {{主机}}:9200/_forcemerge?max_num_segments=1¦强制合并 ES 分段¦es,优化¦
+nginx¦nginx -t¦检查 nginx 配置语法¦nginx,检查¦h
+nginx¦nginx -s reload¦平滑重载 nginx 配置¦nginx,重载¦h
+nginx¦nginx -t && nginx -s reload¦检查通过后再重载¦nginx,重载¦h
+nginx¦nginx -s stop¦快速停止 nginx¦nginx,停止¦
+nginx¦nginx -s quit¦优雅停止 nginx（处理完当前请求）¦nginx,停止¦
+nginx¦nginx -s reopen¦重新打开日志文件（日志切割后用）¦nginx,日志¦
+nginx¦nginx -V 2>&1 | tr ' ' '\n' | grep module¦查看 nginx 编译了哪些模块¦nginx,模块¦h
+nginx¦nginx -v¦查看 nginx 版本¦nginx,版本¦
+nginx¦nginx -c {{配置文件}}¦指定配置文件启动¦nginx,启动¦
+nginx¦ps aux | grep nginx¦查看 nginx 进程¦nginx,进程¦
+nginx¦ls /etc/nginx/conf.d/¦查看 nginx 站点配置¦nginx,配置¦
+nginx¦ls /etc/nginx/sites-enabled/¦查看已启用的站点（Ubuntu）¦nginx,配置¦
+nginx¦ln -s /etc/nginx/sites-available/{{站点}} /etc/nginx/sites-enabled/¦启用一个站点¦nginx,站点¦
+nginx¦grep -rn "server_name" /etc/nginx/¦查看所有站点的域名配置¦nginx,域名¦h
+nginx¦grep -rn "proxy_pass" /etc/nginx/¦查看所有反向代理的后端地址¦nginx,代理¦h
+nginx¦grep -rn "listen" /etc/nginx/conf.d/¦查看所有监听的端口¦nginx,端口¦
+nginx¦grep -rn "ssl_certificate" /etc/nginx/¦查看所有使用的证书路径¦nginx,证书¦h
+nginx¦tail -f /var/log/nginx/error.log¦实时查看 nginx 错误日志¦nginx,日志¦h
+nginx¦tail -f /var/log/nginx/access.log | grep --line-buffered " 50[0-9] "¦实时只看 5xx 请求¦nginx,日志,5xx¦h
+nginx¦tail -f /var/log/nginx/error.log | grep -i upstream¦实时看后端相关的错误¦nginx,日志,后端¦
+nginx¦grep "502\|504" /var/log/nginx/error.log | tail¦查看最近的 502/504 错误¦nginx,日志,502¦h
+nginx¦grep "upstream timed out" /var/log/nginx/error.log | tail¦查看后端超时的记录¦nginx,日志,超时¦
+nginx¦grep "connect() failed" /var/log/nginx/error.log | tail¦查看连不上后端的记录¦nginx,日志,后端¦
+nginx¦grep "too many open files" /var/log/nginx/error.log¦查看文件句柄不足的报错¦nginx,日志,句柄¦
+nginx¦grep "client intended to send too large body" /var/log/nginx/error.log¦查看请求体超限的报错¦nginx,日志,上传¦
+nginx¦awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head¦统计访问最多的 IP¦nginx,日志,统计¦h
+nginx¦awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn¦统计各状态码数量¦nginx,日志,状态码¦h
+nginx¦awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head¦统计访问最多的 URL¦nginx,日志,统计¦
+nginx¦curl -I http://localhost¦查看本机 nginx 响应头¦nginx,检查¦
+nginx¦curl -H "Host: {{域名}}" http://127.0.0.1/¦用指定域名请求本机，测试虚拟主机配置¦nginx,域名,测试¦h
+nginx¦curl -s http://127.0.0.1/nginx_status¦查看 nginx 连接状态页（需开启 stub_status）¦nginx,状态¦h
+nginx¦curl -s -o /dev/null -w "%{http_code} %{time_total}\n" http://127.0.0.1/¦测试本机 nginx 返回码和耗时¦nginx,检查¦
+nginx¦ss -ant | grep :80 | wc -l¦统计 80 端口的连接数¦nginx,连接¦
+nginx¦ss -ant | grep :443 | wc -l¦统计 443 端口的连接数¦nginx,连接¦
+nginx¦lsof -i :80¦查看谁占用了 80 端口¦nginx,端口,占用¦
+nginx¦ulimit -n; cat /proc/$(cat /var/run/nginx.pid)/limits | grep "open files"¦查看 nginx 进程的文件句柄上限¦nginx,句柄¦
+nginx¦cat /etc/nginx/nginx.conf | grep -v "^\s*#" | grep -v "^$"¦查看去掉注释的 nginx 主配置¦nginx,配置¦h
+nginx¦cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak.$(date +%F)¦修改前备份 nginx 配置¦nginx,备份¦h
+nginx¦openssl x509 -in /etc/nginx/ssl/{{证书}}.crt -noout -dates¦查看 nginx 使用的证书有效期¦nginx,证书,过期¦h
+nginx¦certbot certificates¦查看 certbot 管理的证书¦证书,certbot¦
+nginx¦certbot renew --dry-run¦演练证书续期流程¦证书,续期¦h
+nginx¦certbot renew¦续期即将到期的证书¦证书,续期¦
+nginx¦certbot --nginx -d {{域名}}¦为域名自动申请并配置 Let's Encrypt 证书¦证书,申请¦h
+nginx¦htpasswd -c /etc/nginx/.htpasswd {{用户}}¦创建 nginx 基础认证的账号密码文件¦nginx,认证¦
+nginx¦openresty -t && openresty -s reload¦检查并重载 OpenResty¦nginx,openresty¦
+nginx¦tengine -t¦检查 Tengine 配置¦nginx,tengine¦
+nginx¦systemctl status nginx¦查看 nginx 服务状态¦nginx,服务¦
+nginx¦systemctl restart nginx¦重启 nginx（会短暂中断）¦nginx,重启¦
+nginx¦journalctl -u nginx -n 50 --no-pager¦查看 nginx 服务日志¦nginx,日志¦
+nginx¦goaccess {{access.log}} --log-format=COMBINED¦用 goaccess 分析 nginx 访问日志¦nginx,日志,分析¦
+nginx¦cat /etc/nginx/conf.d/{{站点}}.conf¦查看某个站点的配置¦nginx,配置¦
+nginx¦haproxy -c -f /etc/haproxy/haproxy.cfg¦检查 haproxy 配置¦haproxy,检查¦
+nginx¦systemctl reload haproxy¦重载 haproxy¦haproxy,重载¦
+nginx¦echo "show stat" | socat stdio /var/run/haproxy.sock¦查看 haproxy 后端状态¦haproxy,状态¦
+nginx¦echo "disable server {{后端}}/{{节点}}" | socat stdio /var/run/haproxy.sock¦在线下线 haproxy 的某个节点¦haproxy,下线¦
+nginx¦keepalived -t -f /etc/keepalived/keepalived.conf¦检查 keepalived 配置¦keepalived,检查¦
+nginx¦ip addr | grep {{VIP}}¦查看当前机器上有没有持有虚拟 IP¦keepalived,vip¦h
+nginx¦journalctl -u keepalived -n 50 --no-pager¦查看 keepalived 日志¦keepalived,日志¦
+archive¦tar -czvf {{文件}}.tar.gz {{目录}}¦打包并压缩目录（gzip）¦压缩,打包¦h
+archive¦tar -xzvf {{文件}}.tar.gz¦解压 tar.gz 到当前目录¦解压¦h
+archive¦tar -xzvf {{文件}}.tar.gz -C {{目标目录}}¦解压到指定目录¦解压¦h
+archive¦tar -cjvf {{文件}}.tar.bz2 {{目录}}¦打包并用 bzip2 压缩¦压缩,bz2¦
+archive¦tar -xjvf {{文件}}.tar.bz2¦解压 tar.bz2¦解压,bz2¦
+archive¦tar -cJvf {{文件}}.tar.xz {{目录}}¦打包并用 xz 压缩（体积最小）¦压缩,xz¦
+archive¦tar -xJvf {{文件}}.tar.xz¦解压 tar.xz¦解压,xz¦
+archive¦tar -tzvf {{文件}}.tar.gz¦不解压，只查看压缩包里有什么¦查看,压缩包¦h
+archive¦tar -xzvf {{文件}}.tar.gz {{包内路径}}¦只解压压缩包里的某个文件¦解压,单个¦h
+archive¦tar -czvf {{文件}}.tar.gz --exclude='{{排除}}' {{目录}}¦打包时排除某些文件¦压缩,排除¦h
+archive¦tar -czvf {{文件}}-$(date +%F).tar.gz {{目录}}¦打包并在文件名里加日期¦压缩,备份¦h
+archive¦tar -czvf - {{目录}} | split -b 1G - {{文件}}.tar.gz.¦打包并按 1GB 切分¦压缩,分卷¦
+archive¦cat {{文件}}.tar.gz.* | tar -xzvf -¦合并分卷并解压¦解压,分卷¦
+archive¦tar -zcf - {{目录}} | pv > {{文件}}.tar.gz¦打包时显示进度¦压缩,进度¦
+archive¦tar -czf - {{目录}} | ssh {{用户}}@{{主机}} "cat > {{文件}}.tar.gz"¦边打包边传到远程¦压缩,传输¦
+archive¦tar --newer-mtime="{{2025-01-01}}" -czvf {{文件}}.tar.gz {{目录}}¦只打包某天之后改动过的文件¦压缩,增量¦
+archive¦tar -uvf {{文件}}.tar {{目录}}¦把更新过的文件追加进已有的 tar¦压缩,增量¦
+archive¦zip -r {{文件}}.zip {{目录}}¦把目录压缩成 zip¦压缩,zip¦h
+archive¦zip -r -P {{密码}} {{文件}}.zip {{目录}}¦压缩成带密码的 zip¦压缩,密码¦
+archive¦zip -r {{文件}}.zip {{目录}} -x "*.log"¦压缩时排除某类文件¦压缩,排除¦
+archive¦zip -9 -r {{文件}}.zip {{目录}}¦以最高压缩率压缩¦压缩,zip¦
+archive¦unzip {{文件}}.zip¦解压 zip 到当前目录¦解压,zip¦h
+archive¦unzip {{文件}}.zip -d {{目标目录}}¦解压 zip 到指定目录¦解压,zip¦h
+archive¦unzip -l {{文件}}.zip¦查看 zip 里有什么文件¦查看,zip¦
+archive¦unzip -P {{密码}} {{文件}}.zip¦解压带密码的 zip¦解压,密码¦
+archive¦unzip -O gbk {{文件}}.zip¦解压文件名乱码的 zip（GBK 编码）¦解压,乱码¦h
+archive¦unzip -o {{文件}}.zip¦解压并直接覆盖，不提示¦解压,覆盖¦
+archive¦gzip {{文件}}¦压缩单个文件（原文件会被替换）¦压缩,gz¦
+archive¦gzip -k {{文件}}¦压缩单个文件并保留原文件¦压缩,gz¦h
+archive¦gzip -d {{文件}}.gz¦解压 gz 文件¦解压,gz¦
+archive¦gunzip {{文件}}.gz¦解压 gz 文件¦解压,gz¦
+archive¦gzip -9 {{文件}}¦以最高压缩率压缩文件¦压缩,gz¦
+archive¦bzip2 -k {{文件}}¦用 bzip2 压缩并保留原文件¦压缩,bz2¦
+archive¦xz -k {{文件}}¦用 xz 压缩并保留原文件¦压缩,xz¦
+archive¦xz -d {{文件}}.xz¦解压 xz 文件¦解压,xz¦
+archive¦zstd {{文件}}¦用 zstd 快速压缩¦压缩,zstd¦
+archive¦zstd -d {{文件}}.zst¦解压 zstd 文件¦解压,zstd¦
+archive¦7z a {{文件}}.7z {{目录}}¦压缩成 7z¦压缩,7z¦
+archive¦7z x {{文件}}.7z¦解压 7z¦解压,7z¦
+archive¦rar a {{文件}}.rar {{目录}}¦压缩成 rar¦压缩,rar¦
+archive¦unrar x {{文件}}.rar¦解压 rar¦解压,rar¦
+archive¦pigz -p 8 {{文件}}¦用多核并行压缩，速度更快¦压缩,并行¦
+archive¦tar -I pigz -cvf {{文件}}.tar.gz {{目录}}¦用多核并行打包压缩¦压缩,并行¦
+archive¦cpio -idmv < {{文件}}.cpio¦解开 cpio 文件¦解压,cpio¦
+archive¦ar x {{文件}}.deb¦解开 deb 包的外层¦解压,deb¦
+archive¦rsync -av --delete {{源}}/ {{备份目录}}/¦把目录镜像备份到另一处¦备份,同步¦d
+archive¦rsync -av --link-dest={{上次备份}} {{源}}/ {{新备份}}/¦增量备份（未改动文件用硬链接，省空间）¦备份,增量¦h
+archive¦dd if={{/dev/sda}} of={{镜像}}.img bs=4M status=progress¦把整块磁盘做成镜像文件¦备份,磁盘¦d
+archive¦dd if={{镜像}}.img of={{/dev/sda}} bs=4M status=progress¦把镜像写回磁盘（会覆盖目标盘）¦恢复,磁盘¦d
+archive¦cp -a {{源}} {{源}}.bak.$(date +%F)¦修改前先备份一份，名称带日期¦备份,文件¦h
+archive¦cp {{文件}}{,.bak}¦快速备份：生成 文件.bak¦备份,文件¦h
+archive¦find {{备份目录}} -name "*.tar.gz" -mtime +7 -delete¦删除 7 天前的备份¦备份,清理¦d
+archive¦find {{备份目录}} -type f -mtime +30 -exec rm {} \;¦删除 30 天前的备份文件¦备份,清理¦d
+archive¦ls -t {{备份目录}} | tail -n +8 | xargs -I{} rm {{备份目录}}/{}¦只保留最新的 7 个备份¦备份,清理¦d
+archive¦borg create {{仓库}}::{now} {{目录}}¦用 borg 创建备份¦备份,borg¦
+archive¦restic backup {{目录}}¦用 restic 创建备份¦备份,restic¦
+archive¦mysqldump -u{{用户}} -p{{密码}} {{库}} | gzip > {{备份目录}}/{{库}}_$(date +%F).sql.gz¦备份 MySQL 并按日期命名¦备份,mysql¦h
+archive¦tar -czvf /backup/etc-$(date +%F).tar.gz /etc¦备份 /etc 配置目录¦备份,配置¦h
+cron¦crontab -l¦查看当前用户的定时任务¦定时任务,查看¦h
+cron¦crontab -e¦编辑当前用户的定时任务¦定时任务,编辑¦h
+cron¦crontab -u {{用户}} -l¦查看指定用户的定时任务¦定时任务,查看¦
+cron¦crontab -r¦删除当前用户的所有定时任务¦定时任务,删除¦d
+cron¦crontab {{文件}}¦用文件覆盖当前用户的定时任务¦定时任务,导入¦
+cron¦(crontab -l; echo "{{* * * * *}} {{命令}}") | crontab -¦追加一条定时任务¦定时任务,添加¦h
+cron¦crontab -l | grep -v "{{关键字}}" | crontab -¦删除包含关键字的定时任务¦定时任务,删除¦
+cron¦ls /etc/cron.d/¦查看系统级定时任务文件¦定时任务,系统¦
+cron¦cat /etc/crontab¦查看系统定时任务配置¦定时任务,系统¦
+cron¦ls /etc/cron.daily/¦查看每天执行的任务脚本¦定时任务,每天¦
+cron¦ls /var/spool/cron/¦查看各用户的定时任务文件¦定时任务,用户¦
+cron¦systemctl status crond¦查看 cron 服务状态（CentOS）¦定时任务,服务¦h
+cron¦systemctl status cron¦查看 cron 服务状态（Ubuntu）¦定时任务,服务¦
+cron¦systemctl restart crond¦重启 cron 服务¦定时任务,重启¦
+cron¦journalctl -u crond --since today¦查看今天 cron 的执行记录¦定时任务,日志¦h
+cron¦grep CRON /var/log/syslog | tail -20¦查看最近的 cron 执行记录（Ubuntu）¦定时任务,日志¦
+cron¦tail -f /var/log/cron¦实时查看 cron 执行日志¦定时任务,日志¦
+cron¦*/5 * * * * {{命令}}¦每 5 分钟执行一次¦定时任务,表达式¦h
+cron¦0 * * * * {{命令}}¦每小时整点执行¦定时任务,表达式¦
+cron¦0 2 * * * {{命令}}¦每天凌晨 2 点执行¦定时任务,表达式¦h
+cron¦30 3 * * 0 {{命令}}¦每周日凌晨 3:30 执行¦定时任务,表达式¦
+cron¦0 0 1 * * {{命令}}¦每月 1 号零点执行¦定时任务,表达式¦
+cron¦0 9-18 * * 1-5 {{命令}}¦工作日 9 点到 18 点每小时执行¦定时任务,表达式¦
+cron¦@reboot {{命令}}¦开机时执行一次¦定时任务,开机¦h
+cron¦*/10 * * * * {{脚本}} >> {{日志}} 2>&1¦每 10 分钟执行并记录日志¦定时任务,日志¦h
+cron¦0 2 * * * flock -n /tmp/{{名}}.lock {{脚本}}¦每天执行，用文件锁防止重复运行¦定时任务,锁¦
+cron¦at now + {{5}} minutes¦5 分钟后执行一次性任务¦定时任务,一次性¦h
+cron¦at {{23:00}}¦今晚某个时间执行一次性任务¦定时任务,一次性¦
+cron¦atq¦查看等待执行的 at 任务¦定时任务,一次性¦
+cron¦atrm {{任务号}}¦取消一个 at 任务¦定时任务,一次性¦
+cron¦systemctl list-timers¦查看 systemd 定时器¦定时任务,systemd¦
+cron¦sleep {{3600}} && {{命令}} &¦一小时后在后台执行命令¦定时任务,延迟¦
+cron¦echo "{{命令}}" | at now + 1 hour¦一小时后执行命令¦定时任务,一次性¦
+cron¦run-parts --test /etc/cron.daily¦测试每日任务目录会执行哪些脚本¦定时任务,测试¦
+cron¦anacron -T¦检查 anacron 配置¦定时任务,检查¦
+cron¦mailq¦查看邮件队列（cron 输出邮件堆积时用）¦定时任务,邮件¦
+cron¦crontab -l | wc -l¦统计定时任务条数¦定时任务,统计¦
+git¦git status¦查看工作区改动状态¦状态,查看¦h
+git¦git status -s¦简洁查看改动状态¦状态,查看¦
+git¦git log --oneline -20¦单行查看最近 20 次提交¦日志,历史¦h
+git¦git log --oneline --graph --all¦图形化查看所有分支的提交历史¦日志,分支,图形¦h
+git¦git log -p -3¦查看最近 3 次提交的具体改动¦日志,改动¦
+git¦git log --stat -5¦查看最近 5 次提交改了哪些文件¦日志,文件¦
+git¦git log --author="{{作者}}" --oneline¦查看某人的提交¦日志,作者¦
+git¦git log --since="1 week ago" --oneline¦查看最近一周的提交¦日志,时间¦h
+git¦git log -S "{{关键字}}" --oneline¦查找哪次提交引入或删除了某段代码¦日志,搜索,代码¦h
+git¦git log --grep="{{关键字}}" --oneline¦按提交说明搜索¦日志,搜索¦
+git¦git log -- {{文件}}¦查看某个文件的提交历史¦日志,文件¦h
+git¦git log --follow -p -- {{文件}}¦跟踪文件改名后的完整历史¦日志,文件¦
+git¦git blame {{文件}}¦查看文件每一行是谁改的¦追溯,作者¦h
+git¦git show {{提交}}¦查看某次提交的详细内容¦提交,详情¦h
+git¦git show {{提交}}:{{文件}}¦查看某次提交时文件的内容¦提交,文件¦
+git¦git diff¦查看工作区还没暂存的改动¦对比,改动¦h
+git¦git diff --staged¦查看已暂存、准备提交的改动¦对比,暂存¦h
+git¦git diff {{分支1}}..{{分支2}}¦对比两个分支的差异¦对比,分支¦
+git¦git diff {{提交1}} {{提交2}} --stat¦对比两次提交改了哪些文件¦对比,提交¦
+git¦git diff --name-only HEAD~1¦查看最近一次提交改了哪些文件名¦对比,文件¦
+git¦git add .¦暂存所有改动¦暂存,添加¦h
+git¦git add -p¦交互式逐块选择要暂存的改动¦暂存,选择¦
+git¦git add -u¦只暂存已跟踪文件的改动，不含新文件¦暂存¦
+git¦git commit -m "{{说明}}"¦提交暂存的改动¦提交¦h
+git¦git commit -am "{{说明}}"¦暂存已跟踪文件并直接提交¦提交¦h
+git¦git commit --amend¦修改最近一次提交（说明或内容）¦提交,修改¦h
+git¦git commit --amend --no-edit¦把改动追加进上一次提交，不改说明¦提交,修改¦
+git¦git commit --amend --author="{{名字}} <{{邮箱}}>"¦修改最近一次提交的作者¦提交,作者¦
+git¦git push¦推送到远程¦推送¦h
+git¦git push -u origin {{分支}}¦推送并设置上游分支¦推送,分支¦h
+git¦git push --force-with-lease¦安全地强制推送（远程有新提交会拒绝）¦推送,强制¦d
+git¦git push -f¦强制推送，覆盖远程历史¦推送,强制¦d
+git¦git push origin --delete {{分支}}¦删除远程分支¦推送,删除分支¦d
+git¦git push origin {{标签}}¦推送某个标签¦推送,标签¦
+git¦git push --tags¦推送所有标签¦推送,标签¦
+git¦git pull¦拉取并合并远程更新¦拉取¦h
+git¦git pull --rebase¦拉取并用 rebase 方式整合，保持历史线性¦拉取,rebase¦h
+git¦git fetch --all --prune¦拉取所有远程分支并清理已删除的¦拉取,清理¦h
+git¦git clone {{地址}}¦克隆仓库¦克隆¦h
+git¦git clone --depth 1 {{地址}}¦只克隆最近一次提交（速度快）¦克隆,浅克隆¦h
+git¦git clone -b {{分支}} {{地址}}¦克隆指定分支¦克隆,分支¦
+git¦git clone --recurse-submodules {{地址}}¦克隆并同时拉取子模块¦克隆,子模块¦
+git¦git branch¦查看本地分支¦分支,查看¦h
+git¦git branch -a¦查看本地和远程所有分支¦分支,查看¦
+git¦git branch -vv¦查看分支及其跟踪的远程分支¦分支,查看¦
+git¦git branch -r¦只看远程分支¦分支,查看¦
+git¦git branch --merged¦查看已合并到当前分支的分支¦分支,合并¦
+git¦git branch --no-merged¦查看还没合并的分支¦分支,合并¦
+git¦git branch {{分支}}¦创建分支¦分支,创建¦
+git¦git checkout -b {{分支}}¦创建并切换到新分支¦分支,创建¦h
+git¦git checkout {{分支}}¦切换分支¦分支,切换¦h
+git¦git switch {{分支}}¦切换分支（新写法）¦分支,切换¦
+git¦git switch -c {{分支}}¦创建并切换分支（新写法）¦分支,创建¦
+git¦git checkout -b {{本地分支}} origin/{{远程分支}}¦基于远程分支创建本地分支¦分支,远程¦
+git¦git branch -d {{分支}}¦删除已合并的分支¦分支,删除¦
+git¦git branch -m {{新名}}¦重命名当前分支¦分支,重命名¦
+git¦git branch --set-upstream-to=origin/{{分支}}¦设置当前分支的上游¦分支,上游¦
+git¦git merge {{分支}}¦把某分支合并到当前分支¦合并¦h
+git¦git merge --no-ff {{分支}}¦合并并保留一次合并提交¦合并¦
+git¦git merge --abort¦放弃正在进行的合并¦合并,放弃¦h
+git¦git rebase {{分支}}¦把当前分支变基到某分支上¦rebase¦
+git¦git rebase -i HEAD~{{3}}¦交互式整理最近 3 次提交¦rebase,整理¦h
+git¦git rebase --continue¦解决冲突后继续 rebase¦rebase,继续¦
+git¦git rebase --abort¦放弃 rebase¦rebase,放弃¦h
+git¦git cherry-pick {{提交}}¦把某次提交应用到当前分支¦摘取,提交¦h
+git¦git cherry-pick -x {{提交}}¦摘取提交并在说明里注明来源¦摘取,提交¦
+git¦git cherry-pick --abort¦放弃摘取¦摘取,放弃¦
+git¦git stash¦暂存当前改动，让工作区回到干净状态¦暂存,切换¦h
+git¦git stash -u¦暂存改动，连未跟踪的新文件也一起¦暂存¦
+git¦git stash list¦查看暂存列表¦暂存,查看¦
+git¦git stash pop¦恢复最近一次暂存并删除它¦暂存,恢复¦h
+git¦git stash apply¦恢复最近一次暂存，但保留记录¦暂存,恢复¦
+git¦git stash drop¦删除最近一次暂存¦暂存,删除¦
+git¦git stash push -m "{{说明}}"¦带说明暂存改动¦暂存¦
+git¦git stash show -p¦查看最近一次暂存的具体内容¦暂存,查看¦
+git¦git reset --soft HEAD~1¦撤销最近一次提交，改动保留在暂存区¦撤销,提交¦h
+git¦git reset HEAD~1¦撤销最近一次提交，改动保留在工作区¦撤销,提交¦h
+git¦git reset --hard HEAD~1¦撤销最近一次提交并丢弃改动¦撤销,提交¦d
+git¦git reset --hard origin/{{分支}}¦让本地分支完全和远程一致（丢弃本地改动）¦撤销,远程¦d
+git¦git reset HEAD {{文件}}¦把文件从暂存区撤回¦撤销,暂存¦
+git¦git reset --hard {{提交}}¦回退到指定提交并丢弃之后的改动¦回退,提交¦d
+git¦git checkout -- {{文件}}¦丢弃文件的未暂存改动¦撤销,文件¦d
+git¦git restore {{文件}}¦丢弃文件的未暂存改动（新写法）¦撤销,文件¦d
+git¦git restore --staged {{文件}}¦把文件从暂存区撤回（新写法）¦撤销,暂存¦
+git¦git restore --source={{提交}} {{文件}}¦把文件恢复成某次提交时的样子¦恢复,文件¦
+git¦git revert {{提交}}¦新增一个提交来撤销某次提交（不改历史）¦撤销,提交¦h
+git¦git revert -m 1 {{合并提交}}¦撤销一次合并提交¦撤销,合并¦
+git¦git clean -n¦预览会删除哪些未跟踪文件¦清理,预览¦h
+git¦git clean -fd¦删除所有未跟踪的文件和目录¦清理,删除¦d
+git¦git reflog¦查看所有操作历史（找回丢失的提交）¦恢复,历史¦h
+git¦git reflog | head -20¦查看最近 20 次操作记录¦恢复,历史¦
+git¦git checkout {{提交}} -- {{文件}}¦从某次提交里取回一个文件¦恢复,文件¦
+git¦git fsck --lost-found¦找回悬空的对象¦恢复¦
+git¦git remote -v¦查看远程仓库地址¦远程,查看¦h
+git¦git remote add origin {{地址}}¦添加远程仓库¦远程,添加¦
+git¦git remote set-url origin {{地址}}¦修改远程仓库地址¦远程,修改¦h
+git¦git remote show origin¦查看远程仓库详情和分支跟踪情况¦远程,查看¦
+git¦git remote prune origin¦清理远程已删除的分支引用¦远程,清理¦
+git¦git tag¦查看所有标签¦标签,查看¦
+git¦git tag -a {{v1.0.0}} -m "{{说明}}"¦创建带说明的标签¦标签,创建¦h
+git¦git tag -d {{标签}}¦删除本地标签¦标签,删除¦
+git¦git checkout {{标签}}¦切换到某个标签¦标签,切换¦
+git¦git describe --tags¦查看当前代码离最近标签有多远¦标签,版本¦
+git¦git config --global user.name "{{名字}}"¦设置全局提交用户名¦配置,用户¦h
+git¦git config --global user.email "{{邮箱}}"¦设置全局提交邮箱¦配置,邮箱¦h
+git¦git config --list¦查看所有 git 配置¦配置,查看¦
+git¦git config --global core.autocrlf input¦设置换行符策略（Linux/Mac）¦配置,换行¦
+git¦git config --global credential.helper store¦保存账号密码，下次不用再输¦配置,密码¦h
+git¦git config --global credential.helper 'cache --timeout=3600'¦临时缓存密码 1 小时¦配置,密码¦
+git¦git config --global alias.st status¦给 git 命令设置别名¦配置,别名¦
+git¦git config --global http.proxy http://{{代理}}¦设置 git 走代理¦配置,代理¦h
+git¦git config --global --unset http.proxy¦取消 git 代理¦配置,代理¦
+git¦git config --global http.sslVerify false¦关闭 https 证书校验（不安全，仅临时用）¦配置,证书¦d
+git¦git config --global pull.rebase true¦设置 pull 默认用 rebase¦配置,rebase¦
+git¦git config --global core.editor vim¦设置默认编辑器¦配置,编辑器¦
+git¦git config --global init.defaultBranch main¦设置新仓库默认分支名为 main¦配置,分支¦
+git¦git config core.fileMode false¦忽略文件权限变化引起的改动¦配置,权限¦h
+git¦git init¦在当前目录初始化仓库¦初始化¦
+git¦git init --bare {{目录}}.git¦创建裸仓库（用作远程仓库）¦初始化,裸仓库¦
+git¦git submodule update --init --recursive¦初始化并拉取所有子模块¦子模块¦h
+git¦git submodule add {{地址}} {{路径}}¦添加子模块¦子模块¦
+git¦git worktree add {{路径}} {{分支}}¦在另一个目录同时检出另一个分支¦工作树,分支¦
+git¦git archive -o {{文件}}.zip HEAD¦把当前版本打包成 zip（不含 .git）¦打包,导出¦h
+git¦git bundle create {{文件}}.bundle --all¦把整个仓库打成一个离线文件¦打包,离线¦
+git¦git gc --prune=now¦清理仓库垃圾，减小体积¦清理,优化¦
+git¦git count-objects -vH¦查看仓库占用空间¦空间,大小¦
+git¦git rev-parse HEAD¦输出当前提交的完整哈希¦哈希,提交¦h
+git¦git rev-parse --short HEAD¦输出当前提交的短哈希¦哈希,提交¦
+git¦git rev-parse --abbrev-ref HEAD¦输出当前分支名¦分支,脚本¦h
+git¦git ls-files¦列出所有被跟踪的文件¦文件,跟踪¦
+git¦git ls-files --others --exclude-standard¦列出未被跟踪的文件¦文件,未跟踪¦
+git¦git rm --cached {{文件}}¦停止跟踪文件但保留本地文件¦文件,跟踪¦h
+git¦git rm -r --cached .¦清空暂存区缓存（改完 .gitignore 后用）¦文件,跟踪¦
+git¦git mv {{旧名}} {{新名}}¦重命名并让 git 记录改名¦文件,重命名¦
+git¦git shortlog -sn¦统计每个人的提交数量¦统计,作者¦h
+git¦git log --pretty=format:"%h %an %s" -10¦自定义格式查看最近 10 次提交¦日志,格式¦
+git¦git bisect start¦开始二分查找引入 bug 的提交¦排查,二分¦
+git¦git bisect good {{提交}}¦标记某次提交是正常的¦排查,二分¦
+git¦git bisect bad¦标记当前提交有问题¦排查,二分¦
+git¦git bisect reset¦结束二分查找¦排查,二分¦
+git¦git apply {{补丁}}.patch¦应用补丁文件¦补丁¦
+git¦git format-patch -1 {{提交}}¦把一次提交导出成补丁文件¦补丁,导出¦
+git¦git diff > {{文件}}.patch¦把当前改动导出成补丁¦补丁,导出¦
+git¦git update-index --assume-unchanged {{文件}}¦让 git 暂时忽略某个文件的改动¦忽略,文件¦
+git¦git ls-remote --heads origin¦不拉取就查看远程有哪些分支¦远程,分支¦
+git¦git ls-remote --tags origin¦不拉取就查看远程有哪些标签¦远程,标签¦
+git¦git lfs track "*.{{后缀}}"¦用 LFS 管理大文件¦大文件,lfs¦
+git¦git gc --aggressive --prune=now¦深度清理仓库，缩小体积¦清理,优化¦
+git¦git filter-repo --path {{文件}} --invert-paths¦从全部历史中彻底删除某个文件¦历史,删除¦d
+git¦echo "{{规则}}" >> .gitignore¦追加一条忽略规则¦忽略¦
+git¦git check-ignore -v {{文件}}¦检查某个文件为什么被忽略¦忽略,排查¦h
+git¦git stash branch {{分支}}¦把暂存的改动恢复到新分支上¦暂存,分支¦
+git¦git cherry -v¦查看本地有哪些提交还没推送¦推送,未推送¦
+git¦git log origin/{{分支}}..HEAD --oneline¦查看本地领先远程的提交¦推送,未推送¦h
+git¦git log HEAD..origin/{{分支}} --oneline¦查看远程领先本地的提交¦拉取,远程更新¦h
+git¦git merge-base {{分支1}} {{分支2}}¦找出两个分支的共同祖先¦分支,祖先¦
+git¦git diff --check¦检查改动里的多余空格和冲突标记¦检查,冲突¦
+git¦git grep -n "{{关键字}}"¦在仓库里按关键字搜索代码¦搜索,代码¦h
+git¦git grep -n "{{关键字}}" {{提交}}¦在某次提交的代码里搜索¦搜索,代码¦
+git¦git whatchanged -p -1¦查看最近一次提交的改动¦提交,改动¦
+git¦git ls-tree -r HEAD --name-only¦列出当前版本所有文件¦文件,列表¦
+git¦git for-each-ref --sort=-committerdate refs/heads --format='%(refname:short) %(committerdate:relative)'¦按最近提交时间列出分支¦分支,时间¦h
+win¦ipconfig¦查看网卡 IP 信息¦网络,ip¦h
+win¦ipconfig /all¦查看网卡的完整信息（含 DNS、MAC）¦网络,ip,dns¦h
+win¦ipconfig /flushdns¦清空 DNS 缓存¦网络,dns¦h
+win¦ipconfig /release && ipconfig /renew¦释放并重新获取 IP¦网络,ip¦
+win¦ipconfig /displaydns¦查看 DNS 缓存¦网络,dns¦
+win¦netstat -ano¦查看所有连接和对应的进程号¦网络,端口¦h
+win¦netstat -ano | findstr :{{端口}}¦查某个端口被哪个进程占用¦网络,端口,占用¦h
+win¦netstat -ano | findstr LISTENING¦查看所有监听的端口¦网络,端口,监听¦h
+win¦netstat -an | find /c "ESTABLISHED"¦统计已建立的连接数¦网络,连接¦
+win¦netstat -rn¦查看路由表¦网络,路由¦
+win¦tasklist¦查看所有进程¦进程¦h
+win¦tasklist | findstr {{进程名}}¦按名字查进程¦进程,查找¦h
+win¦tasklist /fi "pid eq {{PID}}"¦按 PID 查进程名¦进程,pid¦h
+win¦tasklist /svc¦查看进程对应的服务¦进程,服务¦
+win¦tasklist /v¦查看进程详情（含用户、窗口标题）¦进程,详情¦
+win¦taskkill /pid {{PID}} /f¦强制结束指定 PID 的进程¦进程,结束¦h
+win¦taskkill /im {{进程名}}.exe /f¦强制结束某个名字的所有进程¦进程,结束¦d
+win¦taskkill /im {{进程名}}.exe /f /t¦强制结束进程及其子进程¦进程,结束¦d
+win¦wmic process where name="{{进程名}}.exe" get processid,commandline¦查看进程的完整命令行¦进程,命令行¦
+win¦wmic cpu get name,numberofcores,loadpercentage¦查看 CPU 型号、核数和负载¦cpu,硬件¦
+win¦wmic memorychip get capacity,speed¦查看内存条容量和频率¦内存,硬件¦
+win¦wmic diskdrive get model,size¦查看硬盘型号和容量¦磁盘,硬件¦
+win¦wmic logicaldisk get caption,size,freespace¦查看各盘符的总容量和剩余空间¦磁盘,空间¦h
+win¦wmic bios get serialnumber¦查看电脑序列号¦硬件,序列号¦
+win¦wmic product get name,version¦查看已安装的程序¦软件,已安装¦
+win¦systeminfo¦查看系统详细信息（版本、补丁、开机时间）¦系统,信息¦h
+win¦systeminfo | findstr /B /C:"OS Name" /C:"OS Version"¦只看系统名称和版本¦系统,版本¦
+win¦systeminfo | find "System Boot Time"¦查看上次开机时间¦系统,开机¦
+win¦hostname¦查看计算机名¦主机名¦
+win¦whoami /groups¦查看当前用户所属的组¦用户,组¦
+win¦net user¦查看本机所有用户¦用户¦h
+win¦net user {{用户}} {{密码}} /add¦创建本地用户¦用户,创建¦
+win¦net user {{用户}} {{新密码}}¦修改用户密码¦用户,密码¦h
+win¦net user {{用户}} /active:no¦禁用某个用户¦用户,禁用¦
+win¦net user {{用户}} /delete¦删除用户¦用户,删除¦d
+win¦net localgroup administrators {{用户}} /add¦把用户加入管理员组¦用户,管理员¦
+win¦net localgroup administrators¦查看管理员组成员¦用户,管理员¦h
+win¦net start¦查看正在运行的服务¦服务,运行¦
+win¦net start {{服务}}¦启动服务¦服务,启动¦h
+win¦net stop {{服务}}¦停止服务¦服务,停止¦h
+win¦net use¦查看已连接的网络共享¦网络,共享¦
+win¦net use {{Z:}} \\{{主机}}\{{共享}}¦映射网络驱动器¦网络,共享¦h
+win¦net use {{Z:}} /delete¦断开映射的网络驱动器¦网络,共享¦
+win¦net share¦查看本机共享的目录¦网络,共享¦
+win¦net session¦查看谁连接了本机的共享¦网络,共享¦
+win¦net time \\{{主机}}¦查看远程主机的时间¦时间¦
+win¦sc query¦查看所有服务状态¦服务,状态¦
+win¦sc query {{服务}}¦查看某个服务的状态¦服务,状态¦h
+win¦sc qc {{服务}}¦查看服务的启动类型和路径¦服务,配置¦
+win¦sc config {{服务}} start= auto¦设置服务开机自启¦服务,自启¦h
+win¦sc config {{服务}} start= disabled¦禁用服务¦服务,禁用¦
+win¦sc start {{服务}}¦启动服务¦服务,启动¦
+win¦sc stop {{服务}}¦停止服务¦服务,停止¦
+win¦sc delete {{服务}}¦删除服务¦服务,删除¦d
+win¦sc create {{服务}} binPath= "{{路径}}"¦创建服务¦服务,创建¦
+win¦services.msc¦打开服务管理器¦服务,界面¦
+win¦taskmgr¦打开任务管理器¦进程,界面¦
+win¦perfmon¦打开性能监视器¦性能,界面¦
+win¦resmon¦打开资源监视器¦性能,界面¦
+win¦eventvwr¦打开事件查看器¦日志,界面¦h
+win¦eventvwr.msc¦打开事件查看器¦日志,界面¦
+win¦compmgmt.msc¦打开计算机管理¦管理,界面¦
+win¦devmgmt.msc¦打开设备管理器¦设备,界面¦
+win¦diskmgmt.msc¦打开磁盘管理¦磁盘,界面¦h
+win¦lusrmgr.msc¦打开本地用户和组¦用户,界面¦
+win¦gpedit.msc¦打开本地组策略编辑器¦策略,界面¦
+win¦secpol.msc¦打开本地安全策略¦安全,界面¦
+win¦regedit¦打开注册表编辑器¦注册表,界面¦h
+win¦mstsc¦打开远程桌面连接¦远程桌面¦h
+win¦mstsc /v:{{主机}}:{{端口}}¦远程桌面连接到指定主机和端口¦远程桌面¦h
+win¦mstsc /admin /v:{{主机}}¦以管理员会话远程桌面¦远程桌面¦
+win¦control¦打开控制面板¦界面¦
+win¦ncpa.cpl¦打开网络连接设置¦网络,界面¦h
+win¦appwiz.cpl¦打开程序和功能（卸载软件）¦软件,卸载¦
+win¦sysdm.cpl¦打开系统属性（环境变量在这里）¦系统,环境变量¦
+win¦firewall.cpl¦打开防火墙设置¦防火墙,界面¦
+win¦powercfg.cpl¦打开电源选项¦电源,界面¦
+win¦msinfo32¦查看系统信息汇总¦系统,信息¦
+win¦dxdiag¦查看显卡和 DirectX 信息¦显卡,信息¦
+win¦winver¦查看 Windows 版本号¦系统,版本¦
+win¦sfc /scannow¦扫描并修复系统文件¦修复,系统¦h
+win¦DISM /Online /Cleanup-Image /RestoreHealth¦修复系统映像¦修复,系统¦h
+win¦chkdsk {{C:}} /f¦检查并修复磁盘错误（需重启）¦磁盘,修复¦
+win¦cleanmgr¦打开磁盘清理¦磁盘,清理¦
+win¦defrag {{C:}} /O¦优化磁盘¦磁盘,优化¦
+win¦diskpart¦打开磁盘分区工具¦磁盘,分区¦
+win¦fsutil volume diskfree {{C:}}¦查看磁盘剩余空间¦磁盘,空间¦
+win¦dir /s /b {{目录}}¦递归列出目录下所有文件名¦文件,列表¦h
+win¦dir /a:h¦显示隐藏文件¦文件,隐藏¦
+win¦dir /o:-s¦按大小倒序列出文件¦文件,排序,大小¦
+win¦dir /o:-d¦按时间倒序列出文件¦文件,排序,时间¦
+win¦dir /s *.{{后缀}}¦递归查找某种后缀的文件¦文件,查找¦
+win¦tree /f¦以树形显示目录和文件¦文件,目录¦
+win¦where {{命令}}¦查看命令所在的路径¦命令,路径¦h
+win¦findstr /s /i "{{关键字}}" *.{{后缀}}¦在文件里搜索关键字¦搜索,文件¦h
+win¦find /c /v "" {{文件}}¦统计文件行数¦统计,行数¦
+win¦type {{文件}}¦查看文件内容¦文件,查看¦
+win¦more {{文件}}¦分页查看文件¦文件,查看¦
+win¦copy {{源}} {{目标}}¦复制文件¦文件,复制¦
+win¦xcopy {{源}} {{目标}} /e /i /h /y¦复制整个目录（含子目录和隐藏文件）¦文件,复制¦
+win¦robocopy {{源}} {{目标}} /e /z /mt:16¦多线程复制目录，支持断点续传¦文件,复制¦h
+win¦robocopy {{源}} {{目标}} /mir¦镜像同步目录（目标多余的文件会被删除）¦文件,同步¦d
+win¦move {{源}} {{目标}}¦移动文件¦文件,移动¦
+win¦ren {{旧名}} {{新名}}¦重命名¦文件,重命名¦
+win¦del /f /q {{文件}}¦强制删除文件¦文件,删除¦d
+win¦rd /s /q {{目录}}¦强制删除目录¦文件,删除¦d
+win¦md {{目录}}¦创建目录¦文件,创建¦
+win¦attrib -h -s {{文件}}¦取消文件的隐藏和系统属性¦文件,隐藏¦
+win¦attrib +h {{文件}}¦隐藏文件¦文件,隐藏¦
+win¦icacls {{目录}}¦查看目录权限¦权限,文件¦h
+win¦icacls {{目录}} /grant {{用户}}:(OI)(CI)F¦给用户授予目录完全控制权限¦权限,授权¦
+win¦takeown /f {{文件}} /r /d y¦取得文件或目录的所有权¦权限,所有权¦
+win¦mklink /d {{链接}} {{目标}}¦创建目录符号链接¦链接,快捷方式¦
+win¦mklink /j {{链接}} {{目标}}¦创建目录联接¦链接¦
+win¦fc {{文件1}} {{文件2}}¦对比两个文件¦对比,文件¦
+win¦certutil -hashfile {{文件}} SHA256¦计算文件的 SHA256¦校验,sha256¦h
+win¦certutil -hashfile {{文件}} MD5¦计算文件的 MD5¦校验,md5¦
+win¦certutil -encode {{文件}} {{输出}}¦把文件编码成 base64¦编码,base64¦
+win¦certutil -decode {{文件}} {{输出}}¦解码 base64 文件¦编码,base64¦
+win¦ping -n 4 {{主机}}¦ping 4 次¦网络,ping¦h
+win¦ping -t {{主机}}¦持续 ping（Ctrl+C 停止）¦网络,ping¦h
+win¦ping -l 1472 -f {{主机}}¦测试 MTU 是否能通过¦网络,mtu¦
+win¦tracert {{主机}}¦跟踪路由¦网络,路由¦h
+win¦pathping {{主机}}¦跟踪路由并统计每一跳丢包¦网络,丢包¦
+win¦nslookup {{域名}} {{DNS服务器}}¦指定 DNS 服务器解析¦网络,dns¦
+win¦nslookup -type=mx {{域名}}¦查询域名的邮件记录¦网络,dns¦
+win¦route print¦查看路由表¦网络,路由¦
+win¦route add {{网段}} mask {{掩码}} {{网关}}¦添加临时路由¦网络,路由¦
+win¦route -p add {{网段}} mask {{掩码}} {{网关}}¦添加永久路由¦网络,路由¦
+win¦curl.exe -I {{URL}}¦查看响应头¦网络,http¦
+win¦getmac¦查看网卡 MAC 地址¦网络,mac¦
+win¦nbtstat -a {{主机}}¦查看主机的 NetBIOS 名称¦网络,netbios¦
+win¦netsh interface ip show config¦查看网卡 IP 配置¦网络,配置¦
+win¦netsh interface ip set address "{{网卡名}}" static {{IP}} {{掩码}} {{网关}}¦设置静态 IP¦网络,静态ip¦h
+win¦netsh interface ip set address "{{网卡名}}" dhcp¦改成自动获取 IP¦网络,dhcp¦
+win¦netsh interface ip set dns "{{网卡名}}" static {{DNS}}¦设置 DNS 服务器¦网络,dns¦
+win¦netsh wlan show profiles¦查看保存过的 WiFi¦网络,wifi¦
+win¦netsh wlan show profile name="{{WiFi名}}" key=clear¦查看 WiFi 密码¦网络,wifi,密码¦
+win¦netsh advfirewall show allprofiles¦查看防火墙状态¦防火墙,查看¦
+win¦netsh advfirewall set allprofiles state off¦关闭防火墙¦防火墙,关闭¦d
+win¦netsh advfirewall firewall add rule name="{{名称}}" dir=in action=allow protocol=TCP localport={{端口}}¦放行端口¦防火墙,放行¦h
+win¦netsh advfirewall firewall delete rule name="{{名称}}"¦删除防火墙规则¦防火墙,删除¦
+win¦netsh advfirewall firewall show rule name=all¦查看所有防火墙规则¦防火墙,查看¦
+win¦netsh interface portproxy add v4tov4 listenport={{本地端口}} connectaddress={{目标IP}} connectport={{目标端口}}¦设置端口转发¦网络,转发¦h
+win¦netsh interface portproxy show all¦查看端口转发规则¦网络,转发¦
+win¦netsh winsock reset¦重置网络协议栈（网络异常时用）¦网络,重置¦h
+win¦netsh int ip reset¦重置 TCP/IP 设置¦网络,重置¦
+win¦netsh trace start capture=yes tracefile={{文件}}.etl¦开始抓包¦网络,抓包¦
+win¦shutdown /r /t 0¦立即重启¦重启¦d
+win¦shutdown /s /t 0¦立即关机¦关机¦d
+win¦shutdown /r /t {{60}} /c "{{原因}}"¦60 秒后重启并显示原因¦重启¦d
+win¦shutdown /a¦取消已安排的关机或重启¦重启,取消¦
+win¦shutdown /r /o /t 0¦重启进入高级启动选项¦重启,修复¦
+win¦query user¦查看当前登录的用户和会话¦用户,会话¦h
+win¦query session¦查看所有终端会话¦用户,会话¦
+win¦logoff {{会话ID}}¦注销指定会话（踢人）¦用户,会话¦d
+win¦tscon {{会话ID}} /dest:console¦把远程会话切回控制台¦会话¦
+win¦schtasks /query /fo LIST /v¦查看所有计划任务详情¦计划任务,查看¦h
+win¦schtasks /create /tn "{{名称}}" /tr "{{命令}}" /sc daily /st {{02:00}}¦创建每天执行的计划任务¦计划任务,创建¦h
+win¦schtasks /run /tn "{{名称}}"¦立即运行计划任务¦计划任务,运行¦
+win¦schtasks /delete /tn "{{名称}}" /f¦删除计划任务¦计划任务,删除¦
+win¦reg query "{{注册表路径}}"¦查询注册表项¦注册表,查询¦
+win¦reg add "{{路径}}" /v {{名称}} /t REG_SZ /d {{值}} /f¦添加或修改注册表值¦注册表,修改¦
+win¦reg delete "{{路径}}" /v {{名称}} /f¦删除注册表值¦注册表,删除¦d
+win¦reg export "{{路径}}" {{文件}}.reg¦导出注册表项做备份¦注册表,备份¦
+win¦setx {{变量}} "{{值}}"¦永久设置用户环境变量¦环境变量¦h
+win¦setx {{变量}} "{{值}}" /m¦永久设置系统环境变量¦环境变量¦
+win¦set¦查看所有环境变量¦环境变量¦
+win¦set {{变量}}¦查看某个环境变量¦环境变量¦
+win¦echo %PATH%¦查看 PATH¦环境变量,path¦
+win¦gpupdate /force¦立即刷新组策略¦策略¦
+win¦gpresult /r¦查看当前生效的组策略¦策略¦
+win¦wevtutil qe System /c:20 /rd:true /f:text¦命令行查看最近 20 条系统日志¦日志,系统¦h
+win¦wevtutil qe Application /c:20 /rd:true /f:text¦命令行查看最近 20 条应用日志¦日志,应用¦
+win¦wevtutil cl System¦清空系统日志¦日志,清空¦d
+win¦powershell Get-Process | Sort CPU -Descending | Select -First 10¦CPU 占用最高的 10 个进程¦powershell,cpu¦h
+win¦powershell Get-Process | Sort WS -Descending | Select -First 10¦内存占用最高的 10 个进程¦powershell,内存¦h
+win¦powershell Get-Service | Where Status -eq Running¦查看正在运行的服务¦powershell,服务¦
+win¦powershell Get-NetTCPConnection -LocalPort {{端口}}¦查看端口连接和进程¦powershell,端口¦h
+win¦powershell Test-NetConnection {{主机}} -Port {{端口}}¦测试端口连通¦powershell,端口,连通¦h
+win¦powershell Get-EventLog -LogName System -Newest 20¦查看最近 20 条系统日志¦powershell,日志¦
+win¦powershell Get-ChildItem -Recurse | Sort Length -Descending | Select -First 20¦找出最大的 20 个文件¦powershell,大文件¦h
+win¦powershell Get-HotFix¦查看已安装的系统补丁¦powershell,补丁¦
+win¦powershell Get-WmiObject Win32_OperatingSystem | Select LastBootUpTime¦查看上次开机时间¦powershell,开机¦
+win¦powershell Set-ExecutionPolicy RemoteSigned -Scope CurrentUser¦允许运行本地 PowerShell 脚本¦powershell,脚本¦h
+win¦powershell Get-Content {{日志}} -Wait -Tail 50¦实时查看日志（相当于 tail -f）¦powershell,日志¦h
+win¦powershell Select-String -Path {{文件}} -Pattern "{{关键字}}"¦在文件里搜索（相当于 grep）¦powershell,搜索¦
+win¦powershell Get-FileHash {{文件}} -Algorithm SHA256¦计算文件哈希¦powershell,校验¦
+win¦powershell Expand-Archive {{文件}}.zip -DestinationPath {{目录}}¦解压 zip¦powershell,解压¦
+win¦powershell Compress-Archive {{目录}} {{文件}}.zip¦压缩成 zip¦powershell,压缩¦
+win¦powershell Invoke-WebRequest {{URL}} -OutFile {{文件}}¦下载文件¦powershell,下载¦
+win¦powershell Restart-Service {{服务}}¦重启服务¦powershell,服务¦
+win¦powershell Stop-Process -Name {{进程名}} -Force¦强制结束进程¦powershell,进程¦d
+win¦powershell Get-NetIPAddress¦查看 IP 地址¦powershell,网络¦
+win¦powershell Get-NetAdapter¦查看网卡状态¦powershell,网络¦
+win¦powershell Get-Disk¦查看磁盘¦powershell,磁盘¦
+win¦powershell Get-Volume¦查看卷和剩余空间¦powershell,磁盘¦
+win¦wsl -l -v¦查看已安装的 WSL 发行版和状态¦wsl¦h
+win¦wsl --shutdown¦关闭所有 WSL 虚拟机¦wsl¦
+win¦wsl -d {{发行版}}¦进入指定的 WSL 发行版¦wsl¦
+win¦wsl --export {{发行版}} {{文件}}.tar¦导出 WSL 发行版做备份¦wsl,备份¦
+win¦wsl --set-default-version 2¦让新装的 WSL 默认用 WSL2¦wsl¦
+win¦winget install {{软件}}¦用 winget 安装软件¦软件,安装¦h
+win¦winget upgrade --all¦升级所有软件¦软件,升级¦
+win¦winget search {{关键字}}¦搜索软件¦软件,搜索¦
+win¦start {{路径}}¦用默认程序打开文件或目录¦打开¦
+win¦explorer .¦在资源管理器里打开当前目录¦打开,目录¦h
+win¦clip < {{文件}}¦把文件内容复制到剪贴板¦剪贴板¦
+win¦cls¦清屏¦清屏¦
+win¦chcp 65001¦把终端编码改成 UTF-8（解决乱码）¦编码,乱码¦h
+win¦chcp 936¦把终端编码改成 GBK¦编码,乱码¦
+win¦doskey /history¦查看命令历史¦历史¦
+win¦ver¦查看 Windows 版本¦系统,版本¦
+win¦date /t && time /t¦查看当前日期和时间¦时间¦
+win¦w32tm /resync¦立即同步时间¦时间,同步¦h
+win¦w32tm /query /status¦查看时间同步状态¦时间,同步¦
+win¦w32tm /config /manualpeerlist:"{{NTP服务器}}" /syncfromflags:manual /update¦设置时间服务器¦时间,同步¦
+win¦slmgr /xpr¦查看 Windows 激活状态¦激活¦
+win¦bcdedit¦查看启动配置¦启动,配置¦
+win¦bcdedit /set safeboot minimal¦下次启动进入安全模式¦启动,安全模式¦
+win¦manage-bde -status¦查看 BitLocker 加密状态¦磁盘,加密¦
+win¦vssadmin list shadows¦查看卷影副本（系统还原点）¦备份,还原点¦
+win¦wbadmin get versions¦查看系统备份版本¦备份¦
+win¦cipher /w:{{目录}}¦彻底擦除目录里已删除文件的残留数据¦磁盘,擦除¦
+win¦openfiles /query¦查看哪些文件被打开¦文件,占用¦
+win¦handle.exe {{文件}}¦查看文件被哪个进程占用（需 Sysinternals）¦文件,占用¦
+win¦cmdkey /list¦查看保存的凭据¦凭据,密码¦
+win¦klist¦查看 Kerberos 票据¦域,认证¦
+win¦nltest /dsgetdc:{{域名}}¦查看域控制器¦域,控制器¦
+win¦dsquery user -name {{用户}}¦在域中查询用户¦域,用户¦
+win¦gpupdate /target:computer /force¦强制刷新计算机策略¦域,策略¦
+mid¦kafka-topics.sh --bootstrap-server {{主机}}:9092 --list¦列出 Kafka 所有主题¦kafka,主题¦h
+mid¦kafka-topics.sh --bootstrap-server {{主机}}:9092 --describe --topic {{主题}}¦查看主题的分区和副本详情¦kafka,主题¦h
+mid¦kafka-topics.sh --bootstrap-server {{主机}}:9092 --create --topic {{主题}} --partitions {{3}} --replication-factor {{2}}¦创建 Kafka 主题¦kafka,主题,创建¦
+mid¦kafka-topics.sh --bootstrap-server {{主机}}:9092 --delete --topic {{主题}}¦删除 Kafka 主题¦kafka,主题,删除¦d
+mid¦kafka-console-consumer.sh --bootstrap-server {{主机}}:9092 --topic {{主题}} --from-beginning¦从头消费主题消息（看内容）¦kafka,消费¦h
+mid¦kafka-console-consumer.sh --bootstrap-server {{主机}}:9092 --topic {{主题}} --max-messages 10¦只消费 10 条消息¦kafka,消费¦
+mid¦kafka-console-producer.sh --bootstrap-server {{主机}}:9092 --topic {{主题}}¦手动往主题发消息¦kafka,生产¦
+mid¦kafka-consumer-groups.sh --bootstrap-server {{主机}}:9092 --list¦列出所有消费组¦kafka,消费组¦h
+mid¦kafka-consumer-groups.sh --bootstrap-server {{主机}}:9092 --describe --group {{消费组}}¦查看消费组的积压（lag）¦kafka,积压,lag¦h
+mid¦kafka-consumer-groups.sh --bootstrap-server {{主机}}:9092 --group {{消费组}} --reset-offsets --to-latest --topic {{主题}} --execute¦把消费组位点重置到最新¦kafka,位点,重置¦d
+mid¦kafka-consumer-groups.sh --bootstrap-server {{主机}}:9092 --group {{消费组}} --reset-offsets --to-earliest --topic {{主题}} --execute¦把消费组位点重置到最早¦kafka,位点,重置¦d
+mid¦kafka-log-dirs.sh --bootstrap-server {{主机}}:9092 --describe¦查看各 broker 的日志目录大小¦kafka,磁盘¦
+mid¦kafka-configs.sh --bootstrap-server {{主机}}:9092 --entity-type topics --entity-name {{主题}} --describe¦查看主题的配置¦kafka,配置¦
+mid¦kafka-configs.sh --bootstrap-server {{主机}}:9092 --entity-type topics --entity-name {{主题}} --alter --add-config retention.ms={{86400000}}¦修改主题的消息保留时间¦kafka,配置,保留¦
+mid¦kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list {{主机}}:9092 --topic {{主题}}¦查看主题各分区的最新位点¦kafka,位点¦
+mid¦kafka-broker-api-versions.sh --bootstrap-server {{主机}}:9092¦检查 broker 是否可连接¦kafka,检查¦
+mid¦zkCli.sh -server {{主机}}:2181¦登录 ZooKeeper¦zookeeper,登录¦h
+mid¦echo ruok | nc {{主机}} 2181¦检查 ZooKeeper 是否正常（返回 imok）¦zookeeper,健康¦h
+mid¦echo stat | nc {{主机}} 2181¦查看 ZooKeeper 状态和连接数¦zookeeper,状态¦
+mid¦echo mntr | nc {{主机}} 2181¦查看 ZooKeeper 监控指标¦zookeeper,监控¦
+mid¦zkServer.sh status¦查看 ZooKeeper 是主还是从¦zookeeper,角色¦h
+mid¦ls /¦zkCli 中查看根节点¦zookeeper¦
+mid¦get /{{路径}}¦zkCli 中读取节点数据¦zookeeper¦
+mid¦rabbitmqctl status¦查看 RabbitMQ 节点状态¦rabbitmq,状态¦h
+mid¦rabbitmqctl list_queues name messages consumers¦查看队列积压和消费者数¦rabbitmq,队列,积压¦h
+mid¦rabbitmqctl list_queues name messages_ready messages_unacknowledged¦查看待消费和未确认的消息数¦rabbitmq,队列¦
+mid¦rabbitmqctl list_connections¦查看所有连接¦rabbitmq,连接¦
+mid¦rabbitmqctl list_channels¦查看所有通道¦rabbitmq,通道¦
+mid¦rabbitmqctl list_exchanges¦查看所有交换机¦rabbitmq,交换机¦
+mid¦rabbitmqctl list_bindings¦查看所有绑定关系¦rabbitmq,绑定¦
+mid¦rabbitmqctl list_users¦查看所有用户¦rabbitmq,用户¦
+mid¦rabbitmqctl add_user {{用户}} {{密码}}¦创建用户¦rabbitmq,用户¦
+mid¦rabbitmqctl set_user_tags {{用户}} administrator¦把用户设为管理员¦rabbitmq,用户¦
+mid¦rabbitmqctl set_permissions -p / {{用户}} ".*" ".*" ".*"¦给用户授予全部权限¦rabbitmq,权限¦
+mid¦rabbitmqctl purge_queue {{队列}}¦清空某个队列的消息¦rabbitmq,队列,清空¦d
+mid¦rabbitmqctl cluster_status¦查看 RabbitMQ 集群状态¦rabbitmq,集群¦h
+mid¦rabbitmq-plugins enable rabbitmq_management¦启用管理界面插件¦rabbitmq,插件¦
+mid¦rabbitmqctl set_policy ha-all "^" '{"ha-mode":"all"}'¦设置所有队列做镜像¦rabbitmq,高可用¦
+mid¦rabbitmqctl reset¦重置节点（清除所有数据）¦rabbitmq,重置¦d
+mid¦jps -l¦查看机器上所有 Java 进程¦java,进程¦h
+mid¦jps -lvm¦查看 Java 进程及其启动参数¦java,进程,参数¦h
+mid¦jstack {{PID}}¦导出 Java 线程栈¦java,线程,卡死¦h
+mid¦jstack {{PID}} | grep -A 20 "BLOCKED"¦查看被阻塞的线程¦java,线程,死锁¦
+mid¦jstack -l {{PID}} | grep -i deadlock¦检查 Java 死锁¦java,死锁¦
+mid¦printf "%x\n" {{线程号}}¦把线程号转成十六进制（对照 jstack 用）¦java,线程,cpu¦h
+mid¦jmap -heap {{PID}}¦查看 Java 堆内存使用¦java,内存,堆¦h
+mid¦jmap -histo:live {{PID}} | head -20¦查看内存里对象数量最多的类¦java,内存,对象¦h
+mid¦jmap -dump:live,format=b,file={{文件}}.hprof {{PID}}¦导出堆转储文件（排查内存泄露）¦java,内存,泄露¦h
+mid¦jstat -gcutil {{PID}} 1000 10¦每秒查看 GC 情况，共 10 次¦java,gc¦h
+mid¦jstat -gc {{PID}} 1000¦每秒查看 GC 详细容量¦java,gc¦
+mid¦jstat -gccause {{PID}}¦查看最近一次 GC 的原因¦java,gc¦
+mid¦jcmd {{PID}} VM.flags¦查看 JVM 实际生效的参数¦java,参数¦h
+mid¦jcmd {{PID}} GC.heap_info¦查看堆使用情况¦java,堆¦
+mid¦jcmd {{PID}} Thread.print¦打印线程栈（同 jstack）¦java,线程¦
+mid¦jcmd {{PID}} GC.run¦触发一次 GC¦java,gc¦
+mid¦jinfo -flags {{PID}}¦查看 JVM 启动参数¦java,参数¦
+mid¦java -XX:+PrintFlagsFinal -version | grep -E "MaxHeapSize|UseG1GC"¦查看 JVM 默认堆大小和 GC¦java,参数¦
+mid¦java -Xms{{512m}} -Xmx{{1g}} -jar {{包}}.jar¦指定堆内存启动 Java 程序¦java,启动,内存¦h
+mid¦java -Xmx{{1g}} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath={{目录}} -jar {{包}}.jar¦OOM 时自动导出堆转储¦java,启动,oom¦h
+mid¦nohup java -jar {{包}}.jar > {{日志}} 2>&1 &¦后台启动 Java 程序¦java,启动,后台¦h
+mid¦java -jar {{包}}.jar --spring.profiles.active={{环境}}¦指定 Spring 环境启动¦java,spring,启动¦
+mid¦java -jar {{包}}.jar --server.port={{端口}}¦指定端口启动 Spring Boot 程序¦java,spring,端口¦
+mid¦jar -tf {{包}}.jar | head¦查看 jar 包里的文件¦java,jar¦
+mid¦unzip -p {{包}}.jar META-INF/MANIFEST.MF¦查看 jar 包的 manifest¦java,jar¦
+mid¦curl -s http://{{主机}}:{{端口}}/actuator/health¦查看 Spring Boot 健康状态¦java,spring,健康¦h
+mid¦curl -s http://{{主机}}:{{端口}}/actuator/metrics¦查看 Spring Boot 监控指标¦java,spring,监控¦
+mid¦curl -s http://{{主机}}:{{端口}}/actuator/env¦查看 Spring Boot 生效的环境配置¦java,spring,配置¦
+mid¦curl -X POST http://{{主机}}:{{端口}}/actuator/refresh¦刷新 Spring Cloud 配置¦java,spring,配置¦
+mid¦curl -s http://{{主机}}:8848/nacos/v1/ns/service/list?pageNo=1\&pageSize=100¦查看 Nacos 注册的服务列表¦nacos,服务¦
+mid¦curl -s http://{{主机}}:8500/v1/catalog/services¦查看 Consul 注册的服务¦consul,服务¦
+mid¦consul members¦查看 Consul 集群成员¦consul,集群¦
+mid¦etcdctl get --prefix {{前缀}}¦按前缀读取 etcd 数据¦etcd,查询¦
+mid¦etcdctl member list¦查看 etcd 集群成员¦etcd,集群¦
+mid¦etcdctl endpoint status --write-out=table¦以表格查看 etcd 各节点状态¦etcd,状态¦
+mid¦catalina.sh run¦前台启动 Tomcat 看实时日志¦tomcat,启动¦
+mid¦${CATALINA_HOME}/bin/startup.sh¦启动 Tomcat¦tomcat,启动¦
+mid¦${CATALINA_HOME}/bin/shutdown.sh¦停止 Tomcat¦tomcat,停止¦
+mid¦tail -f ${CATALINA_HOME}/logs/catalina.out¦实时查看 Tomcat 日志¦tomcat,日志¦h
+mid¦ls -lh ${CATALINA_HOME}/logs/¦查看 Tomcat 日志文件大小¦tomcat,日志¦
+mid¦ls ${CATALINA_HOME}/webapps/¦查看 Tomcat 部署的应用¦tomcat,部署¦
+mid¦grep -i "SEVERE" ${CATALINA_HOME}/logs/catalina.out | tail¦查看 Tomcat 严重错误¦tomcat,日志,错误¦
+mid¦netstat -anp | grep {{8080}} | wc -l¦统计 Tomcat 端口的连接数¦tomcat,连接¦
+mid¦supervisorctl status¦查看 supervisor 管理的所有程序状态¦supervisor,状态¦h
+mid¦supervisorctl restart {{程序}}¦重启 supervisor 管理的程序¦supervisor,重启¦h
+mid¦supervisorctl stop {{程序}}¦停止 supervisor 管理的程序¦supervisor,停止¦
+mid¦supervisorctl start {{程序}}¦启动 supervisor 管理的程序¦supervisor,启动¦
+mid¦supervisorctl reread && supervisorctl update¦修改配置后重新加载¦supervisor,配置¦h
+mid¦supervisorctl tail -f {{程序}}¦实时查看程序的输出日志¦supervisor,日志¦
+mid¦pm2 list¦查看 pm2 管理的 Node 进程¦pm2,node,进程¦h
+mid¦pm2 start {{脚本}} --name {{名称}}¦用 pm2 启动程序¦pm2,node,启动¦
+mid¦pm2 restart {{名称}}¦重启 pm2 程序¦pm2,node,重启¦
+mid¦pm2 logs {{名称}}¦查看 pm2 程序日志¦pm2,node,日志¦h
+mid¦pm2 monit¦pm2 实时监控面板¦pm2,node,监控¦
+mid¦pm2 save && pm2 startup¦保存进程列表并设置开机自启¦pm2,node,自启¦
+mid¦pm2 delete {{名称}}¦删除 pm2 程序¦pm2,node,删除¦
+mid¦pm2 reload {{名称}}¦平滑重载 pm2 程序¦pm2,node,重载¦
+mid¦ansible all -m ping¦用 ansible 测试所有主机连通¦ansible,连通¦h
+mid¦ansible {{主机组}} -m shell -a "{{命令}}"¦在一组主机上批量执行命令¦ansible,批量¦h
+mid¦ansible {{主机组}} -m copy -a "src={{源}} dest={{目标}}"¦批量分发文件¦ansible,分发¦h
+mid¦ansible {{主机组}} -m service -a "name={{服务}} state=restarted"¦批量重启服务¦ansible,服务¦
+mid¦ansible {{主机组}} -m yum -a "name={{软件}} state=present"¦批量安装软件¦ansible,软件¦
+mid¦ansible {{主机组}} -m setup -a "filter=ansible_distribution*"¦批量查看系统版本¦ansible,系统¦
+mid¦ansible {{主机组}} -m fetch -a "src={{远程文件}} dest={{本地目录}}"¦批量取回远程文件¦ansible,文件¦
+mid¦ansible-playbook {{剧本}}.yml¦执行 playbook¦ansible,剧本¦h
+mid¦ansible-playbook {{剧本}}.yml --check¦演练 playbook，只看会改什么¦ansible,剧本,演练¦h
+mid¦ansible-playbook {{剧本}}.yml -l {{主机}}¦只对某台主机执行 playbook¦ansible,剧本¦
+mid¦ansible-playbook {{剧本}}.yml --tags {{标签}}¦只执行带某标签的任务¦ansible,剧本¦
+mid¦ansible-playbook {{剧本}}.yml -vvv¦显示最详细的执行过程（排错）¦ansible,调试¦
+mid¦ansible-inventory --list¦查看解析后的主机清单¦ansible,清单¦
+mid¦ansible-vault encrypt {{文件}}¦加密敏感文件¦ansible,加密¦
+mid¦ansible-galaxy install {{角色}}¦安装 ansible 角色¦ansible,角色¦
+mid¦terraform init¦初始化 terraform 工作目录¦terraform,初始化¦
+mid¦terraform plan¦预览将要做的变更¦terraform,计划¦h
+mid¦terraform apply¦应用变更¦terraform,应用¦
+mid¦terraform apply -auto-approve¦不确认直接应用变更¦terraform,应用¦d
+mid¦terraform destroy¦销毁所有资源¦terraform,销毁¦d
+mid¦terraform state list¦查看 terraform 管理的资源¦terraform,状态¦
+mid¦terraform fmt && terraform validate¦格式化并校验配置¦terraform,检查¦
+mid¦terraform output¦查看输出变量¦terraform,输出¦
+mid¦jenkins-cli list-jobs¦列出 Jenkins 所有任务¦jenkins,任务¦
+mid¦java -jar jenkins-cli.jar -s http://{{主机}}:8080/ build {{任务}}¦命令行触发 Jenkins 构建¦jenkins,构建¦
+mid¦cat /var/lib/jenkins/secrets/initialAdminPassword¦查看 Jenkins 初始管理员密码¦jenkins,密码¦h
+mid¦systemctl restart jenkins¦重启 Jenkins¦jenkins,重启¦
+mid¦tail -f /var/log/jenkins/jenkins.log¦实时查看 Jenkins 日志¦jenkins,日志¦
+mid¦gitlab-ctl status¦查看 GitLab 各组件状态¦gitlab,状态¦h
+mid¦gitlab-ctl restart¦重启 GitLab 所有组件¦gitlab,重启¦
+mid¦gitlab-ctl tail¦实时查看 GitLab 所有日志¦gitlab,日志¦
+mid¦gitlab-ctl reconfigure¦修改配置后重新应用¦gitlab,配置¦h
+mid¦gitlab-rake gitlab:backup:create¦创建 GitLab 备份¦gitlab,备份¦h
+mid¦gitlab-rake gitlab:check SANITIZE=true¦检查 GitLab 健康¦gitlab,检查¦
+mid¦promtool check config {{prometheus.yml}}¦检查 Prometheus 配置¦prometheus,检查¦h
+mid¦curl -X POST http://{{主机}}:9090/-/reload¦热加载 Prometheus 配置¦prometheus,重载¦h
+mid¦curl -s http://{{主机}}:9090/api/v1/targets | jq '.data.activeTargets[] | select(.health!="up")'¦查看 Prometheus 里异常的抓取目标¦prometheus,目标¦h
+mid¦curl -s 'http://{{主机}}:9090/api/v1/query?query=up' | jq .¦用接口查询 Prometheus 指标¦prometheus,查询¦
+mid¦curl -s http://{{主机}}:9100/metrics | head¦查看 node_exporter 暴露的指标¦prometheus,exporter¦
+mid¦grafana-cli plugins install {{插件}}¦安装 Grafana 插件¦grafana,插件¦
+mid¦grafana-cli admin reset-admin-password {{新密码}}¦重置 Grafana 管理员密码¦grafana,密码¦h
+mid¦systemctl restart grafana-server¦重启 Grafana¦grafana,重启¦
+mid¦zabbix_get -s {{主机}} -k {{key}}¦手动获取 Zabbix 监控项的值¦zabbix,监控¦
+mid¦zabbix_agentd -t {{key}}¦测试 Zabbix agent 监控项¦zabbix,监控¦
+mid¦tail -f /var/log/zabbix/zabbix_agentd.log¦实时查看 Zabbix agent 日志¦zabbix,日志¦
+mid¦ldapsearch -x -H ldap://{{主机}} -b "{{dc=example,dc=com}}" "(uid={{用户}})"¦在 LDAP 里查询用户¦ldap,查询¦
+mid¦smbclient -L //{{主机}} -U {{用户}}¦查看 samba 共享列表¦samba,共享¦
+mid¦showmount -e {{主机}}¦查看 NFS 服务器共享了哪些目录¦nfs,共享¦h
+mid¦mount -t nfs {{主机}}:{{共享目录}} {{挂载点}}¦挂载 NFS 共享¦nfs,挂载¦h
+mid¦exportfs -rv¦重新加载 NFS 共享配置¦nfs,配置¦
+mid¦exportfs -v¦查看当前 NFS 导出的目录¦nfs,共享¦
+mid¦nfsstat -c¦查看 NFS 客户端统计¦nfs,统计¦
+mid¦mount -t cifs //{{主机}}/{{共享}} {{挂载点}} -o username={{用户}}¦挂载 Windows 共享¦samba,挂载¦
+mid¦ceph -s¦查看 Ceph 集群状态¦ceph,状态¦h
+mid¦ceph osd tree¦查看 Ceph OSD 拓扑¦ceph,osd¦
+mid¦ceph df¦查看 Ceph 容量使用¦ceph,容量¦
+mid¦ceph health detail¦查看 Ceph 告警详情¦ceph,健康¦h
+mid¦systemctl status keepalived¦查看 keepalived 状态¦keepalived,状态¦
+mid¦pcs status¦查看 pacemaker 集群状态¦集群,pacemaker¦
+mid¦drbdadm status¦查看 DRBD 同步状态¦集群,drbd¦
+mid¦memcached-tool {{主机}}:11211 stats¦查看 memcached 状态¦memcached,状态¦
+mid¦echo stats | nc {{主机}} 11211¦查看 memcached 统计¦memcached,状态¦
+mid¦echo flush_all | nc {{主机}} 11211¦清空 memcached 所有缓存¦memcached,清空¦d
+sec¦cat /etc/passwd | awk -F: '$3==0 {print $1}'¦查看 uid 为 0 的账号（应该只有 root）¦审计,root¦h
+sec¦awk -F: '$2=="" {print $1}' /etc/shadow¦查找空密码账号¦审计,密码¦h
+sec¦grep -v "^#" /etc/ssh/sshd_config | grep -v "^$"¦查看 ssh 生效的安全配置¦审计,ssh¦h
+sec¦last -f /var/log/wtmp | head -20¦查看最近登录记录¦审计,登录¦
+sec¦lastb | head -20¦查看最近登录失败记录¦审计,登录,爆破¦h
+sec¦lastb | awk '{print $3}' | sort | uniq -c | sort -rn | head¦统计登录失败最多的来源 IP¦审计,爆破¦h
+sec¦grep "Failed password" /var/log/secure | awk '{print $11}' | sort | uniq -c | sort -rn | head¦统计 ssh 爆破来源（CentOS）¦审计,爆破¦
+sec¦grep "Failed password" /var/log/auth.log | awk '{print $11}' | sort | uniq -c | sort -rn | head¦统计 ssh 爆破来源（Ubuntu）¦审计,爆破¦
+sec¦netstat -antp | grep ESTABLISHED | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -rn | head¦统计连接最多的远程 IP¦审计,连接¦
+sec¦ss -tnp state established '( dport = :22 or sport = :22 )'¦查看当前所有 ssh 连接¦审计,ssh,连接¦h
+sec¦ps -eo pid,user,%cpu,cmd --sort=-%cpu | head¦查看 CPU 异常的进程（排查挖矿）¦审计,挖矿¦h
+sec¦ls -la /tmp /var/tmp /dev/shm¦检查临时目录里有没有可疑文件¦审计,可疑文件¦h
+sec¦find /tmp /var/tmp /dev/shm -type f -executable¦查找临时目录里的可执行文件¦审计,可疑文件¦
+sec¦crontab -l; ls -la /etc/cron.*¦检查有没有可疑的定时任务¦审计,后门,定时任务¦h
+sec¦find /etc/cron* -type f -mtime -7¦查找最近 7 天改过的定时任务文件¦审计,后门¦
+sec¦find / -mtime -1 -type f -not -path "/proc/*" -not -path "/sys/*" 2>/dev/null | head -50¦查找最近 24 小时改动过的文件¦审计,改动¦h
+sec¦find / -name "*.php" -mtime -3 -path "*/upload*" 2>/dev/null¦查找上传目录里最近出现的 php 文件（webshell）¦审计,webshell¦
+sec¦find /var/www -name "*.php" | xargs grep -l "eval(\|base64_decode(" 2>/dev/null¦查找含可疑函数的 php 文件¦审计,webshell¦h
+sec¦ls -la /root/.ssh/ /home/*/.ssh/¦检查所有用户的 ssh 密钥目录¦审计,ssh,密钥¦
+sec¦cat /root/.ssh/authorized_keys¦查看 root 允许登录的公钥¦审计,ssh,密钥¦h
+sec¦find / -name authorized_keys 2>/dev/null¦找出所有 authorized_keys 文件¦审计,ssh,密钥¦
+sec¦cat /etc/ld.so.preload¦检查 ld.so.preload（常被用作后门）¦审计,后门¦h
+sec¦lsmod | head -30¦查看加载的内核模块（排查 rootkit）¦审计,内核模块¦
+sec¦rpm -Va | grep "^..5"¦检查被改动过的系统文件（CentOS）¦审计,完整性¦h
+sec¦debsums -c¦检查被改动过的系统文件（Ubuntu）¦审计,完整性¦
+sec¦lsof -nPi | grep -v LISTEN | awk '{print $1,$9}' | sort | uniq¦查看所有进程的对外连接¦审计,连接¦
+sec¦ps aux | awk '$11 ~ /^\[/ {next} {print}' | grep -v "$(whoami)" | head¦查看非当前用户的进程¦审计,进程¦
+sec¦ls -l /proc/*/exe 2>/dev/null | grep deleted¦查找可执行文件已被删除的进程（常见恶意进程特征）¦审计,后门,进程¦h
+sec¦cat /proc/{{PID}}/maps | head¦查看进程加载的内存区域¦审计,进程¦
+sec¦chkrootkit¦扫描 rootkit¦审计,rootkit¦
+sec¦rkhunter --check --sk¦用 rkhunter 扫描 rootkit¦审计,rootkit¦
+sec¦clamscan -r --bell -i {{目录}}¦用 ClamAV 扫描病毒¦审计,病毒¦
+sec¦freshclam¦更新 ClamAV 病毒库¦审计,病毒¦
+sec¦lynis audit system¦用 lynis 做系统安全基线审计¦审计,基线¦h
+sec¦auditctl -l¦查看 auditd 当前的审计规则¦审计,auditd¦
+sec¦auditctl -w {{文件}} -p wa -k {{标识}}¦监控某个文件的写入和属性修改¦审计,auditd,监控¦h
+sec¦ausearch -k {{标识}}¦按标识查看审计记录¦审计,auditd¦
+sec¦ausearch -m USER_LOGIN -ts today¦查看今天的登录审计¦审计,auditd,登录¦
+sec¦aureport -au¦生成认证报告¦审计,auditd¦
+sec¦aureport --summary¦生成审计汇总报告¦审计,auditd¦
+sec¦nmap -sV -O {{主机}}¦探测主机开放的服务和系统类型¦扫描,端口¦
+sec¦nmap --script vuln {{主机}}¦用 nmap 脚本扫描常见漏洞¦扫描,漏洞¦
+sec¦nmap -p 1-65535 -T4 {{主机}}¦快速扫描全部端口¦扫描,端口¦
+sec¦nmap -sU -p 53,161 {{主机}}¦扫描 UDP 端口¦扫描,udp¦
+sec¦openssl s_client -connect {{主机}}:{{443}} -tls1_2¦测试服务是否支持 TLS 1.2¦扫描,tls¦
+sec¦openssl s_client -connect {{主机}}:{{443}} -tls1 </dev/null¦测试服务是否还支持老旧的 TLS 1.0¦扫描,tls¦
+sec¦nmap --script ssl-enum-ciphers -p 443 {{主机}}¦查看服务支持的加密套件¦扫描,tls¦h
+sec¦testssl.sh {{主机}}:443¦全面检测 https 配置安全性¦扫描,tls¦
+sec¦sslscan {{主机}}:443¦扫描 SSL 配置¦扫描,tls¦
+sec¦nikto -h {{URL}}¦扫描 Web 常见漏洞¦扫描,web¦
+sec¦curl -I -s {{URL}} | grep -i -E "server|x-powered-by"¦查看响应头里暴露的服务器信息¦扫描,信息泄露¦
+sec¦cat /etc/pam.d/system-auth¦查看 PAM 认证配置¦配置,pam¦
+sec¦cat /etc/security/limits.conf¦查看用户资源限制配置¦配置,限制¦
+sec¦cat /etc/login.defs | grep -E "^PASS_"¦查看密码策略（有效期、长度）¦配置,密码策略¦h
+sec¦authconfig --test | grep -i hash¦查看密码使用的哈希算法¦配置,密码¦
+sec¦faillock --user {{用户}}¦查看用户登录失败锁定记录¦审计,锁定¦
+sec¦faillock --user {{用户}} --reset¦解除用户的登录失败锁定¦审计,锁定,解锁¦h
+sec¦pam_tally2 --user={{用户}}¦查看用户登录失败次数¦审计,锁定¦
+sec¦pam_tally2 --user={{用户}} --reset¦清零用户登录失败次数¦审计,解锁¦
+sec¦sestatus¦查看 SELinux 状态¦selinux,状态¦
+sec¦aa-status¦查看 AppArmor 状态¦apparmor,状态¦
+sec¦iptables -S¦以规则形式查看所有防火墙规则¦防火墙,规则¦
+sec¦ipset list¦查看 ipset 封禁名单¦防火墙,封禁¦
+sec¦ipset add {{名单}} {{IP}}¦往封禁名单加一个 IP¦防火墙,封禁¦
+sec¦gpg --gen-key¦生成 GPG 密钥对¦加密,gpg¦
+sec¦gpg -c {{文件}}¦用密码加密文件¦加密,gpg¦
+sec¦gpg {{文件}}.gpg¦解密 gpg 文件¦加密,gpg¦
+sec¦openssl enc -aes-256-cbc -d -in {{文件}}.enc -out {{文件}}¦解密 AES 加密的文件¦加密,解密¦
+sec¦shred -u -z {{文件}}¦覆盖并彻底删除文件，无法恢复¦删除,安全¦d
+sec¦wipe -rf {{目录}}¦安全擦除目录¦删除,安全¦d
+sec¦history -w && cat /dev/null > ~/.bash_history¦清空历史命令记录¦审计,历史¦d
+sec¦getent passwd | awk -F: '$7!~/nologin|false/ {print $1,$7}'¦查看所有能登录的账号¦审计,账号¦h
+sec¦awk -F: '$7 ~ /bash|sh$/ {print $1}' /etc/passwd¦列出有 shell 的账号¦审计,账号¦
+sec¦passwd -S {{用户}}¦查看用户密码状态¦审计,密码¦
+sec¦chage -l {{用户}} | head -3¦查看用户密码最后修改时间¦审计,密码¦
+sec¦cat /etc/hosts.allow /etc/hosts.deny¦查看 TCP wrappers 访问控制¦配置,访问控制¦
+sec¦ss -tulnp | awk 'NR>1 {print $5}' | sort -u¦列出所有对外开放的监听地址¦审计,端口¦h
+dev¦python3 --version¦查看 Python 版本¦python,版本¦h
+dev¦python3 -c "import sys; print(sys.path)"¦查看 Python 的模块搜索路径¦python,路径¦
+dev¦python3 -m json.tool {{文件}}¦格式化 JSON 文件¦python,json¦
+dev¦python3 -m pip list --outdated¦查看有新版本的 Python 包¦python,pip¦
+dev¦python3 -m pdb {{脚本}}.py¦用调试器运行 Python 脚本¦python,调试¦
+dev¦python3 -m py_compile {{脚本}}.py¦检查 Python 脚本语法¦python,检查¦
+dev¦python3 -m timeit "{{表达式}}"¦测试一段 Python 代码的耗时¦python,性能¦
+dev¦python3 -c "import {{模块}}; print({{模块}}.__file__)"¦查看 Python 模块安装在哪¦python,模块¦h
+dev¦python3 -m venv {{目录}} && source {{目录}}/bin/activate¦创建并进入虚拟环境¦python,虚拟环境¦h
+dev¦pip3 show {{包}}¦查看 Python 包的版本和位置¦python,pip¦
+dev¦pip3 install {{包}}=={{版本}}¦安装指定版本的 Python 包¦python,pip,版本¦
+dev¦pip3 download {{包}} -d {{目录}}¦只下载 Python 包（离线安装用）¦python,pip,离线¦
+dev¦pip3 install --no-index --find-links={{目录}} {{包}}¦从本地目录离线安装 Python 包¦python,pip,离线¦
+dev¦conda create -n {{环境}} python={{版本}}¦用 conda 创建环境¦python,conda¦
+dev¦conda activate {{环境}}¦进入 conda 环境¦python,conda¦
+dev¦conda env list¦查看所有 conda 环境¦python,conda¦
+dev¦node -v¦查看 Node 版本¦node,版本¦
+dev¦node -e "console.log({{表达式}})"¦直接运行一行 Node 代码¦node¦
+dev¦npx {{包}}¦不安装直接运行 npm 包¦node,npx¦
+dev¦npm ls {{包}}¦查看某个 npm 包的依赖路径¦node,npm¦
+dev¦npm outdated¦查看有新版本的依赖¦node,npm¦
+dev¦npm audit fix¦自动修复依赖的安全漏洞¦node,npm,安全¦
+dev¦npm run¦查看项目里可用的脚本¦node,npm¦
+dev¦npm start¦启动项目¦node,npm¦
+dev¦rm -rf node_modules package-lock.json && npm install¦清掉依赖重新安装¦node,npm,重装¦d
+dev¦npm config get registry¦查看 npm 当前使用的源¦node,npm,源¦
+dev¦go run {{文件}}.go¦直接运行 Go 程序¦go,运行¦
+dev¦go mod tidy¦整理 Go 依赖¦go,依赖¦h
+dev¦go mod download¦下载 Go 依赖¦go,依赖¦
+dev¦go test ./...¦运行所有 Go 测试¦go,测试¦
+dev¦go vet ./...¦检查 Go 代码问题¦go,检查¦
+dev¦go build -ldflags "-s -w" -o {{输出}}¦编译精简的 Go 程序（体积更小）¦go,编译¦
+dev¦GOOS=linux GOARCH=amd64 go build -o {{输出}}¦在其他系统上交叉编译 Linux 程序¦go,交叉编译¦h
+dev¦go env¦查看 Go 环境配置¦go,环境¦
+dev¦cargo build --release¦编译 Rust 项目（发布模式）¦rust,编译¦
+dev¦cargo run¦运行 Rust 项目¦rust,运行¦
+dev¦cargo test¦运行 Rust 测试¦rust,测试¦
+dev¦php -v¦查看 PHP 版本¦php,版本¦
+dev¦php -m¦查看已加载的 PHP 扩展¦php,扩展¦h
+dev¦php -i | grep php.ini¦查看 php.ini 的位置¦php,配置¦h
+dev¦php -l {{文件}}.php¦检查 PHP 语法¦php,检查¦
+dev¦php -r "{{代码}}"¦直接运行一行 PHP 代码¦php¦
+dev¦php-fpm -t¦检查 php-fpm 配置¦php,检查¦
+dev¦systemctl restart php-fpm¦重启 php-fpm¦php,重启¦
+dev¦composer install¦安装 PHP 依赖¦php,composer¦
+dev¦composer dump-autoload -o¦重新生成自动加载文件¦php,composer¦
+dev¦ruby -v¦查看 Ruby 版本¦ruby,版本¦
+dev¦dotnet --info¦查看 .NET 环境信息¦dotnet,版本¦
+dev¦dotnet publish -c Release -o {{目录}}¦发布 .NET 项目¦dotnet,发布¦
+dev¦dotnet {{程序}}.dll¦运行 .NET 程序¦dotnet,运行¦
+dev¦mvn -v¦查看 Maven 版本¦java,maven,版本¦
+dev¦mvn clean install -DskipTests¦Maven 构建并安装到本地仓库（跳过测试）¦java,maven,构建¦h
+dev¦mvn dependency:purge-local-repository¦清理并重新解析依赖¦java,maven,依赖¦
+dev¦mvn -U clean package¦强制更新依赖并打包¦java,maven,更新¦
+dev¦gradle clean build¦Gradle 清理并构建¦java,gradle,构建¦
+dev¦sed -n '1,10p' pom.xml¦查看 pom.xml 开头¦java,maven¦
+dev¦sqlite3 {{库}}.db ".tables"¦查看 SQLite 数据库里的表¦sqlite,查看¦
+dev¦sqlite3 {{库}}.db ".schema {{表}}"¦查看 SQLite 表结构¦sqlite,表结构¦
+dev¦sqlite3 {{库}}.db "{{SQL}}"¦直接执行一条 SQLite 语句¦sqlite,执行¦
+dev¦sqlite3 {{库}}.db ".dump" > {{文件}}.sql¦导出 SQLite 数据库¦sqlite,备份¦
+dev¦make -j$(nproc)¦用全部 CPU 核并行编译¦编译,并行¦h
+dev¦make clean¦清理编译产物¦编译,清理¦
+dev¦cmake -B build && cmake --build build¦用 cmake 构建项目¦编译,cmake¦
+dev¦gcc -o {{程序}} {{源码}}.c¦用 gcc 编译 C 程序¦编译,gcc¦
+dev¦gcc -g -o {{程序}} {{源码}}.c && gdb {{程序}}¦带调试信息编译并用 gdb 调试¦编译,调试¦
+dev¦valgrind --leak-check=full {{程序}}¦检查程序的内存泄露¦调试,内存¦
+dev¦ltrace {{程序}}¦跟踪程序调用的库函数¦调试¦
+dev¦objdump -d {{程序}} | head¦反汇编程序¦调试,反汇编¦
+dev¦nm {{库}}.so | grep {{函数}}¦查看动态库里有没有某个函数¦调试,库¦
+dev¦file {{程序}}¦查看程序是什么架构、什么格式¦调试,架构¦
+dev¦ldd {{程序}} | grep "not found"¦查找程序缺少哪些动态库¦调试,依赖¦h
+dev¦echo $LD_LIBRARY_PATH¦查看动态库搜索路径¦调试,库¦
+dev¦export LD_LIBRARY_PATH={{目录}}:$LD_LIBRARY_PATH¦临时增加动态库搜索路径¦调试,库¦
+dev¦update-alternatives --list {{命令}}¦查看某命令的所有可选版本¦版本,切换¦
+dev¦alternatives --config {{命令}}¦切换命令的默认版本¦版本,切换¦
+dev¦scl enable {{软件集}} bash¦启用 CentOS 软件集合（新版本软件）¦版本,scl¦
+dev¦sdk list java¦用 sdkman 查看可安装的 Java 版本¦java,版本,sdkman¦
+dev¦sdk use java {{版本}}¦用 sdkman 临时切换 Java 版本¦java,版本,sdkman¦
+dev¦jq -r '.dependencies | keys[]' package.json¦列出 package.json 的所有依赖¦node,依赖¦
+dev¦curl -s {{URL}} | jq .¦请求接口并格式化 JSON 结果¦json,接口¦h
+dev¦curl -s {{URL}} | jq -r '.{{字段}}'¦请求接口并取出某个字段¦json,接口¦
+dev¦httpie {{URL}}¦用 httpie 请求接口（输出更友好）¦接口,http¦
+dev¦http POST {{URL}} {{key}}={{value}}¦用 httpie 发 POST 请求¦接口,http¦
+dev¦yq eval '.{{路径}} = "{{值}}"' -i {{文件}}.yaml¦修改 YAML 文件里的某个值¦yaml,修改¦h
+dev¦yamllint {{文件}}.yaml¦检查 YAML 语法¦yaml,检查¦
+dev¦python3 -c "import yaml,sys; yaml.safe_load(open('{{文件}}'))"¦用 Python 检查 YAML 是否合法¦yaml,检查¦
+dev¦python3 -c "import json,sys; json.load(open('{{文件}}'))"¦用 Python 检查 JSON 是否合法¦json,检查¦
+dev¦xmllint --format {{文件}}.xml¦格式化 XML¦xml,格式化¦
+dev¦xmllint --noout {{文件}}.xml¦检查 XML 语法¦xml,检查¦
+dev¦pandoc {{文件}}.md -o {{文件}}.pdf¦把 Markdown 转成 PDF¦文档,转换¦
+dev¦convert {{图片}}.png -resize 50% {{输出}}.png¦缩小图片¦图片,处理¦
+dev¦ffmpeg -i {{视频}}.mp4 -c copy {{输出}}.mkv¦不重新编码地转换视频封装¦视频,转换¦
+dev¦ffmpeg -i {{视频}}.mp4 -vn -acodec copy {{音频}}.aac¦从视频里提取音频¦视频,音频¦
+misc¦uname -a && cat /etc/os-release¦一次看内核和系统版本¦系统,版本¦h
+misc¦cat /etc/issue¦查看系统登录欢迎信息和版本¦系统,版本¦
+misc¦man {{命令}}¦查看命令的手册¦帮助,手册¦h
+misc¦{{命令}} --help¦查看命令的用法¦帮助,用法¦h
+misc¦tldr {{命令}}¦查看命令的简明用法示例¦帮助,示例¦h
+misc¦info {{命令}}¦查看命令的 info 文档¦帮助,文档¦
+misc¦apropos {{关键字}}¦按关键字搜索相关的命令¦帮助,搜索¦h
+misc¦whatis {{命令}}¦用一句话说明命令是干什么的¦帮助,说明¦
+misc¦compgen -c | grep {{关键字}}¦按关键字搜索系统里有哪些命令¦帮助,搜索¦
+misc¦echo $?¦查看上一条命令的退出码¦退出码,调试¦
+misc¦echo $0¦查看当前用的是哪个 shell¦shell¦
+misc¦echo $PATH | tr ':' '\n'¦把 PATH 分行显示¦环境变量,path¦h
+misc¦printenv | grep -i proxy¦查看代理相关的环境变量¦环境变量,代理¦h
+misc¦export http_proxy=http://{{代理}} https_proxy=http://{{代理}}¦设置终端代理¦代理,环境变量¦h
+misc¦unset http_proxy https_proxy¦取消终端代理¦代理,环境变量¦h
+misc¦export no_proxy="{{域名}},localhost,127.0.0.1"¦设置不走代理的地址¦代理,环境变量¦
+misc¦cat /proc/version¦查看内核编译信息¦内核,版本¦
+misc¦cat /proc/cmdline¦查看内核启动参数¦内核,启动¦
+misc¦lsmod¦查看已加载的内核模块¦内核,模块¦
+misc¦modprobe {{模块}}¦加载内核模块¦内核,模块¦
+misc¦modinfo {{模块}}¦查看内核模块详情¦内核,模块¦
+misc¦rmmod {{模块}}¦卸载内核模块¦内核,模块¦
+misc¦lsusb¦查看 USB 设备¦硬件,usb¦
+misc¦lspci¦查看 PCI 设备¦硬件,pci¦
+misc¦lshw -short¦简要列出所有硬件¦硬件¦
+misc¦lsblk -o NAME,SIZE,TYPE,MOUNTPOINT¦树形查看磁盘和挂载点¦硬件,磁盘¦h
+misc¦dmidecode -t bios¦查看 BIOS 信息¦硬件,bios¦
+misc¦lscpu¦查看 CPU 详细信息¦硬件,cpu¦h
+misc¦ipmitool lan print¦查看服务器带外管理地址¦硬件,ipmi¦h
+misc¦ipmitool chassis power status¦查看服务器电源状态¦硬件,ipmi¦
+misc¦ipmitool chassis power cycle¦通过 IPMI 重启服务器电源¦硬件,ipmi¦d
+misc¦ipmitool user list 1¦查看 IPMI 用户¦硬件,ipmi¦
+misc¦ipmitool mc reset cold¦重置 BMC 管理控制器¦硬件,ipmi¦d
+misc¦megacli -LDInfo -Lall -aAll¦查看 RAID 逻辑盘信息¦硬件,raid¦h
+misc¦megacli -PDList -aAll | grep -E "Slot|Firmware state|Media Error"¦查看 RAID 物理盘状态¦硬件,raid¦
+misc¦storcli /c0 show¦查看 RAID 卡信息¦硬件,raid¦
+misc¦storcli /c0/vall show¦查看所有虚拟盘¦硬件,raid¦
+misc¦cat /proc/mdstat¦查看软 RAID 状态¦硬件,raid¦h
+misc¦mdadm --detail /dev/md0¦查看软 RAID 详情¦硬件,raid¦
+misc¦mdadm --manage /dev/md0 --add {{/dev/sdb1}}¦给软 RAID 添加硬盘¦硬件,raid¦
+misc¦hdparm -I {{/dev/sda}}¦查看硬盘详细信息¦硬件,磁盘¦
+misc¦sdparm {{/dev/sda}}¦查看 SCSI 磁盘参数¦硬件,磁盘¦
+misc¦multipath -ll¦查看多路径存储状态¦硬件,存储¦
+misc¦iscsiadm -m session¦查看 iSCSI 会话¦硬件,存储¦
+misc¦echo "{{内容}}" | mail -s "{{主题}}" {{邮箱}}¦命令行发邮件¦邮件¦
+misc¦mailx -s "{{主题}}" {{邮箱}} < {{文件}}¦把文件内容作为邮件发出¦邮件¦
+misc¦wall "{{消息}}"¦给所有登录用户发广播消息¦通知,广播¦h
+misc¦write {{用户}}¦给某个登录用户发消息¦通知¦
+misc¦notify-send "{{标题}}" "{{内容}}"¦桌面弹出通知¦通知¦
+misc¦curl -X POST -H "Content-Type: application/json" -d '{"msgtype":"text","text":{"content":"{{内容}}"}}' {{Webhook地址}}¦往钉钉/企业微信机器人发消息¦通知,告警,webhook¦h
+misc¦curl -d "text={{内容}}" {{Webhook地址}}¦往 webhook 发简单文本消息¦通知,告警¦
+misc¦script {{文件}}¦把终端操作过程录制到文件¦录制,审计¦
+misc¦asciinema rec {{文件}}.cast¦录制终端操作过程¦录制¦
+misc¦tmux capture-pane -pS -3000 > {{文件}}¦保存 tmux 窗口的历史输出¦tmux,保存¦
+misc¦logrotate -f /etc/logrotate.conf¦强制执行一次所有日志切割¦日志,轮转¦
+misc¦cal¦显示当前月历¦日历¦
+misc¦cal -y¦显示全年日历¦日历¦
+misc¦bc <<< "{{1+2}}"¦命令行计算器¦计算¦h
+misc¦echo $(({{10}}*{{3}}))¦用 shell 做整数运算¦计算¦
+misc¦python3 -c "print({{1+2}})"¦用 Python 做计算¦计算¦
+misc¦expr {{10}} + {{5}}¦用 expr 做计算¦计算¦
+misc¦numfmt --to=iec {{字节数}}¦把字节数转成 KB/MB/GB 易读格式¦计算,单位¦h
+misc¦numfmt --from=iec {{1G}}¦把 1G 之类转成字节数¦计算,单位¦
+misc¦factor {{数字}}¦分解质因数¦计算¦
+misc¦seq -s, 1 {{10}}¦输出用逗号隔开的数字序列¦序列¦
+misc¦cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c {{16}}¦生成随机字符串（密码）¦随机,密码¦h
+misc¦pwgen -s {{16}} 1¦生成强随机密码¦随机,密码¦
+misc¦mkpasswd -m sha-512 {{密码}}¦生成 SHA512 加密的密码串（写入 shadow 用）¦密码,加密¦
+misc¦uuidgen | tr -d '-'¦生成不带横线的 UUID¦随机,uuid¦
+misc¦head -c {{1M}} /dev/urandom > {{文件}}¦生成指定大小的随机文件¦随机,测试¦
+misc¦yes {{内容}} | head -n {{1000}} > {{文件}}¦生成指定行数的测试文件¦测试,创建¦
+misc¦stress --cpu {{4}} --timeout 60¦让 CPU 满载 60 秒（压测）¦压测,cpu¦h
+misc¦stress --vm {{2}} --vm-bytes {{1G}} --timeout 60¦占用内存做压测¦压测,内存¦
+misc¦stress-ng --cpu 0 --cpu-method all -t 60¦用 stress-ng 全核压测 60 秒¦压测,cpu¦
+misc¦sysbench cpu --threads={{4}} run¦CPU 性能测试¦压测,性能¦
+misc¦sysbench memory run¦内存性能测试¦压测,性能¦
+misc¦sysbench fileio --file-test-mode=rndrw prepare¦磁盘 IO 性能测试（先准备文件）¦压测,磁盘¦
+misc¦sysbench mysql --mysql-host={{主机}} --mysql-user={{用户}} --mysql-password={{密码}} run¦MySQL 压测¦压测,mysql¦
+misc¦unixbench¦综合性能跑分¦压测,性能¦
+misc¦time dd if=/dev/zero of=/tmp/test bs=1M count=1000 oflag=direct¦测试磁盘写入速度¦压测,磁盘¦h
+misc¦dd if=/tmp/test of=/dev/null bs=1M¦测试磁盘读取速度¦压测,磁盘¦
+misc¦curl -o /dev/null -s -w "%{speed_download}\n" {{大文件URL}}¦测试下载速度¦压测,下载¦
+misc¦which -a {{命令}}¦查看某命令所有的路径（排查多版本）¦命令,路径¦
+misc¦type -a {{命令}}¦查看某命令是别名、函数还是程序¦命令,别名¦
+misc¦command -V {{命令}}¦查看命令的类型¦命令¦
+misc¦hash -r¦清空命令路径缓存（装了新程序找不到时用）¦命令,缓存¦h
+misc¦source /etc/profile¦重新加载全局环境变量¦环境变量,加载¦h
+misc¦source ~/.bashrc¦重新加载个人 shell 配置¦环境变量,加载¦h
+misc¦exec $SHELL -l¦重新启动登录 shell¦shell,重启¦
+misc¦bash --version¦查看 bash 版本¦shell,版本¦
+misc¦setxkbmap us¦切换键盘布局为美式¦键盘¦
+misc¦loadkeys us¦控制台切换键盘布局¦键盘¦
+misc¦localectl status¦查看系统语言和键盘设置¦语言,键盘¦
+misc¦dpkg-reconfigure tzdata¦交互式设置时区（Ubuntu）¦时区,时间¦
+misc¦ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime¦把时区改成上海¦时区,时间¦h
+misc¦grub2-mkconfig -o /boot/grub2/grub.cfg¦重新生成 grub 配置（CentOS）¦启动,grub¦
+misc¦update-grub¦重新生成 grub 配置（Ubuntu）¦启动,grub¦
+misc¦grubby --default-kernel¦查看默认启动的内核¦启动,内核¦h
+misc¦grubby --set-default {{内核路径}}¦设置默认启动的内核¦启动,内核¦
+misc¦rpm -qa kernel¦查看已安装的所有内核¦内核,版本¦
+misc¦dracut -f¦重新生成 initramfs¦启动,内核¦
+misc¦mkinitcpio -P¦重新生成 initramfs（Arch）¦启动,内核¦
+misc¦lsinitrd | head¦查看 initramfs 里的内容¦启动,内核¦
+misc¦kdump-config show¦查看 kdump 崩溃转储配置¦内核,崩溃¦
+misc¦systemctl rescue¦进入救援模式¦启动,救援¦d
+misc¦chroot {{目录}} /bin/bash¦切换到另一个根目录（救援系统时用）¦救援,chroot¦
+misc¦mount --bind /proc {{目录}}/proc¦chroot 前绑定挂载 proc¦救援,chroot¦
+misc¦passwd root¦修改 root 密码¦密码,root¦h
+misc¦touch /.autorelabel¦下次开机重新标记 SELinux 上下文（救援改密码后用）¦救援,selinux¦
+#@@MORE@@

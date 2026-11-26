@@ -1,0 +1,2603 @@
+{
+  "categories": [
+    {
+      "id": "file",
+      "label": "文件与目录"
+    },
+    {
+      "id": "text",
+      "label": "查找与文本"
+    },
+    {
+      "id": "disk",
+      "label": "磁盘与容量"
+    },
+    {
+      "id": "perm",
+      "label": "权限与用户"
+    },
+    {
+      "id": "proc",
+      "label": "进程与性能"
+    },
+    {
+      "id": "net",
+      "label": "网络与端口"
+    },
+    {
+      "id": "log",
+      "label": "日志排障"
+    },
+    {
+      "id": "pkg",
+      "label": "软件包"
+    },
+    {
+      "id": "svc",
+      "label": "systemd 服务"
+    },
+    {
+      "id": "ssh",
+      "label": "SSH 与传输"
+    },
+    {
+      "id": "docker",
+      "label": "Docker"
+    },
+    {
+      "id": "k8s",
+      "label": "Kubernetes"
+    },
+    {
+      "id": "db",
+      "label": "MySQL / Redis"
+    },
+    {
+      "id": "nginx",
+      "label": "Nginx"
+    },
+    {
+      "id": "archive",
+      "label": "压缩与备份"
+    },
+    {
+      "id": "cron",
+      "label": "定时任务"
+    },
+    {
+      "id": "misc",
+      "label": "系统与其他"
+    }
+  ],
+  "commands": [
+    {
+      "cat": "file",
+      "cmd": "ls -alh",
+      "desc": "查看当前目录全部文件（含隐藏文件，大小易读）",
+      "tags": [
+        "基础"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "file",
+      "cmd": "ls -lt | head -20",
+      "desc": "按修改时间倒序，找最近变动的文件",
+      "tags": [
+        "基础"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "pwd",
+      "desc": "显示当前所在的完整路径",
+      "tags": [
+        "基础"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "cd -",
+      "desc": "回到上一次所在的目录",
+      "tags": [
+        "基础"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "tree -L 2 -d",
+      "desc": "以树形查看两层目录结构",
+      "tags": [
+        "目录"
+      ],
+      "note": "没装的话：yum install -y tree / apt install -y tree",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "mkdir -p /data/app/logs",
+      "desc": "递归创建多级目录",
+      "tags": [
+        "目录"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "cp -a {{源目录}}/ {{目标目录}}/",
+      "desc": "递归复制并保留权限、属主和时间戳（备份首选）",
+      "tags": [
+        "复制"
+      ],
+      "note": "源目录结尾带 / 表示复制「目录里的内容」，不带 / 则连同目录本身一起复制",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "mv {{旧路径}} {{新路径}}",
+      "desc": "移动文件或重命名",
+      "tags": [
+        "移动"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "rm -rf {{目录}}",
+      "desc": "强制递归删除目录及其内容",
+      "tags": [
+        "删除"
+      ],
+      "note": "删之前先用 ls 看清楚路径；拿不准就改名为 xxx.bak 观察几天再删",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "find /data -type f -size +100M",
+      "desc": "查找大于 100M 的文件",
+      "tags": [
+        "查找",
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "find /data -name \"*.log\" -mtime +7",
+      "desc": "查找 7 天前的日志文件",
+      "tags": [
+        "查找",
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "find /data -type f -name \"*.tmp\" -delete",
+      "desc": "查找并删除符合条件的文件",
+      "tags": [
+        "查找",
+        "删除"
+      ],
+      "note": "先去掉 -delete 确认结果正确，再加上执行",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "stat {{文件}}",
+      "desc": "查看文件大小、权限、属主和三个时间戳",
+      "tags": [
+        "信息"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "file {{文件}}",
+      "desc": "判断文件真实类型（不看扩展名）",
+      "tags": [
+        "信息"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "ln -s {{真实路径}} {{链接路径}}",
+      "desc": "创建软链接",
+      "tags": [
+        "链接"
+      ],
+      "note": "建议用绝对路径，否则移动链接后容易失效",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "readlink -f {{文件}}",
+      "desc": "解析软链接最终指向的真实路径",
+      "tags": [
+        "链接"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "file",
+      "cmd": "du -sh * | sort -rh | head -20",
+      "desc": "当前目录下各子项占用空间排行",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "text",
+      "cmd": "grep -rn \"{{关键字}}\" {{目录}}",
+      "desc": "递归搜索文件内容，显示文件名和行号",
+      "tags": [
+        "搜索"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "text",
+      "cmd": "grep -rn --include=\"*.conf\" \"{{关键字}}\" /etc",
+      "desc": "只在指定后缀的文件中搜索",
+      "tags": [
+        "搜索"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "grep -v \"{{排除关键字}}\" {{文件}}",
+      "desc": "反向过滤：排除包含关键字的行",
+      "tags": [
+        "过滤"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "grep -c \"{{关键字}}\" {{文件}}",
+      "desc": "统计匹配到的行数",
+      "tags": [
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "grep -A 3 -B 3 \"{{关键字}}\" {{文件}}",
+      "desc": "显示匹配行及其前后各 3 行",
+      "tags": [
+        "搜索"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "sed -n '1,50p' {{文件}}",
+      "desc": "查看文件第 1 到 50 行",
+      "tags": [
+        "查看"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "sed -i.bak 's/{{旧内容}}/{{新内容}}/g' {{文件}}",
+      "desc": "批量替换文本内容并自动备份",
+      "tags": [
+        "替换"
+      ],
+      "note": ".bak 会在原文件旁生成备份，改坏了可以直接还原",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "awk '{print $1}' {{文件}}",
+      "desc": "取每行第一列（默认按空格分隔）",
+      "tags": [
+        "文本"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "awk -F: '{print $1}' /etc/passwd",
+      "desc": "按冒号分隔取第一列（所有用户名）",
+      "tags": [
+        "文本"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "sort {{文件}} | uniq -c | sort -rn",
+      "desc": "统计每项出现次数并倒序排列",
+      "tags": [
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "wc -l {{文件}}",
+      "desc": "统计文件行数",
+      "tags": [
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "cut -d: -f1 /etc/passwd",
+      "desc": "按分隔符取指定列",
+      "tags": [
+        "文本"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "tr -d '\\r' < {{windows文件}} > {{unix文件}}",
+      "desc": "去掉 Windows 换行符，修复脚本报错",
+      "tags": [
+        "换行"
+      ],
+      "note": "报错 bad interpreter 通常就是回车符导致的",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "jq '.{{字段}}' {{文件}}.json",
+      "desc": "解析 JSON 并取字段值",
+      "tags": [
+        "json"
+      ],
+      "note": "没装 jq：yum install -y jq / apt install -y jq",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "diff -u {{旧文件}} {{新文件}}",
+      "desc": "对比两个文件的差异",
+      "tags": [
+        "对比"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "md5sum {{文件}}",
+      "desc": "计算文件校验值（sha256sum 更安全）",
+      "tags": [
+        "校验"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "text",
+      "cmd": "grep -o '{{正则}}' {{文件}} | wc -l",
+      "desc": "统计某个模式在文件中出现了多少次",
+      "tags": [
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "df -hT",
+      "desc": "查看各分区使用率和文件系统类型",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "disk",
+      "cmd": "df -i",
+      "desc": "查看 inode 使用率",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "磁盘没满但写不进文件，多半是 inode 用完了",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "du -sh {{目录}}",
+      "desc": "查看目录总占用大小",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "disk",
+      "cmd": "du -h --max-depth=1 /data | sort -rh | head",
+      "desc": "逐层定位是哪个子目录占满了磁盘",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "lsblk -f",
+      "desc": "查看磁盘、分区、文件系统和挂载点",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "fdisk -l",
+      "desc": "查看磁盘分区表",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "mount {{设备}} {{挂载点}}",
+      "desc": "临时挂载磁盘或 ISO 镜像",
+      "tags": [
+        "挂载"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "umount {{挂载点}}",
+      "desc": "卸载已挂载的设备",
+      "tags": [
+        "挂载"
+      ],
+      "note": "报 target is busy：用 lsof +D 挂载点 或 fuser -vm 挂载点 找占用进程",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "blkid",
+      "desc": "查看设备 UUID（写 /etc/fstab 用）",
+      "tags": [
+        "挂载"
+      ],
+      "note": "fstab 建议写 UUID=xxx，避免设备名变化导致开不了机",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "iostat -x 1 5",
+      "desc": "查看磁盘 IO 使用率和等待情况",
+      "tags": [
+        "性能"
+      ],
+      "note": "重点看 %util 和 await，接近 100% 说明磁盘是瓶颈",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "iotop -o",
+      "desc": "查看正在读写磁盘的进程",
+      "tags": [
+        "性能"
+      ],
+      "note": "需要 root；没装：yum install -y iotop / apt install -y iotop",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "smartctl -a /dev/sda",
+      "desc": "查看磁盘 SMART 健康状态",
+      "tags": [
+        "硬件"
+      ],
+      "note": "关注 Reallocated_Sector_Ct、Pending_Sector 是否为 0",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "dd if=/dev/zero of=/tmp/testfile bs=1M count=1024",
+      "desc": "测试磁盘顺序写入速度",
+      "tags": [
+        "性能"
+      ],
+      "note": "注意 of= 后面千万别写成真实磁盘设备",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "findmnt",
+      "desc": "以树形查看所有挂载关系",
+      "tags": [
+        "挂载"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "disk",
+      "cmd": "ncdu {{目录}}",
+      "desc": "交互式浏览目录占用，可按键删除大文件",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "需要安装 ncdu；不想装就用 du 逐层排查",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "ls -l {{文件}}",
+      "desc": "查看文件权限、属主和大小",
+      "tags": [
+        "权限"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "chmod 755 {{文件}}",
+      "desc": "权限设为 rwxr-xr-x（目录和可执行文件常用）",
+      "tags": [
+        "权限"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "chmod +x {{脚本}}",
+      "desc": "给脚本增加执行权限",
+      "tags": [
+        "权限"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "chmod -R 755 {{目录}}",
+      "desc": "递归修改目录权限",
+      "tags": [
+        "权限"
+      ],
+      "note": "目录 755、普通文件 644 更安全，别图省事全给 777",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "chown -R {{用户}}:{{用户组}} {{目录}}",
+      "desc": "递归修改属主和属组",
+      "tags": [
+        "权限"
+      ],
+      "note": "确认用户和组已存在，否则会报 invalid user",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "id {{用户}}",
+      "desc": "查看用户的 UID、GID 和所属组",
+      "tags": [
+        "用户"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "sudo -u {{用户}} {{命令}}",
+      "desc": "以指定用户身份执行命令",
+      "tags": [
+        "用户"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "useradd -m -s /bin/bash {{用户}}",
+      "desc": "创建用户并生成家目录",
+      "tags": [
+        "用户"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "usermod -aG {{组}} {{用户}}",
+      "desc": "把用户加入附加组（如 docker）",
+      "tags": [
+        "用户"
+      ],
+      "note": "加完要重新登录才生效，用 id 命令确认一下",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "passwd {{用户}}",
+      "desc": "修改用户密码",
+      "tags": [
+        "用户"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "setfacl -m u:{{用户}}:rwx {{文件}}",
+      "desc": "给单个用户单独授权（ACL）",
+      "tags": [
+        "权限"
+      ],
+      "note": "适合不想改属主、又要额外授权一个用户的场景",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "getfacl {{文件}}",
+      "desc": "查看文件的 ACL 权限",
+      "tags": [
+        "权限"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "perm",
+      "cmd": "umask",
+      "desc": "查看当前默认权限掩码",
+      "tags": [
+        "权限"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "ps aux | grep {{关键字}} | grep -v grep",
+      "desc": "按关键字查找进程",
+      "tags": [
+        "进程"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "proc",
+      "cmd": "ps -ef --forest",
+      "desc": "树形查看进程父子关系",
+      "tags": [
+        "进程"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "top -c",
+      "desc": "实时查看 CPU、内存占用（显示完整命令行）",
+      "tags": [
+        "性能"
+      ],
+      "note": "top 里按 P 按 CPU 排序、按 M 按内存排序、按 1 看每个核心",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "proc",
+      "cmd": "top -Hp {{PID}}",
+      "desc": "查看进程内各线程的 CPU 占用",
+      "tags": [
+        "性能"
+      ],
+      "note": "找到高占用线程 ID 后，用 printf %x 转成十六进制可与 jstack 对应",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "kill -15 {{PID}}",
+      "desc": "向进程发送 SIGTERM，优雅停止",
+      "tags": [
+        "进程"
+      ],
+      "note": "先给它机会释放资源，等几秒没退再考虑 -9",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "kill -9 {{PID}}",
+      "desc": "强制杀死进程，信号无法被忽略",
+      "tags": [
+        "进程"
+      ],
+      "note": "可能丢数据、留下锁文件，能用 -15 就别用 -9",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "pkill -f {{关键字}}",
+      "desc": "按命令行关键字批量杀进程",
+      "tags": [
+        "进程"
+      ],
+      "note": "执行前先 pgrep -af 确认会杀哪些，别误伤",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "pgrep -af {{关键字}}",
+      "desc": "按关键字查进程 PID 和完整命令行",
+      "tags": [
+        "进程"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "lsof -p {{PID}}",
+      "desc": "查看进程打开的文件和端口",
+      "tags": [
+        "进程"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "strace -f -tt -p {{PID}}",
+      "desc": "跟踪进程系统调用，排查卡死、文件、网络问题",
+      "tags": [
+        "排障"
+      ],
+      "note": "输出量很大，可加 -e trace=network 只看网络相关调用",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "free -h",
+      "desc": "查看内存和 swap 使用情况",
+      "tags": [
+        "内存"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "proc",
+      "cmd": "uptime",
+      "desc": "查看运行时间与 1/5/15 分钟平均负载",
+      "tags": [
+        "性能"
+      ],
+      "note": "负载高于 CPU 核数说明有排队，用 nproc 看核数",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "vmstat 1 5",
+      "desc": "每秒采样 5 次，查看 CPU、内存、IO 整体情况",
+      "tags": [
+        "性能"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "mpstat -P ALL 1",
+      "desc": "查看每个 CPU 核心的使用率",
+      "tags": [
+        "性能"
+      ],
+      "note": "属于 sysstat 包：yum install -y sysstat / apt install -y sysstat",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "pidstat -u -p {{PID}} 1",
+      "desc": "持续查看单个进程的 CPU 使用",
+      "tags": [
+        "性能"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "dmesg -T | tail -50",
+      "desc": "查看内核日志（OOM、磁盘、网卡报错）",
+      "tags": [
+        "排障"
+      ],
+      "note": "出现 Out of memory: Killed process 说明进程被系统 OOM 杀了",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "nproc",
+      "desc": "查看 CPU 核心数",
+      "tags": [
+        "性能"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "nohup {{命令}} > {{日志文件}} 2>&1 &",
+      "desc": "后台运行，关闭终端也不退出",
+      "tags": [
+        "后台"
+      ],
+      "note": "长期运行的服务建议用 systemd 托管，nohup 只适合临时任务",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "proc",
+      "cmd": "watch -n 2 '{{命令}}'",
+      "desc": "每 2 秒刷新执行一次命令",
+      "tags": [
+        "监控"
+      ],
+      "note": "例如 watch -n 2 'ss -s' 观察连接数变化",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ss -lntp",
+      "desc": "查看所有监听端口及对应进程",
+      "tags": [
+        "端口"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "net",
+      "cmd": "ss -antp | grep ESTAB",
+      "desc": "查看已建立的 TCP 连接",
+      "tags": [
+        "连接"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ss -s",
+      "desc": "查看 TCP/UDP 连接状态汇总",
+      "tags": [
+        "连接"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "lsof -i :{{端口}}",
+      "desc": "查看端口被哪个进程占用",
+      "tags": [
+        "端口"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "net",
+      "cmd": "netstat -anp | grep {{端口}}",
+      "desc": "老系统查端口占用",
+      "tags": [
+        "端口"
+      ],
+      "note": "新系统可能没装 netstat，优先用 ss -lntp",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ip addr",
+      "desc": "查看网卡和 IP 地址",
+      "tags": [
+        "网卡"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ip route",
+      "desc": "查看路由表（默认网关）",
+      "tags": [
+        "网卡"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ping -c 4 {{主机}}",
+      "desc": "测试网络连通性",
+      "tags": [
+        "连通性"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "traceroute {{主机}}",
+      "desc": "跟踪路由，定位在哪一跳断了",
+      "tags": [
+        "连通性"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "mtr {{主机}}",
+      "desc": "持续路由探测，看每一跳丢包率",
+      "tags": [
+        "连通性"
+      ],
+      "note": "比 traceroute 更直观；没装：yum install -y mtr",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "curl -I {{URL}}",
+      "desc": "只看响应头，快速判断服务是否可用",
+      "tags": [
+        "HTTP"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "net",
+      "cmd": "curl -v {{URL}}",
+      "desc": "查看完整请求过程（DNS、TLS、超时）",
+      "tags": [
+        "HTTP"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "curl -o /dev/null -s -w '%{time_total}\\n' {{URL}}",
+      "desc": "测量接口总耗时（秒）",
+      "tags": [
+        "HTTP"
+      ],
+      "note": "排查接口慢时很实用，可配合 for 循环连续测",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "curl -X POST -H \"Content-Type: application/json\" -d @{{请求体文件}} {{URL}}",
+      "desc": "发送 JSON POST 请求",
+      "tags": [
+        "HTTP"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "dig {{域名}} +short",
+      "desc": "查询域名 DNS 解析结果",
+      "tags": [
+        "DNS"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "nslookup {{域名}}",
+      "desc": "查询 DNS 解析（老工具，够用）",
+      "tags": [
+        "DNS"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "nc -zv {{主机}} {{端口}}",
+      "desc": "测试目标端口是否通",
+      "tags": [
+        "端口"
+      ],
+      "note": "成功显示 succeeded；被拒绝说明端口没开或被防火墙拦",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "telnet {{主机}} {{端口}}",
+      "desc": "测试端口连通性（老系统常用）",
+      "tags": [
+        "端口"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "tcpdump -i {{网卡}} port {{端口}} -nn",
+      "desc": "抓取指定端口的网络包",
+      "tags": [
+        "抓包"
+      ],
+      "note": "加 -w x.pcap 保存，用 Wireshark 打开分析；生产注意流量和权限",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "iptables -L -n -v",
+      "desc": "查看防火墙规则和命中计数",
+      "tags": [
+        "防火墙"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "firewall-cmd --list-all",
+      "desc": "查看 firewalld 开放端口和规则",
+      "tags": [
+        "防火墙"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ethtool {{网卡}}",
+      "desc": "查看网卡速率、双工和链路状态",
+      "tags": [
+        "网卡"
+      ],
+      "note": "Speed 显示 100Mb/s 而交换机是千兆时，检查网线或光模块",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "net",
+      "cmd": "ab -n 1000 -c 100 {{URL}}",
+      "desc": "简单压测接口 QPS 和响应时间",
+      "tags": [
+        "压测"
+      ],
+      "note": "只适合 HTTP GET；没装：yum install -y httpd-tools",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "tail -f {{日志文件}}",
+      "desc": "实时跟踪日志输出",
+      "tags": [
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "log",
+      "cmd": "tail -n 200 {{日志文件}}",
+      "desc": "查看日志最后 200 行",
+      "tags": [
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "tail -f {{日志文件}} | grep --line-buffered \"{{关键字}}\"",
+      "desc": "实时只看包含关键字的日志",
+      "tags": [
+        "日志"
+      ],
+      "note": "--line-buffered 不能省，否则 grep 会攒一大块才输出",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "log",
+      "cmd": "less +F {{日志文件}}",
+      "desc": "可上翻回看的实时日志（Ctrl+C 暂停跟随）",
+      "tags": [
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "grep \"{{关键字}}\" {{日志文件}} | tail -50",
+      "desc": "查看最近 50 条匹配日志",
+      "tags": [
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "zgrep \"{{关键字}}\" {{日志文件}}.gz",
+      "desc": "直接在压缩日志里搜索",
+      "tags": [
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "journalctl -u {{服务}} -f",
+      "desc": "实时查看 systemd 服务日志",
+      "tags": [
+        "日志",
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "log",
+      "cmd": "journalctl -u {{服务}} --since \"1 hour ago\"",
+      "desc": "查看服务最近一小时的日志",
+      "tags": [
+        "日志",
+        "systemd"
+      ],
+      "note": "也支持 \"today\"、\"2026-01-01 10:00\" 这类写法",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "journalctl -p err -b",
+      "desc": "查看本次启动以来错误级别的日志",
+      "tags": [
+        "日志",
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "journalctl --disk-usage",
+      "desc": "查看 journal 日志占用磁盘空间",
+      "tags": [
+        "日志"
+      ],
+      "note": "清理旧日志：journalctl --vacuum-time=7d",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "log",
+      "cmd": "awk '{print $4}' {{access日志}} | cut -d: -f1-2 | sort | uniq -c",
+      "desc": "统计每分钟请求量，定位流量突增",
+      "tags": [
+        "日志",
+        "nginx"
+      ],
+      "note": "前提是 Nginx 默认格式、时间在第 4 列；时间格式按实际日志调整",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "yum install -y {{包名}}",
+      "desc": "CentOS 7 安装软件包",
+      "tags": [
+        "yum"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "dnf install -y {{包名}}",
+      "desc": "CentOS 8+/Rocky/Alma 安装软件包",
+      "tags": [
+        "dnf"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "rpm -qa | grep {{包名}}",
+      "desc": "查询系统是否已安装某个包",
+      "tags": [
+        "rpm"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "rpm -ql {{包名}}",
+      "desc": "查看包安装了哪些文件",
+      "tags": [
+        "rpm"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "dnf provides */{{命令}}",
+      "desc": "查找某个命令属于哪个软件包",
+      "tags": [
+        "dnf"
+      ],
+      "note": "CentOS 7 用 yum provides */命令",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "apt update && apt install -y {{包名}}",
+      "desc": "Debian / Ubuntu 安装软件包",
+      "tags": [
+        "apt"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "dpkg -l | grep {{包名}}",
+      "desc": "查询 Debian 系已安装的包",
+      "tags": [
+        "apt"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "yum clean all && yum makecache",
+      "desc": "清理并重建软件源缓存",
+      "tags": [
+        "yum"
+      ],
+      "note": "报 Cannot retrieve metalink 时先检查网络和源地址",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "yum history",
+      "desc": "查看安装事务记录，可回滚",
+      "tags": [
+        "yum"
+      ],
+      "note": "回滚：yum history undo <ID>",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "pkg",
+      "cmd": "rpm -ivh {{包}}.rpm",
+      "desc": "安装本地 rpm 包",
+      "tags": [
+        "rpm"
+      ],
+      "note": "依赖缺失时别急着加 --nodeps，容易装出半残系统",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl status {{服务}} --no-pager",
+      "desc": "查看服务状态和最近日志",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl restart {{服务}}",
+      "desc": "重启服务",
+      "tags": [
+        "systemd"
+      ],
+      "note": "支持 reload 的服务优先用 reload，可以不中断连接",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl stop {{服务}}",
+      "desc": "停止服务",
+      "tags": [
+        "systemd"
+      ],
+      "note": "停生产服务前先确认影响范围和回滚方式",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl enable --now {{服务}}",
+      "desc": "设置开机自启并立即启动",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl disable {{服务}}",
+      "desc": "取消开机自启",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl list-units --type=service --state=running",
+      "desc": "查看当前正在运行的服务",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl list-unit-files | grep enabled",
+      "desc": "查看已设置开机自启的服务",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl daemon-reload",
+      "desc": "修改 unit 文件后重新加载配置",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl cat {{服务}}",
+      "desc": "查看服务的 unit 文件和 drop-in 配置",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "svc",
+      "cmd": "systemctl list-timers",
+      "desc": "查看 systemd 定时器任务",
+      "tags": [
+        "systemd"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "ssh -p {{端口}} {{用户}}@{{主机}}",
+      "desc": "登录远程主机",
+      "tags": [
+        "登录"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "ssh",
+      "cmd": "ssh {{用户}}@{{主机}} '{{命令}}'",
+      "desc": "不登录，直接在远程执行一条命令",
+      "tags": [
+        "登录"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "ssh-keygen -t ed25519 -C \"{{备注}}\"",
+      "desc": "生成 SSH 密钥对",
+      "tags": [
+        "免密"
+      ],
+      "note": "ed25519 比 rsa 更短更安全，老系统不支持时再用 -t rsa -b 4096",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "ssh-copy-id -p {{端口}} {{用户}}@{{主机}}",
+      "desc": "上传公钥，配置免密登录",
+      "tags": [
+        "免密"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "scp -P {{端口}} {{文件}} {{用户}}@{{主机}}:{{路径}}",
+      "desc": "通过 SSH 传输文件",
+      "tags": [
+        "传输"
+      ],
+      "note": "scp 的端口参数是大写 P，别和 ssh 的小写 p 搞混",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "rsync -avz --progress {{源目录}}/ {{用户}}@{{主机}}:{{目标目录}}/",
+      "desc": "增量同步目录，比 scp 快且可断点续传",
+      "tags": [
+        "传输"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "ssh",
+      "cmd": "rsync -avz --delete {{源目录}}/ {{目标目录}}/",
+      "desc": "让目标目录与源目录完全一致",
+      "tags": [
+        "传输"
+      ],
+      "note": "目标里多出来的文件会被删除，执行前先加 --dry-run 看一遍",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "ssh -L {{本地端口}}:{{目标地址}}:{{目标端口}} {{用户}}@{{跳板机}}",
+      "desc": "本地端口转发，访问内网服务",
+      "tags": [
+        "隧道"
+      ],
+      "note": "例如 -L 3306:10.0.0.5:3306，本地连 127.0.0.1:3306 即可",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "ssh -D {{本地端口}} {{用户}}@{{主机}}",
+      "desc": "建立 SOCKS5 代理",
+      "tags": [
+        "隧道"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "ssh",
+      "cmd": "sshd -t",
+      "desc": "检查 sshd 配置语法是否正确",
+      "tags": [
+        "配置"
+      ],
+      "note": "改完 sshd_config 先 sshd -t 再重启，避免把自己锁在外面",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker ps -a",
+      "desc": "查看所有容器（含已停止）",
+      "tags": [
+        "容器"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker logs -f --tail 200 {{容器}}",
+      "desc": "实时查看容器最后 200 行日志",
+      "tags": [
+        "容器",
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker exec -it {{容器}} bash",
+      "desc": "进入容器（没有 bash 就用 sh）",
+      "tags": [
+        "容器"
+      ],
+      "note": "Alpine 镜像通常只有 sh：docker exec -it 容器 sh",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker inspect {{容器}} | grep -i ipaddress",
+      "desc": "查看容器 IP 地址",
+      "tags": [
+        "容器",
+        "网络"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker stats --no-stream",
+      "desc": "查看容器 CPU、内存、网络占用快照",
+      "tags": [
+        "性能"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker system df",
+      "desc": "查看镜像、容器、数据卷占用空间",
+      "tags": [
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker system prune -a",
+      "desc": "清理所有未使用的镜像、容器和构建缓存",
+      "tags": [
+        "清理"
+      ],
+      "note": "会删掉停止的容器和没被引用的镜像，执行前先 docker system df 看占用",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker image prune -f",
+      "desc": "清理悬空镜像（dangling image）",
+      "tags": [
+        "清理"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker compose -f {{compose文件}} up -d",
+      "desc": "后台启动 compose 服务",
+      "tags": [
+        "compose"
+      ],
+      "note": "新版是 docker compose，老版本是 docker-compose",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker compose logs -f --tail=200 {{服务}}",
+      "desc": "查看 compose 服务的实时日志",
+      "tags": [
+        "compose",
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker restart {{容器}}",
+      "desc": "重启容器",
+      "tags": [
+        "容器"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker cp {{文件}} {{容器}}:{{容器内路径}}",
+      "desc": "在宿主机和容器之间复制文件",
+      "tags": [
+        "容器"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker network inspect {{网络}}",
+      "desc": "查看 Docker 网络内的容器和 IP",
+      "tags": [
+        "网络"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "docker",
+      "cmd": "docker run -d --name {{名称}} -p {{宿主机端口}}:{{容器端口}} {{镜像}}",
+      "desc": "后台运行容器并映射端口",
+      "tags": [
+        "容器"
+      ],
+      "note": "临时排障可以用，长期运行建议写 compose 文件便于管理",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl get pods -A -o wide",
+      "desc": "查看所有命名空间的 Pod 和节点",
+      "tags": [
+        "pod"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl -n {{命名空间}} get pods",
+      "desc": "查看指定命名空间的 Pod",
+      "tags": [
+        "pod"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl describe pod {{Pod}} -n {{命名空间}}",
+      "desc": "排查 Pod 异常，重点看 Events",
+      "tags": [
+        "pod"
+      ],
+      "note": "Events 里常能看到镜像拉取失败、探针失败、调度失败的原因",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl logs -f {{Pod}} -n {{命名空间}} --tail=200",
+      "desc": "实时查看 Pod 日志",
+      "tags": [
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl logs {{Pod}} -n {{命名空间}} --previous",
+      "desc": "查看上一次崩溃容器的日志",
+      "tags": [
+        "日志"
+      ],
+      "note": "Pod 反复重启时，--previous 才能看到崩溃前的输出",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl exec -it {{Pod}} -n {{命名空间}} -- bash",
+      "desc": "进入 Pod 内部",
+      "tags": [
+        "pod"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl get events -n {{命名空间}} --sort-by=.lastTimestamp",
+      "desc": "按时间查看命名空间事件",
+      "tags": [
+        "排障"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl top pod -n {{命名空间}}",
+      "desc": "查看 Pod 的 CPU 和内存使用",
+      "tags": [
+        "性能"
+      ],
+      "note": "需要集群装了 metrics-server",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl rollout restart deploy/{{名称}} -n {{命名空间}}",
+      "desc": "滚动重启 Deployment（不改变镜像）",
+      "tags": [
+        "发布"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl rollout status deploy/{{名称}} -n {{命名空间}}",
+      "desc": "查看发布是否完成",
+      "tags": [
+        "发布"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl rollout undo deploy/{{名称}} -n {{命名空间}}",
+      "desc": "回滚到上一个版本",
+      "tags": [
+        "发布"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl get svc,ing -n {{命名空间}}",
+      "desc": "查看服务和入口配置",
+      "tags": [
+        "网络"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl config get-contexts",
+      "desc": "查看所有可用的集群上下文",
+      "tags": [
+        "集群"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl config use-context {{上下文}}",
+      "desc": "切换当前操作的集群",
+      "tags": [
+        "集群"
+      ],
+      "note": "生产操作前先确认当前 context，避免在测试集群上操作生产",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl get pod {{Pod}} -n {{命名空间}} -o yaml",
+      "desc": "导出 Pod 的完整配置",
+      "tags": [
+        "pod"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl -n {{命名空间}} get pod {{Pod}} -o jsonpath='{.status.podIP}'",
+      "desc": "获取 Pod 的 IP 地址",
+      "tags": [
+        "网络"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl delete pod {{Pod}} -n {{命名空间}}",
+      "desc": "删除 Pod",
+      "tags": [
+        "pod"
+      ],
+      "note": "Deployment 管理的 Pod 会自动重建；StatefulSet 要小心数据",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "k8s",
+      "cmd": "kubectl -n {{命名空间}} get pod -w",
+      "desc": "持续观察 Pod 状态变化",
+      "tags": [
+        "pod"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "mysql -h {{主机}} -u {{用户}} -p -e \"show databases;\"",
+      "desc": "远程连接 MySQL 并执行一条 SQL",
+      "tags": [
+        "mysql"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "db",
+      "cmd": "mysqldump -h {{主机}} -u {{用户}} -p --single-transaction {{库名}} > {{备份文件}}.sql",
+      "desc": "逻辑备份 MySQL（InnoDB 不锁表）",
+      "tags": [
+        "mysql",
+        "备份"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "db",
+      "cmd": "mysql -h {{主机}} -u {{用户}} -p {{库名}} < {{备份文件}}.sql",
+      "desc": "把 SQL 文件导入数据库",
+      "tags": [
+        "mysql"
+      ],
+      "note": "导入会覆盖同名数据，先备份当前库",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "mysql -h {{主机}} -u {{用户}} -p -e \"show full processlist\"",
+      "desc": "查看正在执行的 SQL，定位慢查询和锁等待",
+      "tags": [
+        "mysql"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "mysql -h {{主机}} -u {{用户}} -p -e \"show engine innodb status\"",
+      "desc": "查看 InnoDB 状态、事务和锁信息",
+      "tags": [
+        "mysql"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "redis-cli -h {{主机}} -p {{端口}} info memory",
+      "desc": "查看 Redis 内存使用情况",
+      "tags": [
+        "redis"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "db",
+      "cmd": "redis-cli -h {{主机}} -p {{端口}} info clients",
+      "desc": "查看 Redis 当前连接数",
+      "tags": [
+        "redis"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "redis-cli -h {{主机}} -p {{端口}} --bigkeys",
+      "desc": "扫描找出占用内存的大 key",
+      "tags": [
+        "redis"
+      ],
+      "note": "会遍历全库，生产环境请在低峰期执行",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "redis-cli -h {{主机}} -p {{端口}} slowlog get 10",
+      "desc": "查看最近 10 条慢命令",
+      "tags": [
+        "redis"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "redis-cli -h {{主机}} -p {{端口}} --scan --pattern \"{{前缀}}*\" | head",
+      "desc": "按前缀扫描 key（替代 keys 命令）",
+      "tags": [
+        "redis"
+      ],
+      "note": "千万别在生产用 keys *，会阻塞 Redis",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "db",
+      "cmd": "redis-cli -h {{主机}} -p {{端口}} monitor",
+      "desc": "实时打印 Redis 收到的命令",
+      "tags": [
+        "redis"
+      ],
+      "note": "会显著增加负载，只在排障时短时间开启",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "nginx -t",
+      "desc": "检查 Nginx 配置语法",
+      "tags": [
+        "nginx"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "nginx",
+      "cmd": "nginx -t && nginx -s reload",
+      "desc": "校验通过后平滑重载配置",
+      "tags": [
+        "nginx"
+      ],
+      "note": "先 -t 再 reload，配置有错就不会把服务搞挂",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "nginx",
+      "cmd": "nginx -T | grep -n \"{{关键字}}\"",
+      "desc": "查看合并后的最终生效配置",
+      "tags": [
+        "nginx"
+      ],
+      "note": "nginx -T 需要 1.9.2 以上版本",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "tail -f /var/log/nginx/access.log",
+      "desc": "实时查看访问日志",
+      "tags": [
+        "nginx",
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "tail -f /var/log/nginx/error.log",
+      "desc": "实时查看错误日志",
+      "tags": [
+        "nginx",
+        "日志"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -20",
+      "desc": "访问量 TOP 20 的 IP",
+      "tags": [
+        "nginx",
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn",
+      "desc": "状态码分布，快速看 5xx 比例",
+      "tags": [
+        "nginx",
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -20",
+      "desc": "访问量 TOP 20 的 URL",
+      "tags": [
+        "nginx",
+        "统计"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "awk '$9 >= 500' /var/log/nginx/access.log | tail -50",
+      "desc": "查看最近 50 条 5xx 请求",
+      "tags": [
+        "nginx",
+        "排障"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "nginx",
+      "cmd": "grep \"{{IP}}\" /var/log/nginx/access.log | tail -50",
+      "desc": "查看某个 IP 的访问记录",
+      "tags": [
+        "nginx"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "archive",
+      "cmd": "tar -czvf {{备份名}}.tar.gz {{目录}}",
+      "desc": "打包并压缩目录",
+      "tags": [
+        "备份"
+      ],
+      "note": "排除日志：加 --exclude=\"*.log\"",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "archive",
+      "cmd": "tar -xzvf {{备份名}}.tar.gz -C {{目标目录}}",
+      "desc": "解压到指定目录",
+      "tags": [
+        "解压"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "archive",
+      "cmd": "tar -tzvf {{备份名}}.tar.gz",
+      "desc": "只查看压缩包内容，不解压",
+      "tags": [
+        "解压"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "archive",
+      "cmd": "tar -czvf - {{目录}} | split -b 2G - {{前缀}}.part",
+      "desc": "打包压缩并切成 2G 分片",
+      "tags": [
+        "备份"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "archive",
+      "cmd": "zip -r {{备份名}}.zip {{目录}}",
+      "desc": "打包成 zip",
+      "tags": [
+        "压缩"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "archive",
+      "cmd": "unzip {{文件}}.zip -d {{目标目录}}",
+      "desc": "解压 zip 到指定目录",
+      "tags": [
+        "解压"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "archive",
+      "cmd": "rsync -av --dry-run {{源目录}}/ {{目标目录}}/",
+      "desc": "预览同步结果，不实际写入",
+      "tags": [
+        "备份",
+        "预览"
+      ],
+      "note": "--dry-run 是危险操作前的安全习惯",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "crontab -l",
+      "desc": "查看当前用户的定时任务",
+      "tags": [
+        "cron"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "crontab -e",
+      "desc": "编辑当前用户的定时任务",
+      "tags": [
+        "cron"
+      ],
+      "note": "格式：分 时 日 月 周；命令用绝对路径并重定向日志，否则出错查不到原因",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "crontab -u {{用户}} -l",
+      "desc": "查看指定用户的定时任务",
+      "tags": [
+        "cron"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "tail -f /var/log/cron",
+      "desc": "实时查看 cron 执行日志",
+      "tags": [
+        "cron",
+        "日志"
+      ],
+      "note": "CentOS 是 /var/log/cron，Debian 系看 /var/log/syslog",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "systemctl list-timers --all",
+      "desc": "查看 systemd 定时器",
+      "tags": [
+        "定时"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "date",
+      "desc": "查看当前时间和时区",
+      "tags": [
+        "时间"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "cron",
+      "cmd": "timedatectl set-timezone Asia/Shanghai",
+      "desc": "把系统时区设为北京时间",
+      "tags": [
+        "时间"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "history | grep {{关键字}}",
+      "desc": "从历史命令里找回之前敲过的命令",
+      "tags": [
+        "历史"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": true
+    },
+    {
+      "cat": "misc",
+      "cmd": "cat /etc/os-release",
+      "desc": "查看系统发行版和版本号",
+      "tags": [
+        "信息"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "uname -a",
+      "desc": "查看内核版本和系统架构",
+      "tags": [
+        "信息"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "lscpu",
+      "desc": "查看 CPU 型号、核心数和架构",
+      "tags": [
+        "信息"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "hostnamectl set-hostname {{主机名}}",
+      "desc": "修改主机名",
+      "tags": [
+        "配置"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "sysctl -p",
+      "desc": "重新加载内核参数配置",
+      "tags": [
+        "内核"
+      ],
+      "note": "改 /etc/sysctl.conf 前先备份，改错可能影响网络和内存",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "ulimit -n",
+      "desc": "查看当前最大打开文件数",
+      "tags": [
+        "内核"
+      ],
+      "note": "服务报 too many open files 时，检查 limits.conf 和 systemd 的 LimitNOFILE",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "openssl s_client -connect {{域名}}:443 -servername {{域名}} < /dev/null",
+      "desc": "查看 HTTPS 证书链是否完整",
+      "tags": [
+        "证书"
+      ],
+      "note": "输出里看 verify return code 和证书有效期",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "openssl x509 -in {{证书}}.pem -noout -dates",
+      "desc": "查看证书生效和到期时间",
+      "tags": [
+        "证书"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "openssl rand -base64 32",
+      "desc": "生成一个强随机密码",
+      "tags": [
+        "安全"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "screen -S {{名称}}",
+      "desc": "创建持久会话，断开后任务继续运行",
+      "tags": [
+        "会话"
+      ],
+      "note": "screen -ls 查看，screen -r 名称 恢复，Ctrl+A D 分离",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "tmux new -s {{名称}}",
+      "desc": "创建 tmux 会话",
+      "tags": [
+        "会话"
+      ],
+      "note": "tmux ls 查看，tmux a -t 名称 恢复，Ctrl+B D 分离",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "truncate -s 0 {{日志文件}}",
+      "desc": "清空文件内容但保留文件本身",
+      "tags": [
+        "日志"
+      ],
+      "note": "清日志别用 rm：文件被进程占用时，rm 了空间也不会释放",
+      "danger": true,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "du -sh /var/log/* | sort -rh | head",
+      "desc": "找出 /var/log 下最占空间的日志",
+      "tags": [
+        "日志",
+        "磁盘"
+      ],
+      "note": "",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "export HISTTIMEFORMAT='%F %T '",
+      "desc": "让 history 显示命令执行时间",
+      "tags": [
+        "历史"
+      ],
+      "note": "只在当前会话生效，想永久生效写进 ~/.bashrc",
+      "danger": false,
+      "hot": false
+    },
+    {
+      "cat": "misc",
+      "cmd": "journalctl --vacuum-time=7d",
+      "desc": "只保留最近 7 天的 journal 日志",
+      "tags": [
+        "日志",
+        "清理"
+      ],
+      "note": "会删除旧日志，排查历史问题前先确认",
+      "danger": true,
+      "hot": false
+    }
+  ]
+}
