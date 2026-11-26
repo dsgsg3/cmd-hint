@@ -60,6 +60,8 @@ DEFAULTS = {
         "NOTE: <一句中文说明>\n"
     ),
     "ai_timeout": 60,
+    "update_mode": "download",
+    "update_proxy": "",
     "custom_commands": [],
 }
 

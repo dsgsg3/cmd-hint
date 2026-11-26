@@ -22,6 +22,7 @@ Windows 上的本地命令提示条：在任意窗口里敲字时，实时给出
 - **危险命令二次确认**：删除、格式化、清库这类命令要连按两次才会插入。
 - **可调窗口**：拖动提示条可移动，拖右下角的 `◢` 可调宽度和行数，位置会记住。
 - **自己加命令**：编辑 `%APPDATA%\CmdHint\commands_user.txt`，保存后几秒内生效，不用重新打包。
+- **自动更新**：启动后自动检查 GitHub 上的新版本，在后台下载并校验；托盘菜单点「重启并更新」即可升级。默认不会自己重启。
 
 ## 快捷键
 
@@ -60,6 +61,8 @@ pip install keyboard pystray pillow pypinyin pyinstaller
 首次运行会在 `%APPDATA%\CmdHint\config.json` 生成默认配置。常用的几项：
 
 - `api_base_url` / `api_key` / `api_model`：任意 OpenAI 兼容接口的地址、密钥、模型名。三项齐全才用云端 AI，否则回退到本机 `kimi -p` 命令。
+- `update_mode`：`"download"`（默认，下载并提示你点菜单重启）｜`"auto"`（下载后自动重启）｜`"off"`（不检查更新）。
+- `update_proxy`：更新时走的代理，留空则用系统代理（Windows 设置里的那个）。
 - `scope`：默认 `"all"`，所有窗口都提示；改成 `"terminals"` 就只认 `terminals` 列表里的程序。
 - `exclude`：不记录按键的程序名，默认排除密码管理器。
 - `min_chars` / `max_items` / `ai_timeout`：开始提示的字符数、最多几条、AI 超时秒数。
@@ -108,6 +111,7 @@ redis¦redis-cli --bigkeys¦找出最大的 key¦redis,大key¦h
 - 管理员权限的窗口，要用管理员身份运行本程序才收得到按键。
 - 中文输入法只测过微软拼音，搜狗等没验证。
 - 杀毒软件可能把全局键盘钩子当成键盘记录器，需要加白名单。
+- 自动更新需要程序所在目录可写。放在 Program Files 这类需要管理员权限的位置时，更新会失败并提示手动下载。
 
 ## 项目结构
 

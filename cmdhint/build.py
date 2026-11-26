@@ -81,19 +81,7 @@ def replace(src, dst):
 
 
 def file_version(path):
-    ver = ctypes.WinDLL("version")
-    size = ver.GetFileVersionInfoSizeW(path, None)
-    if not size:
-        return ""
-    data = ctypes.create_string_buffer(size)
-    if not ver.GetFileVersionInfoW(path, 0, size, data):
-        return ""
-    buf, n = ctypes.c_void_p(), wt.UINT()
-    if not ver.VerQueryValueW(data, "\\", ctypes.byref(buf), ctypes.byref(n)) or n.value < 16:
-        return ""
-    ffi = ctypes.cast(buf, ctypes.POINTER(wt.DWORD))
-    ms, ls = ffi[2], ffi[3]
-    return "%d.%d.%d.%d" % (ms >> 16, ms & 0xFFFF, ls >> 16, ls & 0xFFFF)
+    return winapi.file_version(path)
 
 
 def bar_visible(timeout):

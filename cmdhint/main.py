@@ -1,6 +1,7 @@
 import ctypes
 import os
 import queue
+import sys
 import threading
 import time
 import tkinter as tk
@@ -12,6 +13,7 @@ except Exception:
 
 import ai
 import config
+import update
 import winapi
 from bar import ACC, AMBER, DIM, GREEN, RED, Bar
 from engine import Engine
@@ -49,6 +51,9 @@ class App:
         self.bar.on_submit = self.submit_question
         self.bar.on_cancel = self.end_ask
         self.icon = None
+        self.update_ready = None
+        self.update_busy = False
+        self.update_next = time.time() + 20
         self.render()
 
     def run(self):
@@ -73,6 +78,9 @@ class App:
                              checked=lambda m: autostart_enabled()),
             pystray.MenuItem("打开配置文件", lambda i, m: self.q.put(("config",))),
             pystray.MenuItem("打开命令文件", lambda i, m: self.q.put(("cmdfile",))),
+            pystray.MenuItem("检查更新", lambda i, m: self.q.put(("update_check",))),
+            pystray.MenuItem("重启并更新", lambda i, m: self.q.put(("update_apply",)),
+                             visible=lambda item: bool(self.update_ready)),
             pystray.MenuItem("退出", lambda i, m: self.q.put(("quit",))),
         )
         self.icon = pystray.Icon(APP_NAME, img, "命令提示 " + VERSION, menu)
@@ -123,9 +131,71 @@ class App:
             self.set_shown(self.search(query))
         self.render()
 
+    def start_update_check(self, manual):
+        mode = config.load().get("update_mode", "download")
+        if self.update_busy or (not manual and mode == "off"):
+            return
+        self.update_busy = True
+        threading.Thread(target=self.update_worker, args=(manual,), daemon=True).start()
+
+    def update_worker(self, manual):
+        try:
+            info = update.fetch_latest()
+            if not update.is_newer(info["version"]):
+                if manual:
+                    self.notify("已经是最新版本 " + VERSION)
+                return
+            path = update.prepare(info)
+            self.q.put(("update_ready", info["version"], path))
+        except Exception as e:
+            if manual:
+                self.notify("检查更新失败：" + str(e)[:100])
+        finally:
+            self.update_busy = False
+
+    def notify(self, text):
+        if self.icon:
+            try:
+                self.icon.notify(text, "命令提示")
+            except Exception:
+                pass
+
+    def on_update_ready(self, version, path):
+        self.update_ready = (version, path)
+        self.notify("新版本 %s 已下载，右键托盘图标点「重启并更新」" % version)
+        if self.icon:
+            try:
+                self.icon.update_menu()
+            except Exception:
+                pass
+        if config.load().get("update_mode") == "auto":
+            self.apply_update()
+
+    def apply_update(self):
+        if not self.update_ready:
+            return
+        version, path = self.update_ready
+        probe = os.path.join(os.path.dirname(sys.executable), ".cmd-hint-write-test")
+        try:
+            with open(probe, "w") as f:
+                f.write("x")
+            os.remove(probe)
+        except OSError:
+            self.notify("没有权限自动更新，请到 GitHub Releases 手动下载")
+            return
+        try:
+            update.apply_and_restart(path)
+        except Exception as e:
+            self.notify("更新启动失败：" + str(e)[:100])
+            return
+        self.quit()
+
     def tick(self):
         self.bar.keep_topmost()
         self.watch_commands()
+        if time.time() >= self.update_next:
+            self.update_next = time.time() + 6 * 3600
+            self.start_update_check(False)
         if not self.engine.paused and self.engine.sync_fg():
             self.on_ctx()
         self.root.after(1000, self.tick)
@@ -178,6 +248,12 @@ class App:
             self.reloading = False
             self.ai_state = ("err", "命令库读取失败：" + ev[1])
             self.render()
+        elif kind == "update_check":
+            self.start_update_check(True)
+        elif kind == "update_ready":
+            self.on_update_ready(*ev[1:])
+        elif kind == "update_apply":
+            self.apply_update()
         elif kind == "quit":
             self.quit()
 

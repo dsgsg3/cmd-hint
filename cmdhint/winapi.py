@@ -182,6 +182,22 @@ def virtual_screen():
     return left, top, left + gm(78), top + gm(79)
 
 
+def file_version(path):
+    ver = ctypes.WinDLL("version")
+    size = ver.GetFileVersionInfoSizeW(path, None)
+    if not size:
+        return ""
+    data = ctypes.create_string_buffer(size)
+    if not ver.GetFileVersionInfoW(path, 0, size, data):
+        return ""
+    buf, n = ctypes.c_void_p(), wt.UINT()
+    if not ver.VerQueryValueW(data, "\\", ctypes.byref(buf), ctypes.byref(n)) or n.value < 16:
+        return ""
+    ffi = ctypes.cast(buf, ctypes.POINTER(wt.DWORD))
+    ms, ls = ffi[2], ffi[3]
+    return "%d.%d.%d.%d" % (ms >> 16, ms & 0xFFFF, ls >> 16, ls & 0xFFFF)
+
+
 def clear_noactivate(hwnd):
     ex = user32.GetWindowLongPtrW(hwnd, -20)
     user32.SetWindowLongPtrW(hwnd, -20, ex & ~0x08000000)
