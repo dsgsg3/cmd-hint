@@ -6,3 +6,6 @@ build/
 # Python 缓存
 __pycache__/
 *.pyc
+
+# 由 cmdhint/make_version_info.py 生成
+cmdhint/version_info.txt

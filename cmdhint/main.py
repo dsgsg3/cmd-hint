@@ -18,6 +18,7 @@ from engine import Engine
 from matcher import Matcher, resource_path
 from util import (APP_NAME, autostart_enabled, build_cmd, is_dangerous, placeholders,
                   set_autostart, split_query)
+from version import VERSION
 
 
 class App:
@@ -71,7 +72,7 @@ class App:
             pystray.MenuItem("打开配置文件", lambda i, m: self.q.put(("config",))),
             pystray.MenuItem("退出", lambda i, m: self.q.put(("quit",))),
         )
-        self.icon = pystray.Icon(APP_NAME, img, "命令提示", menu)
+        self.icon = pystray.Icon(APP_NAME, img, "命令提示 " + VERSION, menu)
         self.icon.run_detached()
 
     def pump(self):

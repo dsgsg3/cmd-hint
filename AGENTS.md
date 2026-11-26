@@ -25,6 +25,8 @@ Windows 上的本地小工具，面向记不住命令的运维人员。同一个
 | `winapi.py` | ctypes 封装的 Win32 调用：前台窗口、按键转字符、SendInput、窗口样式、输入法状态 |
 | `ai.py` | AI 调用：问命令、提问模式、讲解、报错分析；走云端 API 或本机 `kimi` 命令 |
 | `config.py` | 默认配置，以及 `%APPDATA%\CmdHint\config.json` 的读取 |
+| `version.py` | 版本号，全项目唯一的一处 |
+| `make_version_info.py` | 由 `version.py` 生成 exe 的版本信息文件 `version_info.txt`。生成的文件不进仓库 |
 | `commands.json` | 第一阶段从 `data.js` 导出的 228 条命令。和 `data.js` 各自维护，没有自动同步 |
 | `commands_extra.txt` | 后来扩充的约 2300 条命令，一行一条 |
 
@@ -72,23 +74,42 @@ python main.py
 
 ## 打包
 
-没有打包脚本，每次手工执行。在 `cmdhint/` 下，先把根目录的 `icon.ico` 拷进来：
+没有打包脚本，每次手工执行。在 `cmdhint/` 下，先把根目录的 `icon.ico` 拷进来，再生成版本信息：
 
 ```
 cp ../icon.ico .
-python -m PyInstaller --onefile --windowed --name "命令提示" --icon icon.ico --add-data "commands.json;." --add-data "commands_extra.txt;." --add-data "icon.ico;." --hidden-import pystray._win32 --collect-data pypinyin --hidden-import pypinyin --distpath ../dist --workpath <临时目录> main.py
+python make_version_info.py
+python -m PyInstaller --onefile --windowed --name "命令提示" --icon icon.ico --version-file version_info.txt --add-data "commands.json;." --add-data "commands_extra.txt;." --add-data "icon.ico;." --hidden-import pystray._win32 --collect-data pypinyin --hidden-import pypinyin --distpath ../dist --workpath <临时目录> main.py
 ```
 
-打完删除 `icon.ico`、`*.spec`、`build/`、`__pycache__/`。要点：
+打包会直接覆盖 `dist\命令提示.exe`，而它通常正在运行。所以要先结束它，并把旧的 exe 备份一份，新版确认能启动后再删备份。打完删除 `icon.ico`、`*.spec`、`build/`、`__pycache__/`。要点：
 
 - 不要用 `--specpath`。它会改变 `--add-data` 相对路径的基准，导致找不到 `commands.json`。
 - `--collect-data pypinyin` 必须有，否则 exe 里没有拼音词典。
+- `--version-file version_info.txt` 让 exe 的文件属性里显示版本号。版本号只改 `version.py`，不要手改生成的文件。
+- 验证时启动 exe 要用 `powershell -NoProfile -Command "Start-Process -FilePath '<exe 完整路径>'"`，不要用 `start`，原因见「坑」。
 - 新增数据文件时，要同时加进 `--add-data`，并确认 `matcher.resource_path()` 能读到。
 - exe 是被直接覆盖的，没有保留上一版。
 
 环境：Python 3.12.10；`keyboard 0.13.5`、`pystray 0.19.5`、`pypinyin 0.55.0`、`Pillow 12.3.0`、`pyinstaller 6.22.3`；`pywebview 6.2.1` 只有第一阶段的 `app.py` 用到。`psutil` 装了，但代码没有用到。
 
 `dist\运维命令速查.exe` 是第一阶段用 `app.py` 打的，之后没再打过，当时的打包命令没有记录。
+
+## 版本号
+
+四段式 `主.次.中.小`，当前是 `1.0.0.0`。全项目只在 `cmdhint/version.py` 里写版本号，提示条标题、托盘提示和 exe 的文件属性都从它来。
+
+- **小版本**：第 4 段加 1，范围 1 到 5。修 bug、做小调整，用法不变。
+- **中版本**：第 3 段加 1、第 4 段归 0，范围 1 到 5。新增功能或用法有变化，比如新快捷键、新模式、命令库大扩充。要不要加由开发者判断。
+- **大版本**：第 1 段加 1，其余归 0。整体方式的大改。
+- 第 2 段目前不用，保持 0。
+- 小版本到 5 之后还有小改动，进位到中版本；中版本到 5 之后，进位到大版本。进位规则是按用户的意思理解的，用户没有逐字确认过。
+
+升版本的步骤：
+
+1. 改 `version.py`。
+2. 按上一节打包，确认 exe 文件属性里的版本号对了、程序能启动。
+3. 提交，提交说明里写版本号，并打标签 `v版本号`，例如 `v1.0.0.0`。
 
 ## Git 与推送
 
@@ -131,6 +152,7 @@ git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.he
 - **写文件**：用 Write 分段写已有文件时，第二段起必须带 `mode=append`。漏了会把整个文件覆盖成只剩那一段，`main.py` 和 `bar.py` 各中过一次。改已有文件优先用 Edit。
 - **并行调用**：不要在同一次并行调用里一边写文件、一边运行依赖这个文件的命令。命令可能先执行，报文件不存在。
 - **heredoc**：在 Bash 里用 `cat <<EOF` 写含 `EOF` 字样或 `\n` 转义的内容，会被截断或吃掉转义。内容用 Write 工具写。
+- **从 Bash 启动 exe**：用 `start "" "命令提示.exe"` 启动的 exe 会占住命令的输出通道，命令一直挂到 exe 退出，挂过 94 分钟。验证时用 PowerShell 的 `Start-Process` 启动，它会立即返回。
 - **Alt+数字收不到**：这台机器上 `Alt+字母` 和 `Alt+数字` 的按下事件到不了钩子，原因没查明。所以所有快捷键都用 Ctrl+Alt。
 - **前台被抢**：用户的其他程序（比如 putty）会抢走前台。测试脚本里每次按键前都要检查前台窗口。
 - **exe 要单独验**：源码版通过不代表 exe 通过，尤其是 `--add-data` 的数据文件和 hidden import。

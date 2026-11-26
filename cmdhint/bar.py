@@ -3,6 +3,7 @@ import tkinter.font as tkfont
 
 import winapi
 from util import fill_placeholders, fit, fit_tail, load_state, save_state
+from version import VERSION
 
 BG = "#1b1e26"
 HEAD = "#14161c"
@@ -61,7 +62,7 @@ class Bar:
         head.pack(fill="x")
         self.dot = tk.Label(head, text="●", bg=HEAD, fg=DIM, font=self.f_ui)
         self.dot.pack(side="left", padx=(8, 4))
-        tk.Label(head, text="命令提示", bg=HEAD, fg=ACC, font=self.f_badge).pack(side="left")
+        tk.Label(head, text="命令提示 " + VERSION, bg=HEAD, fg=ACC, font=self.f_badge).pack(side="left")
         self.state = tk.Label(head, bg=HEAD, fg=DIM, font=self.f_ui)
         self.state.pack(side="right", padx=8)
         self.typed = tk.Label(head, bg=HEAD, fg=FG, font=self.f_typed, anchor="w")
@@ -156,7 +157,7 @@ class Bar:
         else:
             self.detail.pack_forget()
         last = min(max(len(shown), 1), self.n_rows) if shown else self.n_rows
-        self.hint.config(text=fit("Ctrl+Alt+1~%d 插入｜A 问 AI｜E 分析报错｜X 讲解｜P 暂停" % last,
+        self.hint.config(text=fit("Ctrl+Alt+1~%d 插入｜Q 提问｜A 问 AI｜E 报错｜X 讲解｜P 暂停" % last,
                                   self.f_small, self.w - 60))
         self.top.update_idletasks()
         need = self.top.winfo_reqheight()
