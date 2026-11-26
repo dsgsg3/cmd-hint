@@ -62,7 +62,8 @@ pip install keyboard pystray pillow pypinyin pyinstaller
 
 - `api_base_url` / `api_key` / `api_model`：任意 OpenAI 兼容接口的地址、密钥、模型名。三项齐全才用云端 AI，否则回退到本机 `kimi -p` 命令。
 - `update_mode`：`"download"`（默认，下载并提示你点菜单重启）｜`"auto"`（下载后自动重启）｜`"off"`（不检查更新）。
-- `update_proxy`：更新时走的代理，留空则用系统代理（Windows 设置里的那个）。
+- `update_proxy`：更新时走的代理，留空则用系统代理（Windows 设置里的那个）。代理连不上会自动改用直连。
+- 更新过程会写入 `%APPDATA%\CmdHint\update.log`，自动更新出问题时先看这个文件。
 - `scope`：默认 `"all"`，所有窗口都提示；改成 `"terminals"` 就只认 `terminals` 列表里的程序。
 - `exclude`：不记录按键的程序名，默认排除密码管理器。
 - `min_chars` / `max_items` / `ai_timeout`：开始提示的字符数、最多几条、AI 超时秒数。
