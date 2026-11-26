@@ -103,7 +103,13 @@ for ($i = 0; $i -lt 60; $i++) {{
         Start-Sleep -Milliseconds 700
     }}
 }}
-Start-Process -FilePath $old
+Start-Sleep -Seconds 5
+for ($t = 0; $t -lt 3; $t++) {{
+    $p = Start-Process -FilePath $old -PassThru
+    Start-Sleep -Seconds 6
+    if (-not $p.HasExited) {{ break }}
+    Start-Sleep -Seconds 3
+}}
 if ($ok) {{ Remove-Item -LiteralPath $new -Force }}
 Remove-Item -LiteralPath $PSCommandPath -Force
 """
