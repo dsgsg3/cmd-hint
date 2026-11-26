@@ -3,6 +3,7 @@ import os
 
 APP_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "CmdHint")
 CONFIG_PATH = os.path.join(APP_DIR, "config.json")
+USER_COMMANDS_PATH = os.path.join(APP_DIR, "commands_user.txt")
 
 DEFAULTS = {
     "terminals": [

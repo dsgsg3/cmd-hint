@@ -3,6 +3,8 @@ import os
 import re
 import sys
 
+import config
+
 try:
     from pypinyin import Style, lazy_pinyin
 except ImportError:
@@ -56,22 +58,51 @@ def load_extra(path):
     return cats, cmds
 
 
+USER_TEMPLATE = """# 命令提示 · 你自己的命令库
+# 保存后几秒内自动生效，不需要重启，也不需要重新打包。
+# 一行一条：分类¦命令¦说明¦标签1,标签2¦标志
+# 标志：d = 危险（插入前要二次确认），h = 常用（排序靠前）
+# 新分类先加一行：@cat¦id¦名称
+# 同一条命令以这里为准，会覆盖内置的同一条命令。
+#
+# 例子（去掉行首的 # 就能用）：
+# @cat¦mine¦我的命令
+# mine¦docker ps --format '{{.Names}}'¦只看容器名¦docker,容器¦h
+# mine¦kubectl get pods -A -w¦盯所有 Pod 的变化¦k8s,监控¦
+"""
+
+
+def ensure_user_file(path):
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(USER_TEMPLATE)
+    return path
+
+
 class Matcher:
-    def __init__(self, path=None, extra_path=None):
+    def __init__(self, path=None, extra_path=None, user_path=None):
         with open(path or resource_path("commands.json"), encoding="utf-8") as f:
             data = json.load(f)
         extra_cats, extra_cmds = load_extra(extra_path or resource_path("commands_extra.txt"))
-        have = {c["id"] for c in data["categories"]}
-        data["categories"] += [c for c in extra_cats if c["id"] not in have]
-        seen = {c["cmd"].strip().lower() for c in data["commands"]}
-        for c in extra_cmds:
-            key = c["cmd"].lower()
-            if key not in seen:
-                seen.add(key)
-                data["commands"].append(c)
-        self.cat_label = {c["id"]: c["label"] for c in data["categories"]}
+        self.user_path = ensure_user_file(user_path or config.USER_COMMANDS_PATH)
+        user_cats, user_cmds = load_extra(self.user_path)
+        self.cat_label = {}
+        for c in data["categories"] + extra_cats + user_cats:
+            self.cat_label[c["id"]] = c["label"]
+        merged, order = {}, []
+        for c in data["commands"] + extra_cmds:
+            key = c["cmd"].strip().lower()
+            if key not in merged:
+                merged[key] = c
+                order.append(key)
+        for c in user_cmds:
+            key = c["cmd"].strip().lower()
+            if key not in merged:
+                order.append(key)
+            merged[key] = c
         self.items = []
-        for c in data["commands"]:
+        for c in (merged[k] for k in order):
             self.items.append({
                 "cmd": c["cmd"],
                 "cmd_l": c["cmd"].lower(),

@@ -4,7 +4,11 @@
 
 ## 1. 补充命令（最需要，也最简单）
 
-`cmdhint/commands_extra.txt` 里一行一条：
+自己用：右键托盘图标选「打开命令文件」，编辑 `%APPDATA%\CmdHint\commands_user.txt`，保存后几秒生效，不用重新打包。
+
+想贡献给所有人：改仓库里的 `cmdhint/commands_extra.txt` 提 PR。
+
+两个文件格式一样，一行一条：
 
 ```
 分类¦命令¦说明¦标签1,标签2¦标志

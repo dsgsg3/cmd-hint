@@ -27,6 +27,8 @@ class App:
         self.cfg = config.load()
         self.matcher = Matcher()
         self.matcher.add_custom(self.cfg.get("custom_commands", []))
+        self.cmd_mtime = self._cmd_mtime()
+        self.reloading = False
         self.q = queue.Queue()
         self.engine = Engine(self.cfg, self.q)
         self.root = tk.Tk()
@@ -70,6 +72,7 @@ class App:
             pystray.MenuItem("开机自启", lambda i, m: self.q.put(("autostart",)),
                              checked=lambda m: autostart_enabled()),
             pystray.MenuItem("打开配置文件", lambda i, m: self.q.put(("config",))),
+            pystray.MenuItem("打开命令文件", lambda i, m: self.q.put(("cmdfile",))),
             pystray.MenuItem("退出", lambda i, m: self.q.put(("quit",))),
         )
         self.icon = pystray.Icon(APP_NAME, img, "命令提示 " + VERSION, menu)
@@ -83,8 +86,46 @@ class App:
             pass
         self.root.after(25, self.pump)
 
+    def _cmd_mtime(self):
+        try:
+            return os.stat(self.matcher.user_path).st_mtime_ns
+        except OSError:
+            return None
+
+    def watch_commands(self):
+        if self.reloading:
+            return
+        mtime = self._cmd_mtime()
+        if mtime is None or mtime == self.cmd_mtime:
+            return
+        self.cmd_mtime = mtime
+        self.reloading = True
+        threading.Thread(target=self.reload_commands, daemon=True).start()
+
+    def reload_commands(self):
+        try:
+            m = Matcher(user_path=self.matcher.user_path)
+            m.add_custom(self.cfg.get("custom_commands", []))
+            self.q.put(("reloaded", m))
+        except Exception as e:
+            self.q.put(("reload_failed", str(e)))
+        finally:
+            self.reloading = False
+
+    def refresh_after_reload(self):
+        if self.fill or self.asking:
+            return
+        if self.shown and self.shown[0].get("ai"):
+            return
+        query, self.query_start = split_query(self.typed)
+        query = query.strip()
+        if len(query) >= self.cfg["min_chars"]:
+            self.set_shown(self.search(query))
+        self.render()
+
     def tick(self):
         self.bar.keep_topmost()
+        self.watch_commands()
         if not self.engine.paused and self.engine.sync_fg():
             self.on_ctx()
         self.root.after(1000, self.tick)
@@ -126,6 +167,17 @@ class App:
             set_autostart(not autostart_enabled())
         elif kind == "config":
             os.startfile(config.CONFIG_PATH)
+        elif kind == "cmdfile":
+            if self.matcher.user_path:
+                os.startfile(self.matcher.user_path)
+        elif kind == "reloaded":
+            self.matcher = ev[1]
+            self.reloading = False
+            self.refresh_after_reload()
+        elif kind == "reload_failed":
+            self.reloading = False
+            self.ai_state = ("err", "命令库读取失败：" + ev[1])
+            self.render()
         elif kind == "quit":
             self.quit()
 
