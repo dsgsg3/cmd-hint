@@ -610,6 +610,9 @@ class App:
 
 
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--apply-update":
+        sys.exit(update.run_apply(sys.argv[2], sys.argv[3]))
+    update.cleanup()
     ok, _h = winapi.single_instance("Local\\CmdHintSingleton")
     if not ok:
         return

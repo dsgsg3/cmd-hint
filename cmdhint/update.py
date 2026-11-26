@@ -2,8 +2,10 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 
 import config
@@ -90,49 +92,48 @@ def prepare(info):
     return dest
 
 
-PS_TEMPLATE = """$ErrorActionPreference = 'SilentlyContinue'
-$new = '{new}'
-$old = '{old}'
-$name = '{name}'
-$ok = $false
-for ($i = 0; $i -lt 60; $i++) {{
-    try {{
-        Copy-Item -LiteralPath $new -Destination $old -Force -ErrorAction Stop
-        $ok = $true
-        break
-    }} catch {{
-        Start-Sleep -Milliseconds 700
-    }}
-}}
-for ($t = 0; $t -lt 4; $t++) {{
-    Start-Sleep -Seconds 4
-    Start-Process -FilePath $old
-    Start-Sleep -Seconds 8
-    $bad = Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object {{ $_.MainWindowTitle -eq 'Error' }}
-    if ($bad) {{
-        Get-Process -Name $name -ErrorAction SilentlyContinue | Stop-Process -Force
-        Start-Sleep -Seconds 4
-        continue
-    }}
-    if (Get-Process -Name $name -ErrorAction SilentlyContinue) {{ break }}
-}}
-if ($ok) {{ Remove-Item -LiteralPath $new -Force }}
-Remove-Item -LiteralPath $PSCommandPath -Force
-"""
+UPDATER_NAME = "CmdHint-updater.exe"
 
 
-def write_install_script(new_path, exe_path):
-    path = os.path.join(os.path.dirname(new_path), "install.ps1")
-    with open(path, "w", encoding="utf-8-sig", newline="\r\n") as f:
-        f.write(PS_TEMPLATE.format(
-            new=new_path.replace("'", "''"), old=exe_path.replace("'", "''"),
-            name=os.path.splitext(os.path.basename(exe_path))[0].replace("'", "''")))
-    return path
+def cleanup():
+    try:
+        names = os.listdir(update_dir())
+    except OSError:
+        return
+    for name in names:
+        if name.lower().endswith((".exe", ".ps1")):
+            try:
+                os.remove(os.path.join(update_dir(), name))
+            except OSError:
+                pass
 
 
 def apply_and_restart(new_path):
-    script = write_install_script(new_path, sys.executable)
-    subprocess.Popen(
-        ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script],
-        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        creationflags=0x08000000, cwd=os.path.dirname(script), close_fds=True)
+    upd = update_dir()
+    os.makedirs(upd, exist_ok=True)
+    helper = os.path.join(upd, UPDATER_NAME)
+    shutil.copy2(sys.executable, helper)
+    subprocess.Popen([helper, "--apply-update", new_path, sys.executable],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     creationflags=0x08000000, close_fds=True)
+
+
+def run_apply(new_path, old_exe):
+    deadline = time.time() + 90
+    while time.time() < deadline:
+        try:
+            shutil.copy2(new_path, old_exe)
+            break
+        except OSError:
+            time.sleep(0.5)
+    time.sleep(1.5)
+    try:
+        os.startfile(old_exe)
+    except OSError:
+        pass
+    time.sleep(2)
+    try:
+        os.remove(new_path)
+    except OSError:
+        pass
+    return 0
