@@ -133,7 +133,6 @@ def write_install_script(new_path, exe_path):
 def apply_and_restart(new_path):
     script = write_install_script(new_path, sys.executable)
     subprocess.Popen(
-        ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
-         "-WindowStyle", "Hidden", "-File", script],
+        ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script],
         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         creationflags=0x08000000, cwd=os.path.dirname(script), close_fds=True)

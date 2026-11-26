@@ -103,7 +103,7 @@ python main.py
 
 四段式 `主.次.中.小`，当前是 `1.0.1.5`。全项目只在 `cmdhint/version.py` 里写版本号，提示条标题、托盘提示和 exe 的文件属性都从它来。
 
-历史：`1.0.0.0` 第一个版本；`1.0.0.1` 加了一键打包脚本；`1.0.1.0` 命令库可外置（`%APPDATA%\CmdHint\commands_user.txt`，保存即生效）；`1.0.1.2` 加自动更新；`1.0.1.3` 修后台启动方式（`DETACHED_PROCESS` 启动的 PowerShell 会立刻退出）；`1.0.1.4` 替换后等几秒再启动；`1.0.1.5` 启动后识别 `Error` 对话框并重试。
+历史：`1.0.0.0` 第一个版本；`1.0.0.1` 加了一键打包脚本；`1.0.1.0` 命令库可外置（`%APPDATA%\CmdHint\commands_user.txt`，保存即生效）；`1.0.1.2` 加自动更新；`1.0.1.3` 修后台启动方式（`DETACHED_PROCESS` 启动的 PowerShell 会立刻退出）；`1.0.1.4` 替换后等几秒再启动；`1.0.1.5` 启动后识别 `Error` 对话框并重试；`1.0.1.6` 去掉后台 PowerShell 的 `-WindowStyle Hidden`（这个参数会让它启动的 GUI 程序起不来）。
 
 - **小版本**：第 4 段加 1，范围 1 到 5。修 bug、做小调整，用法不变。
 - **中版本**：第 3 段加 1、第 4 段归 0，范围 1 到 5。新增功能或用法有变化，比如新快捷键、新模式、命令库大扩充。要不要加由开发者判断。
@@ -149,7 +149,7 @@ git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.he
 - **危险命令**：`util.is_dangerous()` 是正则启发式，整体不区分大小写，只有 `git branch -D` 区分大小写。它只是尽力而为，不是保证。
 - **AI**：全部在工作线程。云端请求带 `"thinking": {"type": "disabled"}` 关闭推理，否则一次要 30 到 55 秒；接口不认这个参数（返回 400 或 422）时，自动重发一次不带它的请求。结果按提示词缓存。
 - **拼音**：`matcher` 启动时用 pypinyin 给每条命令的说明算全拼和首字母，2500 多条约 1 秒。首字母缩写 2 个字母只认开头，3 个字母起可以匹配中间。
-- **自动更新**：`update.py`。`GET /repos/dsgsg3/cmd-hint/releases/latest`（走 `urllib` 的 `ProxyHandler()`，默认读系统代理；`update_proxy` 可覆盖）→ 取 tag 和名字形如 `CmdHint-x.y.z.w.exe` 的附件 → 比版本号 → 下载到 `%APPDATA%\CmdHint\update\`，依次校验附件大小、发布页的 `digest`（sha256）和下载文件自带的 FileVersion。替换自己不能在本进程做：写一个 UTF-8 BOM 的 `install.ps1`（PS 5.1 读带 BOM 才认 UTF-8，路径含中文），用 `CREATE_NO_WINDOW` 启动，等 exe 解锁（最多 60 次 × 0.7 秒）、覆盖、`Start-Process` 重启、自删；替换前主程序会先测 exe 目录是否可写。启动 20 秒后查一次，之后每 6 小时一次。**坑**：用 `DETACHED_PROCESS`（0x8）启动的 PowerShell 会立刻退出，什么都做不了（实测过，三种方式对比只有 `CREATE_NO_WINDOW` 和 `cmd start /b` 能活）。另一个坑：替换完立刻启动，新进程解压时会报 `Failed to load Python DLL`（杀毒扫描新文件、旧进程临时目录清理撞车）。所以脚本改成：复制成功后等 4 秒启动，启动再等 8 秒检查有没有标题为 `Error` 的窗口；有就把整个同名进程杀掉重试，最多 4 次。注意别用 `$p.HasExited` 判断失败——PyInstaller 的错误对话框本身是活着的进程。
+- **自动更新**：`update.py`。`GET /repos/dsgsg3/cmd-hint/releases/latest`（走 `urllib` 的 `ProxyHandler()`，默认读系统代理；`update_proxy` 可覆盖）→ 取 tag 和名字形如 `CmdHint-x.y.z.w.exe` 的附件 → 比版本号 → 下载到 `%APPDATA%\CmdHint\update\`，依次校验附件大小、发布页的 `digest`（sha256）和下载文件自带的 FileVersion。替换自己不能在本进程做：写一个 UTF-8 BOM 的 `install.ps1`（PS 5.1 读带 BOM 才认 UTF-8，路径含中文），用 `CREATE_NO_WINDOW` 启动，等 exe 解锁（最多 60 次 × 0.7 秒）、覆盖、`Start-Process` 重启、自删；替换前主程序会先测 exe 目录是否可写。启动 20 秒后查一次，之后每 6 小时一次。**坑**：用 `DETACHED_PROCESS`（0x8）启动的 PowerShell 会立刻退出，什么都做不了（实测过，三种方式对比只有 `CREATE_NO_WINDOW` 和 `cmd start /b` 能活）。**另一个坑（最关键）**：给这个 PowerShell 加 `-WindowStyle Hidden`，它再 `Start-Process` 启动的 GUI 程序会启动失败（实测：带这个参数起不来、没有任何窗口；去掉就正常）。后台进程本来就用了 `CREATE_NO_WINDOW`，没有控制台窗口，不需要 `-WindowStyle Hidden`。另外替换完立刻启动还可能报 `Failed to load Python DLL`，脚本里等 4 秒再启动，并在启动后检查有没有标题为 `Error` 的窗口，有就杀掉重试，最多 4 次。别用 `$p.HasExited` 判断失败——PyInstaller 的错误对话框本身是活着的进程。
 - **命令文件**：三层来源，后面的覆盖前面的同名命令 —— `commands.json`（第一阶段导出）、`commands_extra.txt`（内置扩充）、`%APPDATA%\CmdHint\commands_user.txt`（用户自己的）。格式一行一条 `分类¦命令¦说明¦标签(逗号分隔)¦标志`，`d` 危险、`h` 常用，新分类用 `@cat¦id¦名称` 声明；分类标签也是用户文件优先。主程序每秒看用户文件的 mtime，变了就起线程重建 Matcher（含拼音预计算），完成后经队列把新对象交回主线程替换。
 
 ## 怎么测试
