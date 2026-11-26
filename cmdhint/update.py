@@ -93,6 +93,7 @@ def prepare(info):
 PS_TEMPLATE = """$ErrorActionPreference = 'SilentlyContinue'
 $new = '{new}'
 $old = '{old}'
+$name = '{name}'
 $ok = $false
 for ($i = 0; $i -lt 60; $i++) {{
     try {{
@@ -103,12 +104,17 @@ for ($i = 0; $i -lt 60; $i++) {{
         Start-Sleep -Milliseconds 700
     }}
 }}
-Start-Sleep -Seconds 5
-for ($t = 0; $t -lt 3; $t++) {{
-    $p = Start-Process -FilePath $old -PassThru
-    Start-Sleep -Seconds 6
-    if (-not $p.HasExited) {{ break }}
-    Start-Sleep -Seconds 3
+for ($t = 0; $t -lt 4; $t++) {{
+    Start-Sleep -Seconds 4
+    Start-Process -FilePath $old
+    Start-Sleep -Seconds 8
+    $bad = Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object {{ $_.MainWindowTitle -eq 'Error' }}
+    if ($bad) {{
+        Get-Process -Name $name -ErrorAction SilentlyContinue | Stop-Process -Force
+        Start-Sleep -Seconds 4
+        continue
+    }}
+    if (Get-Process -Name $name -ErrorAction SilentlyContinue) {{ break }}
 }}
 if ($ok) {{ Remove-Item -LiteralPath $new -Force }}
 Remove-Item -LiteralPath $PSCommandPath -Force
@@ -118,7 +124,9 @@ Remove-Item -LiteralPath $PSCommandPath -Force
 def write_install_script(new_path, exe_path):
     path = os.path.join(os.path.dirname(new_path), "install.ps1")
     with open(path, "w", encoding="utf-8-sig", newline="\r\n") as f:
-        f.write(PS_TEMPLATE.format(new=new_path.replace("'", "''"), old=exe_path.replace("'", "''")))
+        f.write(PS_TEMPLATE.format(
+            new=new_path.replace("'", "''"), old=exe_path.replace("'", "''"),
+            name=os.path.splitext(os.path.basename(exe_path))[0].replace("'", "''")))
     return path
 
 
