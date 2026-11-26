@@ -11,6 +11,7 @@ Windows 上的本地小工具，面向记不住命令的运维人员。同一个
 | `index.html` `app.js` `data.js` `styles.css` `app.py` | **运维命令速查**：本地网页版命令手册。`app.py` 在 `127.0.0.1:8765` 起本地服务（被占用则顺延）并用 pywebview 开窗口；收藏和自定义命令存在浏览器 localStorage（`%LOCALAPPDATA%\OpsCmd\webview`） |
 | `cmdhint/` | **命令提示**：常驻托盘，全局监听键盘，在任意窗口敲字时于提示条里给出命令。目前主要在维护的是它 |
 | `icon.ico` | 两个程序共用的图标 |
+| `一键打包.cmd` | 双击就打包并启动新版，内部调用 `cmdhint/build.py` |
 | `dist/` | 打包产物，已被 `.gitignore` 排除 |
 
 `cmdhint/` 内部：
@@ -26,7 +27,8 @@ Windows 上的本地小工具，面向记不住命令的运维人员。同一个
 | `ai.py` | AI 调用：问命令、提问模式、讲解、报错分析；走云端 API 或本机 `kimi` 命令 |
 | `config.py` | 默认配置，以及 `%APPDATA%\CmdHint\config.json` 的读取 |
 | `version.py` | 版本号，全项目唯一的一处 |
-| `make_version_info.py` | 由 `version.py` 生成 exe 的版本信息文件 `version_info.txt`。生成的文件不进仓库 |
+| `make_version_info.py` | 由 `version.py` 生成 exe 的版本信息 `version_info.txt`。`build.py` 会调用它；单独运行会在同目录生成文件（那个文件不进仓库） |
+| `build.py` | 一键打包：检查依赖、结束旧进程、打包、核对版本号、保留上一版、启动并确认提示条出现，失败自动回滚 |
 | `commands.json` | 第一阶段从 `data.js` 导出的 228 条命令。和 `data.js` 各自维护，没有自动同步 |
 | `commands_extra.txt` | 后来扩充的约 2300 条命令，一行一条 |
 
@@ -35,7 +37,7 @@ Windows 上的本地小工具，面向记不住命令的运维人员。同一个
 - 用户是运维，不是开发。用中文、说人话，少用术语。
 - 用户经常一边用电脑一边让我测试。不要跑会抢前台焦点、往窗口里打字的测试，除非每次按键前都确认前台是测试窗口，不是就中止。
 - 只关闭自己开的测试窗口（标题以 `CHTEST` 开头）。不要按进程名结束终端（`WindowsTerminal.exe`、`cmd.exe`），会关掉用户自己的窗口。
-- `dist\命令提示.exe` 通常正在运行。重新打包前要先结束它，否则文件被占用。
+- `dist\命令提示.exe` 通常正在运行。重新打包用 `python cmdhint/build.py`（或双击 `一键打包.cmd`），它会自己结束旧进程；不要手敲 PyInstaller 命令。
 - 测试不要动用户的剪贴板。必须用时先备份、测完恢复。
 - 不要把 API Key 写进源码、提交或日志。Key 只在 `%APPDATA%\CmdHint\config.json`。
 
@@ -74,22 +76,23 @@ python main.py
 
 ## 打包
 
-没有打包脚本，每次手工执行。在 `cmdhint/` 下，先把根目录的 `icon.ico` 拷进来，再生成版本信息：
+一键打包：双击项目根目录的 `一键打包.cmd`，或在 `cmdhint/` 下运行 `python build.py`。
 
-```
-cp ../icon.ico .
-python make_version_info.py
-python -m PyInstaller --onefile --windowed --name "命令提示" --icon icon.ico --version-file version_info.txt --add-data "commands.json;." --add-data "commands_extra.txt;." --add-data "icon.ico;." --hidden-import pystray._win32 --collect-data pypinyin --hidden-import pypinyin --distpath ../dist --workpath <临时目录> main.py
-```
+脚本依次做这些事，任何一步失败都不会留下坏版本：
 
-打包会直接覆盖 `dist\命令提示.exe`，而它通常正在运行。所以要先结束它，并把旧的 exe 备份一份，新版确认能启动后再删备份。打完删除 `icon.ico`、`*.spec`、`build/`、`__pycache__/`。要点：
+1. 检查依赖（PyInstaller、keyboard、pystray、PIL、pypinyin）和数据文件是否齐全。
+2. 结束正在运行的 `命令提示.exe`。
+3. 在临时目录里打包，核对新 exe 的文件版本号等于 `version.py` 里的版本。
+4. 把现在的 exe 存为 `dist\命令提示.上一版.exe`，再用新版替换。
+5. 启动新版，确认提示条真的出现（找到属于新进程的 `TkTopLevel` 窗口）。没出现就换回上一版并重新启动，退出码为 1，并在 `%TEMP%\命令提示-打包失败.log` 留下打包日志。
 
-- 不要用 `--specpath`。它会改变 `--add-data` 相对路径的基准，导致找不到 `commands.json`。
+- `python build.py --check` 只检查环境和文件，不动任何东西，也不结束进程。
+- `python build.py --no-start` 打包并替换，但不启动。
+- 脚本内部调用的 PyInstaller 参数：`--onefile --windowed --noconfirm --name "命令提示" --icon <根目录 icon.ico> --version-file <临时目录>\version_info.txt --add-data <绝对路径>;. ×3 --hidden-import pystray._win32 --hidden-import pypinyin --collect-data pypinyin --paths <cmdhint> --distpath/--workpath/--specpath <临时目录> <cmdhint>\main.py`。路径都写成绝对路径，所以 `--specpath` 不再破坏相对路径，这是手敲命令时踩过的坑。
+- 新增数据文件时，要同时加进 `build.py` 的 `--add-data` 列表，并确认 `matcher.resource_path()` 能读到。
 - `--collect-data pypinyin` 必须有，否则 exe 里没有拼音词典。
-- `--version-file version_info.txt` 让 exe 的文件属性里显示版本号。版本号只改 `version.py`，不要手改生成的文件。
-- 验证时启动 exe 要用 `powershell -NoProfile -Command "Start-Process -FilePath '<exe 完整路径>'"`，不要用 `start`，原因见「坑」。
-- 新增数据文件时，要同时加进 `--add-data`，并确认 `matcher.resource_path()` 能读到。
-- exe 是被直接覆盖的，没有保留上一版。
+- 版本号只改 `version.py`。`version_info.txt` 由脚本在临时目录生成，不要手改，也不要提交。
+- 源码和打包都从项目根目录取 `icon.ico`，不需要再往 `cmdhint/` 里拷贝。
 
 环境：Python 3.12.10；`keyboard 0.13.5`、`pystray 0.19.5`、`pypinyin 0.55.0`、`Pillow 12.3.0`、`pyinstaller 6.22.3`；`pywebview 6.2.1` 只有第一阶段的 `app.py` 用到。`psutil` 装了，但代码没有用到。
 
@@ -97,7 +100,9 @@ python -m PyInstaller --onefile --windowed --name "命令提示" --icon icon.ico
 
 ## 版本号
 
-四段式 `主.次.中.小`，当前是 `1.0.0.0`。全项目只在 `cmdhint/version.py` 里写版本号，提示条标题、托盘提示和 exe 的文件属性都从它来。
+四段式 `主.次.中.小`，当前是 `1.0.0.1`。全项目只在 `cmdhint/version.py` 里写版本号，提示条标题、托盘提示和 exe 的文件属性都从它来。
+
+历史：`1.0.0.0` 第一个版本；`1.0.0.1` 加了一键打包脚本。
 
 - **小版本**：第 4 段加 1，范围 1 到 5。修 bug、做小调整，用法不变。
 - **中版本**：第 3 段加 1、第 4 段归 0，范围 1 到 5。新增功能或用法有变化，比如新快捷键、新模式、命令库大扩充。要不要加由开发者判断。
@@ -108,8 +113,8 @@ python -m PyInstaller --onefile --windowed --name "命令提示" --icon icon.ico
 升版本的步骤：
 
 1. 改 `version.py`。
-2. 按上一节打包，确认 exe 文件属性里的版本号对了、程序能启动。
-3. 提交，提交说明里写版本号，并打标签 `v版本号`，例如 `v1.0.0.0`。
+2. 运行一键打包（`python build.py`）。它会核对新 exe 的版本号、保留上一版、并确认新版能启动。
+3. 提交，提交说明里写版本号，并打标签 `v版本号`，例如 `v1.0.0.1`。
 
 ## Git 与推送
 
@@ -147,6 +152,8 @@ git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.he
 
 跑测试台之前要先结束正在运行的实例，否则会出现两个提示条。按进程名结束 `python.exe` 会误伤用户自己的 python 进程，按命令行或 PID 结束更稳妥。
 
+改 `build.py` 之后，先跑 `python build.py --check`。要验证失败路径而不影响正在运行的程序：把 `cmdhint/` 复制到临时目录，在副本的 `dist/` 里放两个假的 exe 文件，再打桩 `stop_running`（空函数）、`os.startfile`（只记录）、`bar_visible`（返回 False），然后调副本里的 `main()`。指标是：退出码为 1、原来的版本被恢复、上一版没有被覆盖。
+
 ## 坑（都踩过）
 
 - **写文件**：用 Write 分段写已有文件时，第二段起必须带 `mode=append`。漏了会把整个文件覆盖成只剩那一段，`main.py` 和 `bar.py` 各中过一次。改已有文件优先用 Edit。
@@ -164,4 +171,4 @@ git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.he
 - 缓冲会和终端里的真实内容对不上（方向键、Tab、粘贴之后）。这是设计上的先天限制，看不到终端那一行。
 - 管理员权限的窗口，要用管理员身份启动本程序才收得到按键。
 - 只在微软拼音下测过，搜狗等其它输入法没验证。
-- 还没做：一键打包脚本、测试入库、命令库外置（从 `%APPDATA%` 读用户自己的命令文件）、打包时保留上一版。
+- 还没做：测试入库（把上面三种测试写进仓库）、命令库外置（从 `%APPDATA%` 读用户自己的命令文件）。

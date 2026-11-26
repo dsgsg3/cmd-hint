@@ -1,4 +1,5 @@
 import os
+import sys
 
 from version import VERSION
 
@@ -33,11 +34,16 @@ VSVersionInfo(
 """
 
 
+def text(version=VERSION):
+    return TEMPLATE % {"vers": tuple(int(p) for p in version.split(".")),
+                       "name": NAME, "version": version}
+
+
 def main():
-    parts = tuple(int(p) for p in VERSION.split("."))
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version_info.txt")
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, "version_info.txt")
     with open(path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(TEMPLATE % {"vers": parts, "name": NAME, "version": VERSION})
+        f.write(text())
     print(path)
 
 
