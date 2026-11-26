@@ -118,7 +118,7 @@ python main.py
 
 ## Git 与推送
 
-- 远程是 `https://github.com/dsgsg3/-`，**公开**仓库，分支 `main`。提交者身份只在本仓库里设置：`dsgsg3`，用 GitHub 的匿名邮箱。
+- 远程是 `https://github.com/dsgsg3/cmd-hint`（2026-11-26 从 `dsgsg3/-` 改名而来，旧地址会自动跳转），**公开**仓库，分支 `main`。提交者身份只在本仓库里设置：`dsgsg3`，用 GitHub 的匿名邮箱。
 - `dist/`、`build/`、`*.spec`、`__pycache__/` 已忽略。exe 不进仓库，用户需要时再传 GitHub Release。
 - 这台电脑直连不上 `github.com:443`，但 `api.github.com` 是通的。推送要走系统代理，代理地址查注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings` 的 `ProxyServer`。写这份说明时是 `127.0.0.1:17891`（Clash Verge），端口可能会变。
 - 凭据用 `gh` 已登录的账号。代理和凭据都只在命令里临时指定，没有改全局 git 配置：
