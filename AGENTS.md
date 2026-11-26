@@ -1,0 +1,145 @@
+# 命令提示工具 · 项目说明
+
+给后续维护者（包括 AI 助手）看的说明。改动前先读完，尤其是「坑」那一节。这里的描述如果和代码不一致，以代码为准，并顺手改这份说明。
+
+## 项目是什么
+
+Windows 上的本地小工具，面向记不住命令的运维人员。同一个文件夹里有两个独立的程序：
+
+| 文件 | 作用 |
+|---|---|
+| `index.html` `app.js` `data.js` `styles.css` `app.py` | **运维命令速查**：本地网页版命令手册。`app.py` 在 `127.0.0.1:8765` 起本地服务（被占用则顺延）并用 pywebview 开窗口；收藏和自定义命令存在浏览器 localStorage（`%LOCALAPPDATA%\OpsCmd\webview`） |
+| `cmdhint/` | **命令提示**：常驻托盘，全局监听键盘，在任意窗口敲字时于提示条里给出命令。目前主要在维护的是它 |
+| `icon.ico` | 两个程序共用的图标 |
+| `dist/` | 打包产物，已被 `.gitignore` 排除 |
+
+`cmdhint/` 内部：
+
+| 文件 | 作用 |
+|---|---|
+| `main.py` | 入口。`App` 类持有全部状态，`handle()` 分发事件队列，`render()` 决定提示条显示什么 |
+| `engine.py` | 全局键盘钩子（`keyboard` 库，`suppress=True`）。维护输入缓冲 `buf`，把事件放进队列；填参时用 `_fill_key` 拦键 |
+| `bar.py` | tkinter 提示条。无边框、置顶、不抢焦点；按像素宽度裁剪文字；提问模式临时接管焦点 |
+| `matcher.py` | 命令匹配。加载 `commands.json` 和 `commands_extra.txt`，启动时预计算拼音 |
+| `util.py` | 占位符识别、命令拼装、危险命令识别 `is_dangerous`、开机自启、提示条位置存取、文字裁剪 |
+| `winapi.py` | ctypes 封装的 Win32 调用：前台窗口、按键转字符、SendInput、窗口样式、输入法状态 |
+| `ai.py` | AI 调用：问命令、提问模式、讲解、报错分析；走云端 API 或本机 `kimi` 命令 |
+| `config.py` | 默认配置，以及 `%APPDATA%\CmdHint\config.json` 的读取 |
+| `commands.json` | 第一阶段从 `data.js` 导出的 228 条命令。和 `data.js` 各自维护，没有自动同步 |
+| `commands_extra.txt` | 后来扩充的约 2300 条命令，一行一条 |
+
+## 和用户协作的方式
+
+- 用户是运维，不是开发。用中文、说人话，少用术语。
+- 用户经常一边用电脑一边让我测试。不要跑会抢前台焦点、往窗口里打字的测试，除非每次按键前都确认前台是测试窗口，不是就中止。
+- 只关闭自己开的测试窗口（标题以 `CHTEST` 开头）。不要按进程名结束终端（`WindowsTerminal.exe`、`cmd.exe`），会关掉用户自己的窗口。
+- `dist\命令提示.exe` 通常正在运行。重新打包前要先结束它，否则文件被占用。
+- 测试不要动用户的剪贴板。必须用时先备份、测完恢复。
+- 不要把 API Key 写进源码、提交或日志。Key 只在 `%APPDATA%\CmdHint\config.json`。
+
+## 运行与配置
+
+源码运行（在 `cmdhint/` 下）：
+
+```
+python main.py
+```
+
+源码版正常运行时终端里没有任何输出，出错会直接打印然后退出，排查问题要把输出重定向到文件。打包成的 exe 是无窗口程序，报错完全看不到。重复启动会被单实例互斥量拦住，第二个直接退出。
+
+运行期文件都不在仓库里：
+
+- `%APPDATA%\CmdHint\config.json`：用户配置，首次启动写入默认值。主要项：
+  - `api_base_url` / `api_key` / `api_model`：云端 AI（OpenAI 兼容接口）。三项齐全才用云端，否则退回 `ai_cmd`（默认 `kimi -p`）。
+  - `ai_prompt` `ask_prompt` `explain_prompt` `error_prompt`：四类提示词。
+  - `scope`：`"all"` 时所有窗口都提示；否则只认 `terminals` 列表里的程序。
+  - `exclude`：从不记录按键的程序名。
+  - `min_chars` `max_items` `ai_timeout` `custom_commands`。
+- `%APPDATA%\CmdHint\state.json`：提示条的位置和大小（`x` `y` `w` `rows`），用户拖动后自动保存。不要随手删，那是用户调好的位置。
+
+快捷键都是 Ctrl+Alt 加一个键，由 `engine.py` 拦截：
+
+| 键 | 作用 |
+|---|---|
+| `1`~`9` | 插入第 N 条。处于「讲解待选」时改为讲解该条 |
+| `A` | 把终端里已经敲的内容发给 AI |
+| `Q` | 提问模式：提示条变成输入框，可以输中文。Enter 发送，Esc 取消 |
+| `E` | 读剪贴板里的报错，AI 给原因和修复命令 |
+| `X` | 讲解。有待选命令时进入「选一条」，否则讲解终端里已敲的整条命令 |
+| `P` | 暂停或恢复 |
+
+托盘菜单：暂停、开机自启、打开配置文件、退出。
+
+## 打包
+
+没有打包脚本，每次手工执行。在 `cmdhint/` 下，先把根目录的 `icon.ico` 拷进来：
+
+```
+cp ../icon.ico .
+python -m PyInstaller --onefile --windowed --name "命令提示" --icon icon.ico --add-data "commands.json;." --add-data "commands_extra.txt;." --add-data "icon.ico;." --hidden-import pystray._win32 --collect-data pypinyin --hidden-import pypinyin --distpath ../dist --workpath <临时目录> main.py
+```
+
+打完删除 `icon.ico`、`*.spec`、`build/`、`__pycache__/`。要点：
+
+- 不要用 `--specpath`。它会改变 `--add-data` 相对路径的基准，导致找不到 `commands.json`。
+- `--collect-data pypinyin` 必须有，否则 exe 里没有拼音词典。
+- 新增数据文件时，要同时加进 `--add-data`，并确认 `matcher.resource_path()` 能读到。
+- exe 是被直接覆盖的，没有保留上一版。
+
+环境：Python 3.12.10；`keyboard 0.13.5`、`pystray 0.19.5`、`pypinyin 0.55.0`、`Pillow 12.3.0`、`pyinstaller 6.22.3`；`pywebview 6.2.1` 只有第一阶段的 `app.py` 用到。`psutil` 装了，但代码没有用到。
+
+`dist\运维命令速查.exe` 是第一阶段用 `app.py` 打的，之后没再打过，当时的打包命令没有记录。
+
+## Git 与推送
+
+- 远程是 `https://github.com/dsgsg3/-`，**公开**仓库，分支 `main`。提交者身份只在本仓库里设置：`dsgsg3`，用 GitHub 的匿名邮箱。
+- `dist/`、`build/`、`*.spec`、`__pycache__/` 已忽略。exe 不进仓库，用户需要时再传 GitHub Release。
+- 这台电脑直连不上 `github.com:443`，但 `api.github.com` 是通的。推送要走系统代理，代理地址查注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings` 的 `ProxyServer`。写这份说明时是 `127.0.0.1:17891`（Clash Verge），端口可能会变。
+- 凭据用 `gh` 已登录的账号。代理和凭据都只在命令里临时指定，没有改全局 git 配置：
+
+```
+git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.helper=!gh auth git-credential" push
+```
+
+- 所以直接敲 `git push` 会失败，这是预期的。不要强推。
+
+## 架构要点
+
+- **线程**：键盘钩子在独立线程，只做轻量判断，然后把事件放进 `queue`。tkinter 主线程每 25 毫秒 `pump()` 取出来处理。任何 tkinter 调用只能在主线程。插入命令的 `inject()` 在工作线程里调 SendInput，期间把 `engine.injecting` 设为 True，让钩子忽略自己发出的按键。
+- **提示条窗口**：用 Win32 `ShowWindow` 显示，不走 tkinter 的 deiconify。扩展样式带 `WS_EX_NOACTIVATE`，所以点它不会抢走终端焦点。`winfo_viewable()` 对这种窗口不可靠，用 `bar.shown` 标志判断。
+- **焦点切换**：提问模式会临时去掉 NOACTIVATE 并抢焦点，否则中文输入法的汉字进不来。结束后焦点还回原窗口，引擎会把它当成「切换了窗口」，触发 `on_ctx()` 清空显示。所以有两层保护：`ctx_hold`（提问结束后 2.5 秒内忽略这次变化）和「AI 等待期间不清空」。`check_ask_focus` 在 250 毫秒后检查，没抢到焦点就取消提问，避免把字打进终端。
+- **拦键**：`engine._block(scan_code)` 返回 False 吞掉按键，并记下 scan code，用来吞掉对应的抬起事件。
+- **缓冲**：`engine.buf` 记的是「用户敲了什么」，不是终端里的真实内容。方向键、Tab、粘贴、Enter、Esc 会清空或截断它。`comp` 是中文输入法里还没上屏的拼音字母数，这期间按空格或数字是选字，缓冲要清空。
+- **占位符**：`{{容器}}` 是要用户填的参数。`{{.Names}}`、`{{json .}}` 这类是 Go 模板，原样保留，判断在 `util._is_param`。
+- **危险命令**：`util.is_dangerous()` 是正则启发式，整体不区分大小写，只有 `git branch -D` 区分大小写。它只是尽力而为，不是保证。
+- **AI**：全部在工作线程。云端请求带 `"thinking": {"type": "disabled"}` 关闭推理，否则一次要 30 到 55 秒；接口不认这个参数（返回 400 或 422）时，自动重发一次不带它的请求。结果按提示词缓存。
+- **拼音**：`matcher` 启动时用 pypinyin 给每条命令的说明算全拼和首字母，2500 多条约 1 秒。首字母缩写 2 个字母只认开头，3 个字母起可以匹配中间。
+- **命令文件格式**：`commands_extra.txt` 一行一条，`分类¦命令¦说明¦标签(逗号分隔)¦标志`，标志 `d` 表示危险、`h` 表示常用。新分类用 `@cat¦id¦名称` 声明。命令重复的自动跳过。
+
+## 怎么测试
+
+仓库里没有自动化测试。以往每次改动都是临时写脚本、测完删除。可以复用的三种做法：
+
+1. **假事件单测引擎**：实例化 `Engine`，把 `winapi.foreground`、`process_name`、`key_down`、`char_for_scan` 换成假函数，用带 `name`、`scan_code`、`event_type` 属性的假对象调 `engine.on_event()`，检查返回值（False 表示按键被拦下）和队列里的事件。
+2. **不碰键盘的测试台**：`import main as M`，`app = M.App()`。把 `app.engine.start` 和 `app.start_tray` 换成空函数（不装钩子、不出托盘），把 `app.inject` 换成只记录参数的函数（不真打字）。然后用 `app.handle(("buf", "...", hwnd))`、`app.pick(0)` 这类调用直接驱动，用 `app.root.update()` 处理 tkinter 事件，对提示条窗口截图核对显示。
+3. **真实键盘**：必须从另一个进程注入按键。同一个进程里用 `keyboard.write` 或 `press_and_release` 注入的事件，会被钩子当成自己的回放直接跳过，看起来像「钩子没反应」。
+
+跑测试台之前要先结束正在运行的实例，否则会出现两个提示条。按进程名结束 `python.exe` 会误伤用户自己的 python 进程，按命令行或 PID 结束更稳妥。
+
+## 坑（都踩过）
+
+- **写文件**：用 Write 分段写已有文件时，第二段起必须带 `mode=append`。漏了会把整个文件覆盖成只剩那一段，`main.py` 和 `bar.py` 各中过一次。改已有文件优先用 Edit。
+- **并行调用**：不要在同一次并行调用里一边写文件、一边运行依赖这个文件的命令。命令可能先执行，报文件不存在。
+- **heredoc**：在 Bash 里用 `cat <<EOF` 写含 `EOF` 字样或 `\n` 转义的内容，会被截断或吃掉转义。内容用 Write 工具写。
+- **Alt+数字收不到**：这台机器上 `Alt+字母` 和 `Alt+数字` 的按下事件到不了钩子，原因没查明。所以所有快捷键都用 Ctrl+Alt。
+- **前台被抢**：用户的其他程序（比如 putty）会抢走前台。测试脚本里每次按键前都要检查前台窗口。
+- **exe 要单独验**：源码版通过不代表 exe 通过，尤其是 `--add-data` 的数据文件和 hidden import。
+- **截图裁剪**：提示条的位置由用户决定，存在 `state.json` 里。不要按左上角裁剪，先取窗口矩形。
+
+## 已知限制与未完成项
+
+- exe 里的提问模式（`Ctrl+Alt+Q`）没有端到端验证过，只验证了源码版。
+- 缓冲会和终端里的真实内容对不上（方向键、Tab、粘贴之后）。这是设计上的先天限制，看不到终端那一行。
+- 管理员权限的窗口，要用管理员身份启动本程序才收得到按键。
+- 只在微软拼音下测过，搜狗等其它输入法没验证。
+- 还没做：一键打包脚本、测试入库、命令库外置（从 `%APPDATA%` 读用户自己的命令文件）、打包时保留上一版。
