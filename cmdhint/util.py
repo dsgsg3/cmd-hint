@@ -10,6 +10,7 @@ import config
 APP_NAME = "CmdHint"
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 STATE_PATH = os.path.join(config.APP_DIR, "state.json")
+FREQ_PATH = os.path.join(config.APP_DIR, "freq.json")
 _SEPARATORS = re.compile(r"\|\||&&|[|;&]")
 
 
@@ -181,3 +182,31 @@ def save_state(update):
     os.makedirs(config.APP_DIR, exist_ok=True)
     with open(STATE_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f)
+
+
+def load_freq(path=None):
+    try:
+        with open(path or FREQ_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def bump_freq(cmd, path=None):
+    key = cmd.strip().lower()
+    if not key:
+        return
+    data = load_freq(path)
+    data[key] = int(data.get(key, 0)) + 1
+    if len(data) > 2000:
+        for k, _ in sorted(data.items(), key=lambda kv: kv[1])[: len(data) - 1500]:
+            del data[k]
+    os.makedirs(config.APP_DIR, exist_ok=True)
+    with open(path or FREQ_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f)
+
+
+def caret_left_steps(cmd):
+    idx = cmd.find("<")
+    return 0 if idx < 0 else len(cmd) - idx

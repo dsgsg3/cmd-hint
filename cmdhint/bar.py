@@ -39,6 +39,7 @@ class Bar:
         self.f_ui, self.f_small, self.f_badge = mk(UI, 9), mk(UI, 8), mk(UI, 8, True)
         self.rh = max(self.f_cmd.metrics("linespace"), self.f_ui.metrics("linespace")) + 8
         self._last = ("", DIM, "", [], "", DIM, "", False)
+        self.row_count = 0
         self._drag = self._rs = None
         self.shown = False
         self._build()
@@ -60,6 +61,7 @@ class Bar:
         body.pack(fill="both", expand=True, padx=1, pady=1)
         head = tk.Frame(body, bg=HEAD)
         head.pack(fill="x")
+        self.on_pick = None
         self.dot = tk.Label(head, text="●", bg=HEAD, fg=DIM, font=self.f_ui)
         self.dot.pack(side="left", padx=(8, 4))
         tk.Label(head, text="命令提示 " + VERSION, bg=HEAD, fg=ACC, font=self.f_badge).pack(side="left")
@@ -88,6 +90,8 @@ class Bar:
             tag.pack(fill="both", expand=True)
             cmd.pack(side="left", fill="both", expand=True)
             desc.pack(fill="both", expand=True)
+            for w in (fr[0], fr[1], fr[2], tag, cmd, desc):
+                w.bind("<Double-Button-1>", lambda e, i=i: self._double(i))
             fr[0].grid(row=i, column=0, padx=(8, 0))
             fr[1].grid(row=i, column=1)
             fr[2].grid(row=i, column=2, padx=(0, 8))
@@ -120,6 +124,7 @@ class Bar:
         self.typed.config(text=fit_tail(typed, self.f_typed, self.w - 230))
         badge_w = self.f_badge.measure("★推荐") + 14
         shown = rows[:self.n_rows]
+        self.row_count = len(shown)
         for i, (fr, tag, cmd, badge, desc) in enumerate(self.rows):
             if i >= self.n_rows or i >= len(shown):
                 for f in fr:
@@ -186,6 +191,21 @@ class Bar:
 
     def keep_topmost(self):
         winapi.keep_topmost(self.hwnd)
+
+    def bring_into_screen(self):
+        l, t, r, b = winapi.work_area(self.hwnd)
+        x, y = self._pos
+        w, h = self.top.winfo_width(), self.top.winfo_height()
+        nx = max(l, min(x, r - w))
+        ny = max(t, min(y, b - h))
+        if (nx, ny) != (x, y):
+            self._pos = (nx, ny)
+            self.top.geometry("+%d+%d" % (nx, ny))
+
+    def _double(self, idx):
+        if self.on_pick and idx < self.row_count:
+            self.on_pick(idx)
+        return "break"
 
     def _clamp(self, x, y):
         l, t, r, b = winapi.virtual_screen()

@@ -18,8 +18,8 @@ import winapi
 from bar import ACC, AMBER, DIM, GREEN, RED, Bar
 from engine import Engine
 from matcher import Matcher, resource_path
-from util import (APP_NAME, autostart_enabled, build_cmd, is_dangerous, placeholders,
-                  set_autostart, split_query)
+from util import (APP_NAME, autostart_enabled, bump_freq, build_cmd, caret_left_steps,
+                  is_dangerous, placeholders, set_autostart, split_query)
 from version import VERSION
 
 
@@ -50,6 +50,7 @@ class App:
         self.ctx_hold = 0.0
         self.bar.on_submit = self.submit_question
         self.bar.on_cancel = self.end_ask
+        self.bar.on_pick = self.click_pick
         self.icon = None
         self.update_ready = None
         self.update_busy = False
@@ -193,7 +194,10 @@ class App:
 
     def tick(self):
         self.bar.keep_topmost()
+        self.bar.bring_into_screen()
         self.watch_commands()
+        if not self.engine.paused and not self.engine.healthy():
+            self.engine.restart()
         if time.time() >= self.update_next:
             self.update_next = time.time() + 6 * 3600
             self.start_update_check(False)
@@ -234,6 +238,8 @@ class App:
             self.on_buf("")
         elif kind == "toggle":
             self.toggle()
+        elif kind == "freeze":
+            self.engine.frozen = True
         elif kind == "autostart":
             set_autostart(not autostart_enabled())
         elif kind == "config":
@@ -300,7 +306,7 @@ class App:
         self.render()
 
     def on_buf(self, text):
-        if self.asking:
+        if self.asking or self.engine.paused:
             return
         self.reset_view()
         self.cancel_fill()
@@ -382,6 +388,7 @@ class App:
         n = max(len(committed) - self.query_start, 0)
         if comp and len(eng.buf) - comp < self.query_start:
             n = 0
+        bump_freq(row["cmd"])
         names = placeholders(row["cmd"])
         if names:
             self.fill = {"cmd": row["cmd"], "names": names, "vals": [""] * len(names),
@@ -392,25 +399,45 @@ class App:
                              daemon=True).start()
         self.render()
 
+    def click_pick(self, idx):
+        if self.asking or self.fill:
+            return
+        hwnd = self.engine.hwnd
+        winapi.force_foreground(hwnd)
+        self.root.after(120, lambda: self.pick(idx))
+
     def inject(self, cmd, n, comp, hwnd):
+        update.log("inject 开始 cmd=%r n=%s" % (cmd[:40], n))
         winapi.wait_modifiers_released()
         if winapi.foreground()[0] != hwnd:
+            update.log("inject 放弃：前台已不是目标窗口")
             return
         eng = self.engine
+        back = 0
         eng.injecting = True
         try:
             if comp:
                 winapi.send_vk(0x1B)
                 time.sleep(0.12)
             winapi.send_backspaces(n)
-            winapi.send_text(cmd)
+            winapi.send_text_slow(cmd)
             time.sleep(0.05)
+            back = caret_left_steps(cmd)
+            if back:
+                winapi.send_left(back)
+        except Exception as e:
+            update.log("inject 出错：%r" % e)
+            raise
         finally:
             eng.injecting = False
+        update.log("inject 完成，回退 %d 步" % back)
         keep = len(eng.buf) - comp - n
         eng.comp = 0
         eng.buf = eng.buf[:max(keep, 0)] + cmd
-        self.q.put(("buf", eng.buf))
+        if back:
+            self.q.put(("freeze",))
+        else:
+            self.q.put(("buf", eng.buf))
 
     def fill_char(self, ch):
         f = self.fill

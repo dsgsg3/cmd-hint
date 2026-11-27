@@ -1,4 +1,6 @@
 import os
+import re
+import time
 
 import keyboard
 
@@ -7,9 +9,10 @@ import winapi
 MOD_WORDS = ("ctrl", "shift", "alt", "windows", "lock")
 RESET_KEYS = {
     "tab", "up", "down", "left", "right", "home", "end",
-    "delete", "page up", "page down", "insert",
+    "delete", "page up", "page down",
 }
 MAX_BUF = 200
+IDLE_RESET_SEC = 45.0
 
 
 class Engine:
@@ -26,14 +29,28 @@ class Engine:
         self.filling = False
         self.asking = False
         self.visible_count = 0
+        self.frozen = False
         self.hwnd = 0
         self.tid = 0
         self.term = False
         self.proc = ""
         self.blocked_up = set()
+        self.last_event = 0.0
+        self.last_key = 0.0
 
     def start(self):
         keyboard.hook(self.on_event, suppress=True)
+        self.last_event = time.monotonic()
+
+    def restart(self):
+        try:
+            keyboard.unhook_all()
+        except Exception:
+            pass
+        self.start()
+
+    def healthy(self):
+        return time.monotonic() - self.last_event < 30
 
     def stop(self):
         try:
@@ -76,8 +93,15 @@ class Engine:
                 self.blocked_up.discard(sc)
                 return False
             return True
+        self.last_event = time.monotonic()
+        now = time.monotonic()
+        if self.buf and now - self.last_key > IDLE_RESET_SEC:
+            self.buf = ""
+            self.comp = 0
+        self.last_key = now
         ctrl = winapi.key_down(0x11)
         alt = winapi.key_down(0x12)
+        shift = winapi.key_down(0x10)
         win = winapi.key_down(0x5B) or winapi.key_down(0x5C)
         if ctrl and alt and name == "p":
             self.q.put(("toggle",))
@@ -86,6 +110,7 @@ class Engine:
             return True
         if self.sync_fg():
             self.filling = False
+            self.frozen = False
             self.q.put(("ctx",))
         if self.asking:
             return True
@@ -94,6 +119,12 @@ class Engine:
         if not self.term:
             return True
         if any(w in name for w in MOD_WORDS):
+            return True
+        if self.frozen:
+            if name in RESET_KEYS or name == "enter" or name == "esc" or ctrl or alt:
+                self.frozen = False
+                self.comp = 0
+                self._set("")
             return True
         if ctrl and alt and name in ("a", "e", "x", "q"):
             self.q.put(("ai", self.buf) if name == "a" else (
@@ -105,12 +136,32 @@ class Engine:
                 self.q.put(("pick", idx))
                 return self._block(sc)
         if name == "backspace":
-            if ctrl or alt:
+            if ctrl and not alt:
+                self.comp = 0
+                self._set(re.sub(r"\S+\s*$", "", self.buf))
+            elif alt:
                 self.comp = 0
                 self._set("")
             else:
                 self.comp = max(self.comp - 1, 0)
                 self._set(self.buf[:-1])
+            return True
+        if ctrl and not alt and name == "v" or shift and not ctrl and not alt and name == "insert":
+            text = winapi.clipboard_text()
+            if "\n" in text or "\r" in text:
+                text = ""
+            if text and len(self.buf) + len(text) <= MAX_BUF:
+                self.comp = 0
+                self._set(self.buf + text)
+            else:
+                self.comp = 0
+                self._set("")
+            return True
+        if ctrl and not alt and name == "w":
+            self.comp = 0
+            self._set(re.sub(r"\S+\s*$", "", self.buf))
+            return True
+        if ctrl and not alt and not shift and name == "l":
             return True
         if name == "enter":
             if self.comp:

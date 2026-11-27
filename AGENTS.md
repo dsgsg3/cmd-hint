@@ -61,6 +61,8 @@ python main.py
   - `min_chars` `max_items` `ai_timeout` `custom_commands` `update_mode` `update_proxy`。`update_mode` 三档：`download`（默认，下载并提示）、`auto`（下载后自动重启）、`off`（不检查）。
 - `%APPDATA%\CmdHint\state.json`：提示条的位置和大小（`x` `y` `w` `rows`），用户拖动后自动保存。不要随手删，那是用户调好的位置。
 - `%APPDATA%\CmdHint\commands_user.txt`：用户自己的命令库，首次启动用模板生成（全部是注释）。主程序每秒比对它的修改时间，变了就在后台线程重建 Matcher（约 1 秒）；重建期间提示条沿用旧数据，完成后自动刷新当前搜索。同一条命令以这个文件为准，覆盖内置的。
+- `%APPDATA%\CmdHint\freq.json`：每条命令被 `Ctrl+Alt+1~9` 选用的次数。匹配时每次选用加 6 分（上限 60），所以常用命令会自己排到前面。不记录你敲过的内容。
+- `%APPDATA%\CmdHint\update.log`：自动更新的检查/下载/替换过程日志，排查先看它。
 
 快捷键都是 Ctrl+Alt 加一个键，由 `engine.py` 拦截：
 
@@ -73,7 +75,9 @@ python main.py
 | `X` | 讲解。有待选命令时进入「选一条」，否则讲解终端里已敲的整条命令 |
 | `P` | 暂停或恢复 |
 
-托盘菜单：暂停、开机自启、打开配置文件、打开命令文件、退出。
+提示条上的鼠标操作：拖任意位置移动；拖右下角 `◢` 调宽度和行数；**双击某一行直接插入那条命令**（会先把焦点还给原终端再插入）。
+
+托盘菜单：暂停、开机自启、打开配置文件、打开命令文件、检查更新、重启并更新（仅在新版下载好时出现）、退出。
 
 ## 打包
 
@@ -144,7 +148,11 @@ git -c http.proxy=http://127.0.0.1:17891 -c credential.helper= -c "credential.he
 - **提示条窗口**：用 Win32 `ShowWindow` 显示，不走 tkinter 的 deiconify。扩展样式带 `WS_EX_NOACTIVATE`，所以点它不会抢走终端焦点。`winfo_viewable()` 对这种窗口不可靠，用 `bar.shown` 标志判断。
 - **焦点切换**：提问模式会临时去掉 NOACTIVATE 并抢焦点，否则中文输入法的汉字进不来。结束后焦点还回原窗口，引擎会把它当成「切换了窗口」，触发 `on_ctx()` 清空显示。所以有两层保护：`ctx_hold`（提问结束后 2.5 秒内忽略这次变化）和「AI 等待期间不清空」。`check_ask_focus` 在 250 毫秒后检查，没抢到焦点就取消提问，避免把字打进终端。
 - **拦键**：`engine._block(scan_code)` 返回 False 吞掉按键，并记下 scan code，用来吞掉对应的抬起事件。
-- **缓冲**：`engine.buf` 记的是「用户敲了什么」，不是终端里的真实内容。方向键、Tab、粘贴、Enter、Esc 会清空或截断它。`comp` 是中文输入法里还没上屏的拼音字母数，这期间按空格或数字是选字，缓冲要清空。
+- **往终端打字**：必须用 `winapi.send_text_slow()`，它逐字符用 `VkKeyScanW` 取真实虚拟键、自动带 Shift（大写、`:`、`|`、`"` 这类）。**不要用 `send_text()` 的 `KEYEVENTF_UNICODE` 包**——在 cmd.exe 里收不到，表现是「回删了但命令没打进去」，Windows Terminal 里却正常，极易误判成逻辑 bug。`send_backspaces` 用 `VK_BACK` 是可靠的。
+- **提示条位置**：`bring_into_screen()` 用 `winapi.work_area(self.hwnd)`，**不要用 `virtual_screen()`**。这台机器的 `GetSystemMetrics(SM_XVIRTUALSCREEN)` 返回 -2560、宽 5120，和实际单屏 2560×1440 不符，用它会算错边界并把窗口推出屏幕。判断时要用窗口宽高（`r - w`、`b - h`），不是固定边距。
+- **缓冲**：`engine.buf` 记的是「用户敲了什么」，不是终端里的真实内容。方向键、Tab、粘贴、Enter、Esc 会清空或截断它。`comp` 是中文输入法里还没上屏的拼音字母数，这期间按空格或数字是选字，缓冲要清空。缓冲的同步规则：`Ctrl+V` / `Shift+Insert` 读剪贴板单行并入（多行则清空）；`Ctrl+W` 和 `Ctrl+退格` 删到上一个词；`Ctrl+L` 清屏但保留输入；停 45 秒没按键就自动重置。
+- **插入后冻结**：插入带 `<参数>` 的命令后，光标被回退到第一个 `<` 前面。此时缓冲已经和终端内容不一致，所以 `engine.frozen = True`，普通字符不再进缓冲，直到按 Enter / Esc / 方向键 / 组合键解冻。没有参数的命令插入后不冻结，缓冲直接更新为插入的整条命令。
+- **钩子健康**：`engine.last_event` 在每次按键时更新，`healthy()` 判断 30 秒内有没有事件；`main.tick()` 发现暂停已恢复但仍不健康就 `engine.restart()`。这是兜底——真正的预防是 `winapi.process_name` 的 PID 缓存，把回调里最慢的一步从 38 微秒降到 0.14 微秒，避免超过 Windows 的 300ms 钩子超时被静默摘除。
 - **占位符**：`{{容器}}` 是要用户填的参数。`{{.Names}}`、`{{json .}}` 这类是 Go 模板，原样保留，判断在 `util._is_param`。
 - **危险命令**：`util.is_dangerous()` 是正则启发式，整体不区分大小写，只有 `git branch -D` 区分大小写。它只是尽力而为，不是保证。
 - **AI**：全部在工作线程。云端请求带 `"thinking": {"type": "disabled"}` 关闭推理，否则一次要 30 到 55 秒；接口不认这个参数（返回 400 或 422）时，自动重发一次不带它的请求。结果按提示词缓存。

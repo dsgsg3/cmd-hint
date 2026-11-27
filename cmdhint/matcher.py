@@ -4,6 +4,7 @@ import re
 import sys
 
 import config
+from util import load_freq
 
 try:
     from pypinyin import Style, lazy_pinyin
@@ -78,6 +79,20 @@ def ensure_user_file(path):
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(USER_TEMPLATE)
     return path
+
+
+ALIASES = {
+    "k8s": "kubectl", "dk": "docker", "dc": "docker compose", "ng": "nginx",
+    "pg": "psql", "my": "mysql", "rd": "redis-cli", "fw": "firewall-cmd",
+    "jf": "journalctl", "k": "kubectl",
+}
+
+
+def expand_alias(phrase):
+    words = phrase.split(" ")
+    if words and words[0] in ALIASES:
+        return " ".join([ALIASES[words[0]]] + words[1:])
+    return phrase
 
 
 class Matcher:
@@ -168,9 +183,11 @@ class Matcher:
 
     def search(self, query, limit=5):
         phrase = " ".join(query.strip().lower().split())
+        phrase = expand_alias(phrase)
         tokens = phrase.split(" ") if phrase else []
         if not tokens:
             return []
+        freq = load_freq()
         scored = []
         for it in self.items:
             s = self._score(it, tokens, phrase)
@@ -179,6 +196,7 @@ class Matcher:
                 if s > 0 and it["hot"]:
                     s += 1.5
             if s > 0:
+                s += min(freq.get(it["cmd_l"], 0) * 6.0, 60.0)
                 scored.append((s, it))
         scored.sort(key=lambda x: (-x[0], len(x[1]["cmd"])))
         return [it for _, it in scored[:limit]]

@@ -39,6 +39,12 @@ user32.SetForegroundWindow.argtypes = [wt.HWND]
 user32.IsIconic.argtypes = [wt.HWND]
 user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
 user32.GetAsyncKeyState.restype = ctypes.c_short
+user32.VkKeyScanW.argtypes = [ctypes.c_wchar]
+user32.VkKeyScanW.restype = ctypes.c_short
+user32.GetClipboardData.restype = ctypes.c_void_p
+kernel32.GlobalLock.argtypes = [ctypes.c_void_p]
+kernel32.GlobalLock.restype = ctypes.c_void_p
+kernel32.GlobalUnlock.argtypes = [ctypes.c_void_p]
 user32.GetKeyState.argtypes = [ctypes.c_int]
 user32.GetKeyState.restype = ctypes.c_short
 kernel32.GetCurrentThreadId.restype = wt.DWORD
@@ -96,7 +102,21 @@ def foreground():
     return hwnd, tid, pid.value
 
 
+_proc_cache = {}
+
+
 def process_name(pid):
+    name = _proc_cache.get(pid)
+    if name is None:
+        name = _query_process_name(pid)
+        if name:
+            if len(_proc_cache) > 500:
+                _proc_cache.clear()
+            _proc_cache[pid] = name
+    return name
+
+
+def _query_process_name(pid):
     h = kernel32.OpenProcess(0x1000, False, pid)
     if not h:
         return ""
@@ -108,6 +128,24 @@ def process_name(pid):
         return ""
     finally:
         kernel32.CloseHandle(h)
+
+
+def clipboard_text():
+    if not user32.OpenClipboard(None):
+        return ""
+    try:
+        h = user32.GetClipboardData(13)
+        if not h:
+            return ""
+        p = kernel32.GlobalLock(ctypes.c_void_p(h))
+        if not p:
+            return ""
+        try:
+            return ctypes.wstring_at(ctypes.c_void_p(p)) or ""
+        finally:
+            kernel32.GlobalUnlock(ctypes.c_void_p(h))
+    finally:
+        user32.CloseClipboard()
 
 
 def key_down(vk):
@@ -247,8 +285,37 @@ def send_text(text):
         time.sleep(0.01)
 
 
+def send_text_slow(text):
+    """Type text using real key presses (VkKeyScanW), one char at a time.
+
+    Windows Terminal and cmd.exe reliably accept this, unlike unicode packets."""
+    for ch in text:
+        v = user32.VkKeyScanW(ch)
+        vk = v & 0xFF
+        if vk == 0xFF or vk == 0 or not ch.isascii():
+            u = ord(ch)
+            _send([_key_input(scan=u, flags=KEYEVENTF_UNICODE),
+                   _key_input(scan=u, flags=KEYEVENTF_UNICODE | KEYEVENTF_KEYUP)])
+            time.sleep(0.012)
+            continue
+        shift = bool((v >> 8) & 0x01)
+        if shift:
+            _send([_key_input(vk=0x10)])
+            time.sleep(0.004)
+        _send([_key_input(vk=vk), _key_input(vk=vk, flags=KEYEVENTF_KEYUP)])
+        if shift:
+            _send([_key_input(vk=0x10, flags=KEYEVENTF_KEYUP)])
+        time.sleep(0.012)
+
+
 def send_vk(vk):
     _send([_key_input(vk=vk), _key_input(vk=vk, flags=KEYEVENTF_KEYUP)])
+
+
+def send_left(n):
+    for _ in range(min(n, 120)):
+        send_vk(0x25)
+        time.sleep(0.004)
 
 
 def wait_modifiers_released(timeout=1.5):
